@@ -60,6 +60,15 @@
   }
   .mast-sub { color: var(--mut); margin: 16px 0 0; max-width: 60ch; }
   .mast-sub b { color: var(--ink); font-weight: 400; }
+  .mast-ctl { display: flex; align-items: center; gap: 10px; margin: 20px 0 0;
+    font-size: 12.5px; color: var(--mut); }
+  .mast-ctl button {
+    all: unset; cursor: pointer; border: 1px solid var(--line-2); padding: 3px 10px 4px;
+    color: var(--ink); font-size: 12px;
+  }
+  .mast-ctl button:hover { border-color: var(--accent); color: var(--accent); }
+  .mast-ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mast-ctl b { color: var(--ink); font-weight: 400; }
 
   /* ---- layout ---- */
   .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
@@ -589,14 +598,14 @@
   /* micro-transitions — chrome eases ink-to-ink; buttons stamp down on press */
   .seedctl button, .themectl > button, #wheelpop button, .extabs button, .grainpick button,
   .swapbtn, nav.side a, .navm a, .bc a, .pgn button, .mlist button, .tbar button,
-  .combo li, .numf button { transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease; }
+  .combo li, .numf button, .mast-ctl button { transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease; }
   .sbtn { transition: transform 0.08s ease, border-color 0.16s ease; }
-  .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .themectl > button:active { transform: translateY(1px); }
+  .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .mast-ctl button:active, .themectl > button:active { transform: translateY(1px); }
   @media (prefers-reduced-motion: reduce) {
     .seedctl button, .themectl > button, #wheelpop button, .extabs button, .grainpick button,
     .swapbtn, nav.side a, .navm a, .bc a, .pgn button, .mlist button, .tbar button,
-    .combo li, .numf button, .sbtn { transition: none; }
-    .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .themectl > button:active { transition: none; transform: none; }
+    .combo li, .numf button, .sbtn, .mast-ctl button { transition: none; }
+    .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .mast-ctl button:active, .themectl > button:active { transition: none; transform: none; }
   }
 </style>
 <script>try { document.documentElement.dataset.mode = localStorage.getItem('stipple-mode') || 'dark'; }
@@ -623,7 +632,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
         <button id="grainreset">reset</button>
       </div>
     </div>
-    <div class="seedctl">seed <b id="seedval">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
+    <div class="seedctl">seed <b id="seedval" class="seedout">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
     <a href="#quick-start">github</a>
     <a href="#quick-start">studio →</a>
   </div>
@@ -736,6 +745,11 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
   <p class="mast-sub">A component library that ships its own printing press. This wordmark is not a
   font rendering — it is <b>four ink plates</b> at the true process screen angles, each dot sized by
   the tone underneath it. Every surface below is pressed by the same engine.</p>
+  <div class="mast-ctl">
+    <button id="proof" type="button" title="Re-run the press — four plates land, register and ink up">⎙ pull a proof</button>
+    <button id="rollpress" type="button" title="Roll a new seed — every surface on the page re-presses">⚄ roll a press</button>
+    <span>seed <b class="seedout">1859</b></span>
+  </div>
 </div>
 
 <section class="doc" id="quick-start">
@@ -3191,7 +3205,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         ents.forEach(en => {
           if (!en.isIntersecting) return;
           grainIO.unobserve(en.target);
-          pressIn(en.target._grainS);
+          pressIn(en.target._grainS, en.target._grainS.ms);
         });
       }, { threshold: 0.15 })
     : null;
@@ -4844,19 +4858,28 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     // its only real job is warming the cyan. The sweep is carried blue -> pink.
     // Inks come from INKS, not hardcoded CMYK, so the hue wheel turns the
     // masthead with everything else.
+    // lx/ly is where the plate STARTS the run — how far out of register it lands
+    // before it settles onto dx/dy. The colour plates come in off the sheet at an
+    // angle and chase the key; the key drops straight down and square, because it
+    // is the plate the others are registered against, not one of the chasers.
     const PLATES = [
-      { ink: 'yellow', ang: 0.0, dx: 0.9, dy: 1.0, w: (u) => 0.10 + 0.18 * (1 - u) },
-      { ink: 'blue', ang: 0.262, dx: -1.4, dy: 0.7, w: (u) => 0.12 + 0.72 * (1 - u) },
-      { ink: 'pink', ang: 1.309, dx: 1.2, dy: -0.9, w: (u) => 0.12 + 0.72 * u },
-      { ink: null, ang: 0.785, dx: 0, dy: 0, w: (u, v) => 0.10 + 0.26 * v }, // key
+      { ink: 'yellow', ang: 0.0, dx: 0.9, dy: 1.0, lx: 7, ly: -5, w: (u) => 0.10 + 0.18 * (1 - u) },
+      { ink: 'blue', ang: 0.262, dx: -1.4, dy: 0.7, lx: -9, ly: 4, w: (u) => 0.12 + 0.72 * (1 - u) },
+      { ink: 'pink', ang: 1.309, dx: 1.2, dy: -0.9, lx: 8, ly: 5, w: (u) => 0.12 + 0.72 * u },
+      { ink: null, ang: 0.785, dx: 0, dy: 0, lx: 0, ly: 7, w: (u, v) => 0.10 + 0.26 * v }, // key
     ];
     // The docs masthead is a third the width of the landing hero, so it gets a
     // finer screen: pitch is chosen against the CAP HEIGHT, not the canvas. Below
     // roughly ten dots per letter the screen stops resolving the letterform and
     // starts eating it — the counters of A and O fill in first.
     const PITCH = 8;
+    // How much of the run the sweep occupies. 0 would ink the whole sheet at
+    // once; 1 would mean the last dot only starts as the first one finishes.
+    const SWEEP = 0.55;
     let T = null, W = 0, H = 0, ctx = null, lastDpr = 0;
-    const s = { cv: mastCv, kind: 'grain', pat: null, x: { pr: 1 } };
+    // Four staggered plates need longer than the 700ms a single surface takes —
+    // .ms is read by pressIn via grainIO and by both controls below.
+    const s = { cv: mastCv, kind: 'grain', pat: null, ms: 1500, x: { pr: 1 } };
     s.rebuild = () => {
       const w = mastCv.clientWidth;
       if (!w) { s.stale = true; return; }
@@ -4887,16 +4910,38 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       // ink on paper darkens where plates overlap; ink on a black ground adds light
       ctx.globalCompositeOperation = THEME.mode === 'dark' ? 'lighter' : 'multiply';
       const cell = PITCH * GRAIN.scale;
-      for (const { pl, pts } of s.plates) {
+      // THE RUN. Every animated term below collapses at pr === 1 — e reaches 1 so
+      // the landing offset is exactly 0, and ink reaches exactly 1 for every dot —
+      // so the settled frame is bit-for-bit the frame this pressed before any of
+      // this existed. The run lives entirely in the transient. Keep it that way:
+      // if a term here can't reach its resting value exactly, it is a bug, not a
+      // flourish, and it will show as a wordmark that never quite finishes.
+      for (let i = 0; i < s.plates.length; i++) {
+        const { pl, pts } = s.plates[i];
+        // Each plate gets its own window of the run, so a proof reads as four
+        // separate impressions rather than one fade. Cubic ease-out: the plate
+        // arrives fast and decelerates into register, the way a real one settles.
+        const pu = Math.min(1, Math.max(0, (s.x.pr - i * 0.12) / 0.64));
+        const e = 1 - Math.pow(1 - pu, 3);
+        const ox = pl.dx + (1 - e) * pl.lx, oy = pl.dy + (1 - e) * pl.ly;
         ctx.fillStyle = pl.ink ? INKS[pl.ink] : (THEME.mode === 'dark' ? INKS.white : INKS.black);
         ctx.beginPath();
         for (const p of pts) {
-          if (p.th > s.x.pr) continue;
-          const lum = T.sample(p.x - pl.dx, p.y - pl.dy, cell * 0.5);
+          const lum = T.sample(p.x - ox, p.y - oy, cell * 0.5);
           if (lum < 0.02) continue;
           const t = Math.min(0.92, lum * pl.w(p.x / W, p.y / H) * 1.2 * GRAIN.ink);
           if (t <= 0.012) continue;
-          const r = cell * 0.56 * Math.sqrt(t);
+          // q is this dot's place in the sweep: mostly how far across the sheet it
+          // sits, nudged by blue noise so the leading edge has a grain instead of
+          // being a ruled line. It MUST be clamped — the point grid overruns the
+          // canvas by a pitch, so a raw p.x / W exceeds 1 and would leave the
+          // right-hand dots a hair short of full ink at rest, forever.
+          const q = Math.min(1, Math.max(0, (p.x / W) * 0.78 + p.th * 0.22));
+          const ink = Math.min(1, Math.max(0, pu * (1 + SWEEP) - SWEEP * q));
+          if (ink <= 0) continue;
+          // ink-up: the dot grows from nothing to its tone radius. Same sqrt as the
+          // am screen — area carries tone, so a half-inked dot is sqrt(0.5), not 0.5.
+          const r = cell * 0.56 * Math.sqrt(t * ink);
           ctx.moveTo(p.x + r, p.y);
           ctx.arc(p.x, p.y, r, 0, 6.283);
         }
@@ -4906,20 +4951,31 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     };
     registry.push(s);
     if (grainIO) { s.x.pr = 0; mastCv._grainS = s; grainIO.observe(mastCv); }
+    // Pull a proof: re-run the press. pressIn owns the reduced-motion case (it
+    // snaps to 1) and carries its own generation token, so a mashed button
+    // cancels the run in flight rather than stacking a second one on top.
+    document.getElementById('proof').addEventListener('click', () => {
+      s.x.pr = 0; pressIn(s, s.ms);
+    });
   }
 
-  // ============ reroll + boot ============
-  document.getElementById('reroll').addEventListener('click', () => {
+  // ============ roll a press + boot ============
+  // One seed drives every surface, so rolling it re-presses the whole page. The
+  // masthead control and the topbar control are deliberately the same action —
+  // the point of a seed is that it owns everything you didn't pin down.
+  function rollPress() {
     state.seed = 1000 + Math.floor(Math.random() * 9000);
-    document.getElementById('seedval').textContent = state.seed;
+    document.querySelectorAll('.seedout').forEach(el => { el.textContent = state.seed; });
     registry.forEach(s => {
       s.rebuild(); if (s.afterRebuild) s.afterRebuild();
       const rc = !reduced && s.kind === 'grain' && s.x && s.cv && s.cv.getBoundingClientRect();
-      if (rc && rc.width && rc.bottom > 0 && rc.top < innerHeight) { s.x.pr = 0; pressIn(s, 550); }
+      if (rc && rc.width && rc.bottom > 0 && rc.top < innerHeight) { s.x.pr = 0; pressIn(s, s.ms || 550); }
       else s.draw();
     });
     area.enter();
-  });
+  }
+  document.getElementById('reroll').addEventListener('click', rollPress);
+  document.getElementById('rollpress').addEventListener('click', rollPress);
   let rto = 0;
   addEventListener('resize', () => {
     clearTimeout(rto);
