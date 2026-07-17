@@ -24,6 +24,86 @@
 
 ---
 
+## Install
+
+There's no npm package, by design. Halftone UI ships as source you copy into your own repo — shadcn/dither-ui style — so you own the code instead of pinning a version.
+
+```bash
+# framework-free core (zero deps)
+npx degit ecgang/halftone-ui/halftone-kit/core your-app/src/halftone/core
+
+# + React adapter (needs core beside it — react/ imports '../core')
+npx degit ecgang/halftone-ui/halftone-kit/react your-app/src/halftone/react
+npx degit ecgang/halftone-ui/halftone-kit/core  your-app/src/halftone/core
+
+# + Vue adapter (same requirement — vue/ imports '../core' too)
+npx degit ecgang/halftone-ui/halftone-kit/vue your-app/src/halftone/vue
+npx degit ecgang/halftone-ui/halftone-kit/core your-app/src/halftone/core
+```
+
+`react/` and `vue/` are thin adapters over `core/` — they always import it as `../core`, so it has to live one directory up from wherever you drop the adapter folder.
+
+### Vanilla
+
+```js
+import { createPressContext, press } from './halftone/core/index.js'
+
+const ctx = createPressContext()
+press(document.querySelector('canvas'), {
+  field: (u, v) => (v > 0.6 ? 1 : 0), // tone 0..1; u,v normalized, v=0 top
+}, ctx)
+```
+
+### React
+
+```jsx
+import { HalftoneProvider, Surface } from './halftone/react/index.js'
+
+export default function App() {
+  return (
+    <HalftoneProvider>
+      <Surface field={(u, v) => (v > 0.6 ? 1 : 0)} style={{ height: 160 }} />
+    </HalftoneProvider>
+  )
+}
+```
+
+The adapter is `.jsx` — your own bundler (Vite, webpack, Next) compiles it like any other component in your app.
+
+### Vue
+
+```js
+import { h } from 'vue'
+import { HalftoneProvider, Surface } from './halftone/vue/index.js'
+
+export default {
+  render() {
+    return h(HalftoneProvider, () =>
+      h(Surface, { field: (u, v) => (v > 0.6 ? 1 : 0), style: 'height:160px' }),
+    )
+  },
+}
+```
+
+Plain `.js` render functions (`h()`) — no SFC, nothing to compile, drop it straight into a Vite/Nuxt build.
+
+### Components
+
+| Component | Wraps (real DOM / a11y) |
+|---|---|
+| `Surface` | the base pressed canvas — bring your own semantic wrapper |
+| `Text` | pair with your own visually-hidden heading |
+| `Image` | pair with your own visually-hidden `<img alt>` |
+| `Button` | a real `<button>` |
+| `Meter` | a real `<progress>` |
+| `Card` | a real container element (`div` by default, `as` to change it) |
+| `BarChart` | a real `<table>` with `<caption>` |
+| `LineChart` | a real `<table>` with `<caption>` |
+
+Every canvas is `aria-hidden` decoration — the table above is where the actual semantics live.
+
+Full API + prop reference: [`halftone-kit/README.md`](halftone-kit/README.md). Play with every screen and dial live in [Studio](https://halftone-ui.com/studio/).
+
 ## What this is
 
 Most UI libraries **paint**: a fill is a hex value, a gradient is a CSS function, a chart is an SVG path. Halftone UI **prints**. Every fill is a live canvas holding a seeded dot cloud, and each dot carries its own threshold. A component supplies a *tone function* — how dark is the ink at this point? — and the press keeps the dots that tone can reach.
@@ -83,16 +163,10 @@ Or just [download `dist/index.html`](https://raw.githubusercontent.com/ecgang/ha
 
 ## Vue / React
 
-The docs show every component with Vue and React snippets. The engine's source of truth is the framework-free core in [`halftone-kit/core/`](halftone-kit/core/) — `dist/index.html` is that core inlined into one self-contained file by [`tools/build-standalone.mjs`](tools/build-standalone.mjs) (the docs are dogfooded on the real library). Packaged/adapter builds are on the roadmap.
+The docs show every component with Vue and React snippets. The engine's source of truth is the framework-free core in [`halftone-kit/core/`](halftone-kit/core/) — `dist/index.html` is that core inlined into one self-contained file by [`tools/build-standalone.mjs`](tools/build-standalone.mjs) (the docs are dogfooded on the real library). The React and Vue adapters in [`halftone-kit/`](halftone-kit/) are copy-in, not npm-installed — see [Install](#install) above.
 
-```vue
-<HButton color="purple">Press me</HButton>
-```
-
-```bash
-npm i @halftone-ui/core   # planned
-npm i @halftone-ui/vue    # planned
-npm i @halftone-ui/react  # planned
+```jsx
+<Button color="purple">Press me</Button>
 ```
 
 ## Why "halftone" and not "stipple"
