@@ -10,6 +10,6 @@ export { mulberry32, poisson, makeNoise } from './rng.js';
 export { screenPts, amPts, grainPts, amDot } from './screens.js';
 export { INKS, PAPER, mixHex, iband, tuneInk, tuneMix } from './color.js';
 export { textField } from './fields.js';
-export { drawPress, fieldSampler } from './draw.js';
+export { drawPress, fieldSampler, DOT } from './draw.js';
 export { createPressContext, RESTING_BASE } from './context.js';
 export { press, resolvePress, mount } from './press.js';

@@ -26,6 +26,12 @@
 
 import { amDot } from './screens.js';
 
+// The FM dot geometry: a near-fixed mark whose size eases with the field value. Different surfaces
+// legitimately want different dot weights (a chart reads better with a heavier dot than a button),
+// so the law is a per-call parameter, not a constant — `radius = base + span*min(cap, v)`. These
+// defaults reproduce the generic surface (docs:3152/3161) exactly; the charts pass their own.
+export const DOT = { round: [0.42, 0.85], square: [1.05, 0.75], cap: 1.15 };
+
 // Resolve `field` (scalar closure OR escalation descriptor) to a plain (u, v) -> 0..1 sampler.
 // P1 implements the correctness path only (scalar, or the descriptor's own `.sample`); the bulk
 // `sampleInto` / coarse-`resolution` fast paths are a later, golden-verified optimization that
@@ -47,8 +53,10 @@ export function fieldSampler(field) {
 //   roll   : resting-geometry entropy — consumed at point generation (mount/rebuild), accepted
 //            here for signature stability across the 4->1 collapse (§4a); the draw loop is
 //            seed/roll-invariant given its pts.
-export function drawPress(ctx, { pts, W, H, field, plates = null, screen, grain = {}, pr = 1, roll = 0 }) {
+export function drawPress(ctx, { pts, W, H, field, plates = null, screen, grain = {}, pr = 1, roll = 0, dot = null }) {
   const ink = grain.ink ?? 1;
+  const d = dot ? { ...DOT, ...dot } : DOT;   // merge so a caller can override just `round` or `cap`
+  const [rb, rs] = d.round, [sb, ss] = d.square, cap = d.cap;
 
   if (plates && plates.length) {
     // P2 SEAM. The masthead batches all arcs into ONE path per plate and fills once under a
@@ -68,10 +76,10 @@ export function drawPress(ctx, { pts, W, H, field, plates = null, screen, grain 
     if (p.c) { amDot(ctx, p, v); continue; }
     if (v > p.th) {
       if (round) {
-        ctx.beginPath(); ctx.arc(p.x, p.y, 0.42 + 0.85 * Math.min(1.15, v), 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, rb + rs * Math.min(cap, v), 0, 6.283); ctx.fill();
       } else {
-        const d = 1.05 + 0.75 * Math.min(1.15, v);
-        ctx.fillRect(p.x - d / 2, p.y - d / 2, d, d);
+        const side = sb + ss * Math.min(cap, v);
+        ctx.fillRect(p.x - side / 2, p.y - side / 2, side, side);
       }
     }
   }

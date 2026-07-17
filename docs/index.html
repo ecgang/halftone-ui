@@ -3365,15 +3365,22 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
           if (solo >= 0 && solo !== si) return;
           const vals = DATA[s.key];
           ctx.fillStyle = s.color;
-          for (const p of sets[si]) {
-            if (p.x < M.l || p.x > W - M.r || p.y > yBase) continue;
-            const yc = curveY(vals, p.x);
-            if (p.y < yc) continue;
-            const tone = Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9 * GRAIN.ink;
-            if (p.c) { amDot(ctx, p, tone); continue; }
-            if (tone <= p.th) continue;
-            ctx.beginPath(); ctx.arc(p.x, p.y, 0.45 + 0.9 * Math.min(1.15, tone), 0, 6.283); ctx.fill();
-          }
+          // the area fill funnels through the core press; the field carries the curve geometry and
+          // returns 0 outside the filled band (== the old early-continue). heavier chart dot law.
+          drawPress(ctx, {
+            pts: sets[si], W, H,
+            field: (u, v, p) => {
+              if (p.x < M.l || p.x > W - M.r || p.y > yBase) return 0;
+              const yc = curveY(vals, p.x);
+              if (p.y < yc) return 0;
+              return Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
+            },
+            // the chart always presses ROUND dots (arc) whatever the screen GRID is — the pattern
+            // shapes the point set (grainPts, above), not the mark. 'stipple' selects the round law.
+            screen: 'stipple',
+            grain: { ink: GRAIN.ink },
+            dot: { round: [0.45, 0.9], cap: 1.15 },
+          });
           for (const e of edge[si]) {
             if (e.th > 0.85) continue;
             const y = curveY(vals, e.x) + e.o;
@@ -3478,19 +3485,25 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         ctx.fillStyle = DIM;
         for (let gx = M.l; gx < W - M.r; gx += 3.5) ctx.fillRect(gx, yb, 1.3, 1.3);
         ctx.fillStyle = PAL.blue;
-        for (const p of pts) {
-          if (p.th > obj.x.pr) continue;
-          if (p.y > yb) continue;
-          for (let i = 0; i < vals.length; i++) {
-            const b = bar(i);
-            if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
-            const boost = hover === i ? 1.3 : 1;
-            const tone = Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost * GRAIN.ink;
-            if (p.c) amDot(ctx, p, tone);
-            else if (tone > p.th) { ctx.beginPath(); ctx.arc(p.x, p.y, 0.5 + 1.05 * Math.min(1.1, tone), 0, 6.283); ctx.fill(); }
-            break;
-          }
-        }
+        // bars funnel through the core press too; the field returns the per-bar column tone (with
+        // the hover boost) or 0 between/under bars. dot law and pr gate match the old inline loop.
+        drawPress(ctx, {
+          pts, W, H,
+          field: (u, v, p) => {
+            if (p.y > yb) return 0;
+            for (let i = 0; i < vals.length; i++) {
+              const b = bar(i);
+              if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
+              const boost = hover === i ? 1.3 : 1;
+              return Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost;
+            }
+            return 0;
+          },
+          screen: 'stipple',  // round dots on whatever grid (see area chart note)
+          grain: { ink: GRAIN.ink },
+          pr: obj.x.pr,
+          dot: { round: [0.5, 1.05], cap: 1.1 },
+        });
         ctx.fillStyle = MUT;
         ctx.font = '9.5px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
         vals.forEach((v, i) => {
