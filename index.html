@@ -558,6 +558,18 @@
   .chlog .ver:first-child { margin-top: 0; }
   .chlog .ver b { color: var(--ink); font-size: 13px; }
   .chlog p { margin: 0 0 4px; color: var(--mut); font-size: 12.5px; }
+  /* micro-transitions — chrome eases ink-to-ink; buttons stamp down on press */
+  .seedctl button, .themectl > button, #wheelpop button, .extabs button, .grainpick button,
+  .swapbtn, nav.side a, .navm a, .bc a, .pgn button, .mlist button, .tbar button,
+  .combo li, .numf button { transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease; }
+  .sbtn { transition: transform 0.08s ease, border-color 0.16s ease; }
+  .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .themectl > button:active { transform: translateY(1px); }
+  @media (prefers-reduced-motion: reduce) {
+    .seedctl button, .themectl > button, #wheelpop button, .extabs button, .grainpick button,
+    .swapbtn, nav.side a, .navm a, .bc a, .pgn button, .mlist button, .tbar button,
+    .combo li, .numf button, .sbtn { transition: none; }
+    .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .themectl > button:active { transition: none; transform: none; }
+  }
 </style>
 <script>document.documentElement.dataset.mode = localStorage.getItem('stipple-mode') || 'dark';</script>
 
@@ -2975,7 +2987,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   function surface(cv, { h, r = 2.5, color, tone, pre = null, loop = false }) {
     cv.setAttribute('aria-hidden', 'true');
     const off = (seedTick += 313);
-    const s = { cv, x: { boost: 1, t: 0 }, raf: 0, pat: null, kind: 'grain' };
+    const s = { cv, x: { boost: 1, t: 0, pr: 1 }, raf: 0, pat: null, kind: 'grain' };
     s.rebuild = () => {
       const f = fit(cv, h);
       if (!f) { s.stale = true; return; }
@@ -2991,6 +3003,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       ctx.fillStyle = typeof color === 'function' ? color() : color;
       if ((s.pat || GRAIN.pattern) !== 'stipple') {
         for (const p of s.pts) {
+          if (p.th > x.pr) continue;
           const v = tone(p, W, H, x, s.noise);
           if (v > p.th) {
             const d = 1.05 + 0.75 * Math.min(1.15, v);
@@ -2999,6 +3012,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         }
       } else {
         for (const p of s.pts) {
+          if (p.th > x.pr) continue;
           const v = tone(p, W, H, x, s.noise);
           if (v > p.th) {
             ctx.beginPath(); ctx.arc(p.x, p.y, 0.42 + 0.85 * Math.min(1.15, v), 0, 6.283); ctx.fill();
@@ -3013,6 +3027,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       step();
     };
     registry.push(s);
+    if (grainIO) { s.x.pr = 0; cv._grainS = s; grainIO.observe(cv); }
     return s;
   }
 
@@ -3027,6 +3042,30 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     };
     step();
   }
+
+  // press-in: a grain surface prints in threshold order the first time it scrolls
+  // into view — with hatch bands, the light plate lands first, cross joins, shadows last.
+  function pressIn(s, ms = 700) {
+    const gen = s.pg = (s.pg || 0) + 1;
+    if (reduced || s.stale) { s.x.pr = 1; if (!s.stale) s.draw(); return; }
+    const t0 = performance.now();
+    const tick = (t) => {
+      if (s.pg !== gen) return;
+      s.x.pr = Math.min(1, (t - t0) / ms);
+      if (!s.stale) s.draw();
+      if (s.x.pr < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  const grainIO = ('IntersectionObserver' in window) && !reduced
+    ? new IntersectionObserver((ents) => {
+        ents.forEach(en => {
+          if (!en.isIntersecting) return;
+          grainIO.unobserve(en.target);
+          pressIn(en.target._grainS);
+        });
+      }, { threshold: 0.15 })
+    : null;
 
   // ============ buttons ============
   document.querySelectorAll('.sbtn').forEach(btn => {
@@ -3401,7 +3440,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
                yt: M.t + (H - M.t - M.b) * (1 - vals[i] / vmax) };
     };
     const obj = {
-      cv: barsCv, pat: null, kind: 'grain',
+      cv: barsCv, pat: null, kind: 'grain', x: { pr: 1 },
       rebuild() {
         const f = fit(barsCv, 150);
         if (!f) { this.stale = true; return; }
@@ -3416,6 +3455,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         for (let gx = M.l; gx < W - M.r; gx += 3.5) ctx.fillRect(gx, yb, 1.3, 1.3);
         ctx.fillStyle = PAL.blue;
         for (const p of pts) {
+          if (p.th > obj.x.pr) continue;
           if (p.y > yb) continue;
           for (let i = 0; i < vals.length; i++) {
             const b = bar(i);
@@ -3443,6 +3483,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     });
     barsCv.addEventListener('pointerleave', () => { hover = -1; obj.draw(); });
     registry.push(obj);
+    if (grainIO) { obj.x.pr = 0; barsCv._grainS = obj; grainIO.observe(barsCv); }
   })();
 
   // ============ toast ============
@@ -4449,7 +4490,10 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         box.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
         surfs.forEach(s => {
           s.pat = g;
-          if (!s.stale) { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); }
+          if (!s.stale) {
+            s.rebuild(); if (s.afterRebuild) s.afterRebuild();
+            if (s.x) { s.x.pr = 0; pressIn(s, 450); } else s.draw();
+          }
         });
       });
       box.appendChild(b);
@@ -4618,7 +4662,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   document.getElementById('reroll').addEventListener('click', () => {
     state.seed = 1000 + Math.floor(Math.random() * 9000);
     document.getElementById('seedval').textContent = state.seed;
-    registry.forEach(s => { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); });
+    registry.forEach(s => {
+      s.rebuild(); if (s.afterRebuild) s.afterRebuild();
+      const rc = !reduced && s.kind === 'grain' && s.x && s.cv && s.cv.getBoundingClientRect();
+      if (rc && rc.width && rc.bottom > 0 && rc.top < innerHeight) { s.x.pr = 0; pressIn(s, 550); }
+      else s.draw();
+    });
     area.enter();
   });
   let rto = 0;
