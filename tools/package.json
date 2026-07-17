@@ -9,6 +9,10 @@
     "golden:selftest": "node golden-frames.mjs --selftest"
   },
   "devDependencies": {
-    "playwright": "^1.61.1"
+    "esbuild": "^0.27.0",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.61.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
