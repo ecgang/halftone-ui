@@ -80,10 +80,10 @@ export function Text({
   return (
     <canvas
       ref={ref}
-      aria-hidden="true"
       className={className}
       style={{ display: 'block', width: '100%', ...style }}
       {...rest}
+      aria-hidden="true" // after {...rest} so it can't be overridden — the canvas is always decorative
     />
   );
 }

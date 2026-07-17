@@ -35,6 +35,16 @@ const app = `
   const svgAlpha = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'>"
     + "<circle cx='100' cy='60' r='42' fill='black'/></svg>";
   const imgAlphaSrc = 'data:image/svg+xml,' + encodeURIComponent(svgAlpha);
+  const BROKEN = 'data:image/png;base64,Zm9v'; // decodes to "foo" — not a valid image, fires onerror
+
+  // Starts on the opaque gradient (inks); clicking swaps to a broken src. The surface must go BLANK,
+  // not keep showing the old image (the stale-content regression Codex flagged).
+  function SwapImage() {
+    const [bad, setBad] = React.useState(false);
+    return React.createElement('div', { 'data-box': 'swap' },
+      React.createElement('button', { id: 'swap-btn', onClick: () => setBad(true) }, 'swap'),
+      React.createElement(Image, { src: bad ? BROKEN : imgSrc, screen: 'stipple', color: 'blue', h: 120 }));
+  }
 
   function App() {
     return React.createElement(HalftoneProvider, { mode: 'dark' },
@@ -61,6 +71,7 @@ const app = `
           React.createElement(LineChart, { data: [3, 6, 4, 9, 7, 12], area: true, caption: 'Ink-up over time', color: 'blue', screen: 'stipple', h: 120 })),
         React.createElement('div', { 'data-box': 'imgalpha' },
           React.createElement(Image, { src: imgAlphaSrc, screen: 'stipple', color: 'blue', h: 120 })),
+        React.createElement(SwapImage),
       ),
     );
   }
@@ -85,7 +96,8 @@ fs.writeFileSync(htmlPath, html);
 const browser = await chromium.launch({ args: ['--disable-gpu'] });
 const page = await browser.newPage({ viewport: { width: 420, height: 640 }, deviceScaleFactor: 1 });
 const errors = [];
-page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+// Keep real JS console errors; ignore the expected broken-resource noise from the stale-swap test.
+page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load|ERR_|net::/i.test(m.text())) errors.push(m.text()); });
 page.on('pageerror', (e) => errors.push(String(e)));
 await page.goto(pathToFileURL(htmlPath).href);
 
@@ -94,7 +106,7 @@ let inks = [];
 try {
   await page.waitForFunction(() => {
     const cs = [...document.querySelectorAll('canvas')];
-    if (cs.length < 9) return false;
+    if (cs.length < 10) return false;
     return cs.every((cv) => {
       if (!cv.width) return false;
       const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -128,15 +140,37 @@ const alpha = await page.evaluate(() => {
   };
 });
 
+// Stale-content regression: swap the image to a broken src and confirm the surface goes BLANK, not
+// keeps the old image. inkOf() counts inked pixels on the swap canvas.
+const swapSel = '[data-box="swap"] canvas';
+const inkOf = () => page.evaluate((sel) => {
+  const cv = document.querySelector(sel);
+  if (!cv || !cv.width) return -1;
+  const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+  let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 10) n++; return n;
+}, swapSel);
+const swapBefore = await inkOf();
+await page.click('#swap-btn');
+await page.waitForFunction((sel) => {
+  const cv = document.querySelector(sel);
+  if (!cv || !cv.width) return false;
+  const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] > 10) return false;
+  return true;
+}, swapSel, { timeout: 4000 }).catch(() => {});
+const swapAfter = await inkOf();
+
 const pngPath = path.join(HERE, '.verify-react-visual.png');
 await page.screenshot({ path: pngPath, fullPage: true });
 await browser.close();
 
-const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)', 'Image (transparent bg)'];
-ok('nine canvases mounted', inks.length === 9, `count=${inks.length}`);
+const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)', 'Image (transparent bg)', 'Image (swap, pre-click)'];
+ok('ten canvases mounted', inks.length === 10, `count=${inks.length}`);
 inks.forEach((c, i) => ok(`${label[i] || 'canvas ' + i}: real ink drawn`, c.ink > 0, `${c.w}x${c.h}, inkPx=${c.ink}`));
 ok('alpha regression: a transparent background inks nothing (blank corner)', alpha && alpha.corner === 0, `corner=${alpha?.corner}`);
 ok('alpha regression: the opaque shape still inks (center has ink)', alpha && alpha.center > 0, `center=${alpha?.center}`);
+ok('stale regression: a valid image inks before the swap', swapBefore > 0, `before=${swapBefore}`);
+ok('stale regression: swapping to a broken src goes BLANK, not stale (no old image retained)', swapAfter === 0, `after=${swapAfter}`);
 ok('no console/page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(`\nscreenshot: ${pngPath}`);
 

@@ -37,10 +37,12 @@ export function Surface({
   return (
     <canvas
       ref={ref}
-      aria-hidden="true"
       className={className}
       style={{ display: 'block', width: '100%', ...style }}
       {...rest}
+      // AFTER {...rest} so it can't be overridden: the canvas is decorative, always. Semantics live
+      // in the caller's real DOM (V-10). A caller passing aria-hidden must not expose it to a11y.
+      aria-hidden="true"
     />
   );
 }

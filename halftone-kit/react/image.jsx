@@ -43,8 +43,15 @@ export function Image({
   useEffect(() => {
     if (typeof document === 'undefined' || !src || typeof window.Image !== 'function') return undefined;
     let cancelled = false;
+    // A NEW source must never keep showing the OLD image. Drop the prior luminance up front and
+    // rebuild to a blank field; if the new src is slow, errors, or is CORS-tainted, the surface
+    // stays blank rather than displaying stale (possibly sensitive) prior content.
+    lum.current = null;
+    press.rebuild();
     const img = new window.Image();
     img.crossOrigin = 'anonymous';   // allow getImageData when the host sends CORS headers
+    const fail = () => { if (cancelled) return; lum.current = null; press.rebuild(); };
+    img.onerror = fail;              // broken/removed src -> blank, not stale
     img.onload = () => {
       if (cancelled) return;
       const ar = (img.width / img.height) || 1;
@@ -55,7 +62,7 @@ export function Image({
       const sc = Math.max(gw / img.width, gh / img.height);
       g.drawImage(img, (gw - img.width * sc) / 2, (gh - img.height * sc) / 2, img.width * sc, img.height * sc);
       let d;
-      try { d = g.getImageData(0, 0, gw, gh).data; } catch (e) { return; } // CORS-tainted → stay blank
+      try { d = g.getImageData(0, 0, gw, gh).data; } catch (e) { fail(); return; } // CORS-tainted → blank, not stale
       const data = new Float32Array(gw * gh);
       for (let i = 0; i < gw * gh; i++) {
         const j = i * 4;
@@ -84,10 +91,10 @@ export function Image({
   return (
     <canvas
       ref={ref}
-      aria-hidden="true"
       className={className}
       style={{ display: 'block', width: '100%', ...style }}
       {...rest}
+      aria-hidden="true" // after {...rest} so it can't be overridden — the canvas is always decorative
     />
   );
 }

@@ -253,6 +253,24 @@ ok('LineChart: registered + drew the area on the shared context', lctx.size === 
 await act(async () => { lroot.unmount(); });
 ok('LineChart: unmount cleans up (registry back to baseline)', lctx.size === lBase, `size=${lctx.size}`);
 
+// ---- 4h. aria-hidden is NON-overridable on every canvas primitive (V-10 decorative invariant) ----
+const actx = createPressContext({});
+const acont = window.document.createElement('div');
+window.document.body.appendChild(acont);
+const aroot = createRoot(acont);
+await act(async () => {
+  aroot.render(h(HalftoneProvider, { context: actx }, h('div', null,
+    h(Surface, { field: () => 0.5, 'aria-hidden': 'false' }),
+    h(Text, { text: 'X', 'aria-hidden': 'false' }),
+    h(Image, { src: 'x.png', 'aria-hidden': 'false' }),
+  )));
+});
+const primCanvases = acont.querySelectorAll('canvas');
+ok('aria-hidden: a caller cannot expose any canvas primitive to the a11y tree (Surface/Text/Image)',
+  primCanvases.length === 3 && [...primCanvases].every((c) => c.getAttribute('aria-hidden') === 'true'),
+  `values=${[...primCanvases].map((c) => c.getAttribute('aria-hidden')).join(',')}`);
+await act(async () => { aroot.unmount(); });
+
 // ---- 5. Two providers hold independent state (blocker 2) -----------------------------------------
 const a = createPressContext({ mode: 'dark' });
 const b = createPressContext({ mode: 'light' });
