@@ -1,2 +1,8 @@
+# Vercel's local link/build artifacts
 .vercel
-.env*
+
+# Secrets, including whatever `vercel env pull` drops here. Templates stay
+# trackable on purpose — they carry no secrets and onboarding needs them.
+.env
+.env.local
+.env.*.local
