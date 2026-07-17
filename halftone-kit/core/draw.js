@@ -10,6 +10,12 @@
 // shape is plumbed here in P1 so the acceleration path can land later WITHOUT touching this site
 // again (the whole reason it is in the signature now — see §4a risk note).
 //
+// A THIRD arg — the raw screen point `p` — is passed after (u, v) as a PIXEL-EXACT escape hatch.
+// New fields should ignore it and stay normalized. But two callers need exact pixels for byte
+// identity: legacy tone closures whose math is written in device space (recovering p.x via u*W is
+// not FP-exact and would flip dot radii, failing the golden), and pixel-native samplers like the
+// masthead's text-luminance `T.sample(px, py, r)`. `p` gives them p.x/p.y with zero round-trip.
+//
 // The dispatch, point by point (single-plate / mono press):
 //   press-in gate : a point inks only once the run has reached its threshold (p.th <= pr)
 //   am (p.c)      : amplitude — the cell carries tone, sqrt radius, no threshold (amDot)
@@ -58,7 +64,7 @@ export function drawPress(ctx, { pts, W, H, field, plates = null, screen, grain 
   const round = !screen || screen === 'stipple';
   for (const p of pts) {
     if (p.th > pr) continue;
-    const v = sample(p.x / W, p.y / H) * ink;
+    const v = sample(p.x / W, p.y / H, p) * ink;
     if (p.c) { amDot(ctx, p, v); continue; }
     if (v > p.th) {
       if (round) {

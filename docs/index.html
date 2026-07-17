@@ -2952,7 +2952,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 <div id="toast-pop" role="status"><canvas></canvas><div class="in"><span class="chk">▪</span><span id="toast-msg">Deploy finished</span></div></div>
 
 <script type="module">
-  import { mulberry32, poisson, makeNoise, screenPts, amPts, grainPts, amDot, textField, INKS, PAPER, mixHex, tuneInk, tuneMix } from '../halftone-kit/core/index.js';
+  import { mulberry32, poisson, makeNoise, screenPts, amPts, grainPts, amDot, textField, INKS, PAPER, mixHex, tuneInk, tuneMix, drawPress } from '../halftone-kit/core/index.js';
   // Storage throws under file:// in some browsers and whenever cookies are
   // blocked. These reads run during init, so an unguarded throw would take
   // theme, hue and grain down with it — not just the saved preference.
@@ -3032,25 +3032,16 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       ctx.clearRect(0, 0, W, H);
       if (pre) pre(ctx, W, H);
       ctx.fillStyle = typeof color === 'function' ? color() : color;
-      if ((s.pat || GRAIN.pattern) !== 'stipple') {
-        for (const p of s.pts) {
-          if (p.th > x.pr) continue;
-          const v = tone(p, W, H, x, s.noise) * GRAIN.ink;
-          if (p.c) { amDot(ctx, p, v); continue; }
-          if (v > p.th) {
-            const d = 1.05 + 0.75 * Math.min(1.15, v);
-            ctx.fillRect(p.x - d / 2, p.y - d / 2, d, d);
-          }
-        }
-      } else {
-        for (const p of s.pts) {
-          if (p.th > x.pr) continue;
-          const v = tone(p, W, H, x, s.noise) * GRAIN.ink;
-          if (v > p.th) {
-            ctx.beginPath(); ctx.arc(p.x, p.y, 0.42 + 0.85 * Math.min(1.15, v), 0, 6.283); ctx.fill();
-          }
-        }
-      }
+      // The generic surface press now funnels through the core's single drawPress site. The tone
+      // closure stays a legacy pixel-space field: (u,v,p) => tone(p,...) uses the raw point so the
+      // rebuild is byte-identical to the inline loop this replaced (V-4). GRAIN.ink is the dial.
+      drawPress(ctx, {
+        pts: s.pts, W, H,
+        field: (u, v, p) => tone(p, W, H, x, s.noise),
+        screen: s.pat || GRAIN.pattern,
+        grain: { ink: GRAIN.ink },
+        pr: x.pr,
+      });
     };
     s.start = () => {
       cancelAnimationFrame(s.raf);
