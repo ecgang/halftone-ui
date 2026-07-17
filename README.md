@@ -28,6 +28,7 @@ It's inspired by (and a loving riff on) [dither-ui.com](https://dither-ui.com/) 
 ## Features
 
 - **~90 documented components** — primitives (switch, slider, OTP field, dialogs, menus, combobox…), charts (line, pie, radar, area, bars, sparkline), full page examples (dashboard, pricing, sign-in flows), and a set of four-plate crosshatch "ink styles"
+- **Four grains everywhere** — every pressed example carries a picker in its tab row: re-press it as stipple, lines, waves, or crosshatch, live
 - **Real light & dark themes** — a designed print-shop-cream light mode and an archival-black dark mode, not an inversion filter
 - **OKLCH hue wheel** — drag a ring in the topbar and every pigment on the page rotates through OKLCH hue space live; neutrals stay neutral
 - **Seeded & deterministic** — one seed drives every surface; `reroll` reprints the world

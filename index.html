@@ -80,6 +80,14 @@
   }
   .extabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
   .extabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .grainpick { margin-left: auto; display: flex; gap: 2px; align-items: center; }
+  .grainpick button {
+    font: 10.5px/1 ui-monospace, Menlo, monospace; color: var(--dim); background: none;
+    border: 1px solid transparent; border-bottom: 1px solid transparent; border-radius: 3px;
+    padding: 4px 6px; margin-bottom: 6px; cursor: pointer; letter-spacing: 0.02em;
+  }
+  .grainpick button:hover { color: var(--mut); }
+  .grainpick button[aria-pressed="true"] { color: var(--ink); border-color: var(--line); }
   .stage {
     border: 1px solid var(--line); border-top: none; background: var(--panel);
     padding: 48px 32px; display: flex; align-items: center; justify-content: center;
@@ -2914,6 +2922,19 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     }
     return pts;
   }
+  // grain patterns — any surface can press as stipple, lines, waves, or hatch.
+  // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
+  const GRAIN = { pattern: 'stipple' };
+  function grainPts(W, H, r, rng, pat) {
+    if (!pat || pat === 'stipple') return poisson(W, H, r, rng);
+    const pts = [], pitch = r * 2.7;
+    const fams = pat === 'hatch' ? [0.26, 1.83] : [pat === 'waves' ? 0 : -0.62];
+    const pp = pat === 'hatch' ? pitch * 1.4 : pitch;
+    for (const a of fams)
+      for (const q of screenPts(W, H, pp, a, rng, pat === 'waves'))
+        pts.push({ x: q.x, y: q.y, th: q.j });
+    return pts;
+  }
   function makeNoise(seed) {
     const h = (x, y) => {
       const s = Math.sin(x * 127.1 + y * 311.7 + seed * 0.618) * 43758.5453;
@@ -2953,12 +2974,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   function surface(cv, { h, r = 2.5, color, tone, pre = null, loop = false }) {
     cv.setAttribute('aria-hidden', 'true');
     const off = (seedTick += 313);
-    const s = { cv, x: { boost: 1, t: 0 }, raf: 0 };
+    const s = { cv, x: { boost: 1, t: 0 }, raf: 0, pat: null, kind: 'grain' };
     s.rebuild = () => {
       const f = fit(cv, h);
       if (!f) { s.stale = true; return; }
       s.stale = false; s.ctx = f.ctx; s.W = f.w; s.H = f.h;
-      s.pts = poisson(f.w, f.h, r, mulberry32(state.seed + off));
+      s.pts = grainPts(f.w, f.h, r * 0.8, mulberry32(state.seed + off), s.pat || GRAIN.pattern);
       s.noise = makeNoise(state.seed + off);
     };
     s.draw = () => {
@@ -2967,10 +2988,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       ctx.clearRect(0, 0, W, H);
       if (pre) pre(ctx, W, H);
       ctx.fillStyle = typeof color === 'function' ? color() : color;
+      const lg = (s.pat || GRAIN.pattern) !== 'stipple';
+      const r0 = lg ? 0.40 : 0.42, r1 = lg ? 0.62 : 0.85;
       for (const p of s.pts) {
         const v = tone(p, W, H, x, s.noise);
         if (v > p.th) {
-          ctx.beginPath(); ctx.arc(p.x, p.y, 0.5 + 1.05 * Math.min(1.15, v), 0, 6.283); ctx.fill();
+          ctx.beginPath(); ctx.arc(p.x, p.y, r0 + r1 * Math.min(1.15, v), 0, 6.283); ctx.fill();
         }
       }
     };
@@ -3239,12 +3262,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       return yAt(v * prog);
     }
     const obj = {
-      cv: areaCv,
+      cv: areaCv, pat: null, kind: 'grain',
       rebuild() {
         const f = fit(areaCv, 280);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        sets = SERIES.map((s, si) => poisson(W, H, 3.6, mulberry32(state.seed + si * 7919)));
+        sets = SERIES.map((s, si) => grainPts(W, H, 2.9, mulberry32(state.seed + si * 7919), obj.pat || GRAIN.pattern));
         edge = SERIES.map((s, si) => {
           const rng = mulberry32(state.seed * 31 + si), out = [];
           for (let x = M.l; x <= W - M.r; x += 2.1)
@@ -3277,7 +3300,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
             if (p.y < yc) continue;
             const tone = Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
             if (tone <= p.th) continue;
-            ctx.beginPath(); ctx.arc(p.x, p.y, 0.55 + 1.1 * tone, 0, 6.283); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, 0.45 + 0.9 * tone, 0, 6.283); ctx.fill();
           }
           for (const e of edge[si]) {
             if (e.th > 0.85) continue;
@@ -3369,12 +3392,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
                yt: M.t + (H - M.t - M.b) * (1 - vals[i] / vmax) };
     };
     const obj = {
-      cv: barsCv,
+      cv: barsCv, pat: null, kind: 'grain',
       rebuild() {
         const f = fit(barsCv, 150);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        pts = poisson(W, H, 2.9, mulberry32(state.seed + 101));
+        pts = grainPts(W, H, 2.3, mulberry32(state.seed + 101), obj.pat || GRAIN.pattern);
       },
       draw() {
         if (this.stale || !ctx) return;
@@ -4397,6 +4420,33 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     };
     swapReg('smudge', inkSurface(document.getElementById('smudge-cv'), o), o);
   }
+
+  // ============ grain pickers — press any example in any grain ============
+  const GRAINS = ['stipple', 'lines', 'waves', 'hatch'];
+  document.querySelectorAll('[data-ex]').forEach(ex => {
+    const surfs = registry.filter(s => s.kind === 'grain' && s.cv && ex.contains(s.cv));
+    if (!surfs.length) return;
+    const tabs = ex.querySelector('.extabs');
+    if (!tabs || tabs.querySelector('.grainpick')) return;
+    const box = document.createElement('div');
+    box.className = 'grainpick';
+    box.setAttribute('role', 'group');
+    box.setAttribute('aria-label', 'Grain pattern');
+    GRAINS.forEach(g => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = g;
+      b.setAttribute('aria-pressed', String(g === 'stipple'));
+      b.addEventListener('click', () => {
+        box.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+        surfs.forEach(s => {
+          s.pat = g;
+          if (!s.stale) { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); }
+        });
+      });
+      box.appendChild(b);
+    });
+    tabs.appendChild(box);
+  });
 
   // ============ theme engine — designed light/dark + OKLCH hue wheel ============
   // Two designed palettes (not an inversion): dark is the working room, light is the
