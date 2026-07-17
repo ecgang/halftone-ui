@@ -396,6 +396,22 @@
   }
   #wheelpop button:hover { border-color: var(--accent); color: var(--accent); }
   #wheelcv { cursor: crosshair; touch-action: none; }
+  #grainpop {
+    position: absolute; top: 36px; right: 0; z-index: 60; min-width: 216px;
+    background: var(--panel); border: 1px solid var(--line-2); padding: 12px;
+    display: flex; flex-direction: column; gap: 9px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  }
+  #grainpop .gdial { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--mut); }
+  #grainpop .gdial b { color: var(--ink); font-weight: 400; width: 46px; }
+  #grainpop input[type="range"] { flex: 1; width: 100px; accent-color: var(--accent); }
+  #grainpop .num { font-size: 10.5px; color: var(--dim); width: 30px; text-align: right; font-variant-numeric: tabular-nums; }
+  #grainpop small { color: var(--dim); font-size: 10.5px; align-self: center; }
+  #grainpop > button {
+    background: none; border: 1px solid var(--line-2); color: var(--mut);
+    font: inherit; font-size: 11px; padding: 2px 10px; cursor: pointer; align-self: center;
+  }
+  #grainpop > button:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ---- round 8: full-parity primitives ---- */
   .rowc { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; align-items: center; }
@@ -584,6 +600,14 @@
         <canvas id="wheelcv" aria-label="OKLCH hue wheel — drag to rotate the theme"></canvas>
         <small>drag the ring · OKLCH hue</small>
         <button id="wheelreset">reset</button>
+      </div>
+      <button id="grainbtn" title="Global grain — screen scale, ink weight, wash strength" aria-haspopup="true" aria-expanded="false">▦ grain</button>
+      <div id="grainpop" hidden>
+        <div class="gdial"><b>scale</b><input type="range" id="gr-scale" min="0.6" max="1.8" step="0.05" value="1" aria-label="Screen scale"><span class="num" id="gr-scale-v">1.00</span></div>
+        <div class="gdial"><b>ink</b><input type="range" id="gr-ink" min="0.5" max="1.5" step="0.05" value="1" aria-label="Ink weight"><span class="num" id="gr-ink-v">1.00</span></div>
+        <div class="gdial"><b>washes</b><input type="range" id="gr-wash" min="0" max="2" step="0.1" value="1" aria-label="Wash strength"><span class="num" id="gr-wash-v">1.0</span></div>
+        <small>re-presses every surface live</small>
+        <button id="grainreset">reset</button>
       </div>
     </div>
     <div class="seedctl">seed <b id="seedval">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
@@ -2936,7 +2960,14 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   }
   // grain patterns — any surface can press as stipple, lines, waves, or hatch.
   // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
-  const GRAIN = { pattern: 'hatch' };
+  const GRAIN = { pattern: 'hatch', scale: 1, ink: 1, wash: 1 };
+  try {
+    const gs = JSON.parse(localStorage.getItem('stipple-grain') || '{}');
+    const dial = (v, lo, hi) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
+    if (dial(gs.scale, 0.6, 1.8)) GRAIN.scale = gs.scale;
+    if (dial(gs.ink, 0.5, 1.5)) GRAIN.ink = gs.ink;
+    if (dial(gs.wash, 0, 2)) GRAIN.wash = gs.wash;
+  } catch (e) { /* corrupt storage: keep defaults */ }
   function grainPts(W, H, r, rng, pat) {
     if (!pat || pat === 'stipple') return poisson(W, H, r, rng);
     const pts = [], pitch = Math.max(2.8, r * 2.2);
@@ -2992,7 +3023,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       const f = fit(cv, h);
       if (!f) { s.stale = true; return; }
       s.stale = false; s.ctx = f.ctx; s.W = f.w; s.H = f.h;
-      s.pts = grainPts(f.w, f.h, r * 0.8, mulberry32(state.seed + off), s.pat || GRAIN.pattern);
+      s.pts = grainPts(f.w, f.h, r * 0.8 * GRAIN.scale, mulberry32(state.seed + off), s.pat || GRAIN.pattern);
       s.noise = makeNoise(state.seed + off);
     };
     s.draw = () => {
@@ -3004,7 +3035,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       if ((s.pat || GRAIN.pattern) !== 'stipple') {
         for (const p of s.pts) {
           if (p.th > x.pr) continue;
-          const v = tone(p, W, H, x, s.noise);
+          const v = tone(p, W, H, x, s.noise) * GRAIN.ink;
           if (v > p.th) {
             const d = 1.05 + 0.75 * Math.min(1.15, v);
             ctx.fillRect(p.x - d / 2, p.y - d / 2, d, d);
@@ -3013,7 +3044,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       } else {
         for (const p of s.pts) {
           if (p.th > x.pr) continue;
-          const v = tone(p, W, H, x, s.noise);
+          const v = tone(p, W, H, x, s.noise) * GRAIN.ink;
           if (v > p.th) {
             ctx.beginPath(); ctx.arc(p.x, p.y, 0.42 + 0.85 * Math.min(1.15, v), 0, 6.283); ctx.fill();
           }
@@ -3090,12 +3121,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   document.querySelectorAll('[data-wash]').forEach(cv => {
     surface(cv, {
       r: 2.8, color: () => PAL[cv.dataset.wash] || PAL.purple,
-      tone: (p, W, H, x, n) => Math.pow(p.y / H, 2.1) * (0.35 + n(p.x / 70, p.y / 70)) * 1.35,
+      tone: (p, W, H, x, n) => GRAIN.wash * Math.pow(p.y / H, 3.6) * (0.16 + 0.3 * n(p.x / 70, p.y / 70)),
     });
   });
   surface(document.getElementById('wash'), {
     h: 170, r: 2.8, color: () => PAL.purple, loop: true,
-    tone: (p, W, H, x, n) => Math.pow(n(p.x / 90 + x.t, p.y / 55), 1.35) * 1.25,
+    tone: (p, W, H, x, n) => GRAIN.wash * Math.pow(n(p.x / 90 + x.t, p.y / 55), 1.35) * 1.25,
   });
 
   // ============ meters ============
@@ -3315,7 +3346,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         const f = fit(areaCv, 280);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        sets = SERIES.map((s, si) => grainPts(W, H, 2.9, mulberry32(state.seed + si * 7919), obj.pat || GRAIN.pattern));
+        sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(state.seed + si * 7919), obj.pat || GRAIN.pattern));
         edge = SERIES.map((s, si) => {
           const rng = mulberry32(state.seed * 31 + si), out = [];
           for (let x = M.l; x <= W - M.r; x += 2.1)
@@ -3445,7 +3476,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         const f = fit(barsCv, 150);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        pts = grainPts(W, H, 2.3, mulberry32(state.seed + 101), obj.pat || GRAIN.pattern);
+        pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(state.seed + 101), obj.pat || GRAIN.pattern);
       },
       draw() {
         if (this.stale || !ctx) return;
@@ -4643,7 +4674,11 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     wheelBtn.addEventListener('click', () => {
       wheelPop.hidden = !wheelPop.hidden;
       wheelBtn.setAttribute('aria-expanded', String(!wheelPop.hidden));
-      if (!wheelPop.hidden) drawWheel();
+      if (!wheelPop.hidden) {
+        drawWheel();
+        const gp = document.getElementById('grainpop');
+        if (gp && !gp.hidden) { gp.hidden = true; document.getElementById('grainbtn').setAttribute('aria-expanded', 'false'); }
+      }
     });
     document.getElementById('wheelreset').addEventListener('click', () => {
       THEME.hue = 0; applyTheme(); drawWheel(); repaintAll();
@@ -4654,6 +4689,45 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       }
     });
     rethemers.push(() => { if (!wheelPop.hidden) drawWheel(); });
+  }
+
+  // global grain — Studio-style dials that re-press every surface on the site
+  const grainBtn = document.getElementById('grainbtn');
+  const grainPop = document.getElementById('grainpop');
+  {
+    const dials = [
+      { id: 'gr-scale', key: 'scale', def: 1, fmt: v => v.toFixed(2) },
+      { id: 'gr-ink', key: 'ink', def: 1, fmt: v => v.toFixed(2) },
+      { id: 'gr-wash', key: 'wash', def: 1, fmt: v => v.toFixed(1) },
+    ];
+    const saveGrain = () => localStorage.setItem('stipple-grain',
+      JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash }));
+    const setDial = (d, v) => {
+      GRAIN[d.key] = v;
+      document.getElementById(d.id).value = v;
+      document.getElementById(d.id + '-v').textContent = d.fmt(v);
+    };
+    dials.forEach(d => {
+      setDial(d, GRAIN[d.key]);
+      document.getElementById(d.id).addEventListener('input', (e) => {
+        setDial(d, +e.target.value);
+        saveGrain(); requestRepaint();
+      });
+    });
+    grainBtn.addEventListener('click', () => {
+      grainPop.hidden = !grainPop.hidden;
+      grainBtn.setAttribute('aria-expanded', String(!grainPop.hidden));
+      if (!grainPop.hidden && !wheelPop.hidden) { wheelPop.hidden = true; wheelBtn.setAttribute('aria-expanded', 'false'); }
+    });
+    document.getElementById('grainreset').addEventListener('click', () => {
+      dials.forEach(d => setDial(d, d.def));
+      saveGrain(); repaintAll();
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!grainPop.hidden && !grainPop.contains(e.target) && e.target !== grainBtn) {
+        grainPop.hidden = true; grainBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
   }
   setModeLabel();
   applyTheme();
