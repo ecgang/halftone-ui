@@ -2,4 +2,9 @@
 .verify-react.bundle.mjs
 .verify-react-visual.html
 .verify-react-visual.png
+.verify-vue.bundle.mjs
+.verify-vue-visual.html
+.verify-vue-visual.png
+.verify-studio.html
+.verify-studio.png
 node_modules/
