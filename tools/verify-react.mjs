@@ -27,9 +27,9 @@ const entry = `
   import { createRoot } from 'react-dom/client';
   import { act } from 'react-dom/test-utils';
   import { renderToStaticMarkup } from 'react-dom/server';
-  import { HalftoneProvider, Surface, Text, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
+  import { HalftoneProvider, Surface, Text, Image, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
   import { createPressContext } from ${JSON.stringify(coreIndex)};
-  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, usePress, useHalftoneContext, createPressContext };
+  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, usePress, useHalftoneContext, createPressContext };
 `;
 const built = await esbuild.build({
   absWorkingDir: ROOT,
@@ -63,6 +63,10 @@ HC.prototype.getContext = function () {
 Object.defineProperty(HC.prototype, 'clientWidth', { configurable: true, get() { return 300; } });
 Object.defineProperty(HC.prototype, 'clientHeight', { configurable: true, get() { return 150; } });
 window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+// jsdom's Image never fires load (no decode). Stub one that records instances so the test can fire
+// onload deterministically (an auto-firing timer races React's act() and makes the delta unreadable).
+const madeImages = [];
+window.Image = class FakeImage { constructor() { this.width = 200; this.height = 120; this.onload = null; this.crossOrigin = null; madeImages.push(this); } set src(v) { this._src = v; } get src() { return this._src; } };
 window.requestAnimationFrame = (cb) => setTimeout(() => cb(Date.now()), 0);
 window.cancelAnimationFrame = (id) => clearTimeout(id);
 window.devicePixelRatio = 1;
@@ -78,7 +82,7 @@ globalThis.devicePixelRatio = 1;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const m = await import(pathToFileURL(tmp).href);
-const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, createPressContext } = m;
+const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, createPressContext } = m;
 const act = React.act || actLegacy;   // React.act (18.3+) is the non-deprecated path
 const h = React.createElement;
 const clearsOf = (canvas) => (drawnPerCanvas.get(canvas) || []).filter((c) => c === 'clearRect').length;
@@ -128,6 +132,22 @@ ok('Text: registered and drew on the shared context', tcanvas && tctx.size === t
 ok('Text: pushed the wordmark height through the press (canvas got a CSS height)', !!tcanvas && /\d/.test(tcanvas.style.height || ''), `height=${tcanvas?.style.height || '(none)'}`);
 await act(async () => { troot.unmount(); });
 ok('Text: unmount cleans up (registry back to baseline)', tctx.size === tBase, `size=${tctx.size}`);
+
+// ---- 4c. <Image>: load, sample luminance, re-press, clean up ------------------------------------
+const ictx = createPressContext({});
+const icontainer = window.document.createElement('div');
+window.document.body.appendChild(icontainer);
+const iroot = createRoot(icontainer);
+const iBase = ictx.size;
+await act(async () => { iroot.render(h(HalftoneProvider, { context: ictx }, h(Image, { src: 'x.png' }))); });
+const icanvas = icontainer.querySelector('canvas');
+ok('Image: mounts and registers on the shared context', icanvas && ictx.size === iBase + 1, `size=${ictx.size}`);
+const iClearsPre = clearsOf(icanvas);
+await act(async () => { madeImages.forEach((im) => im.onload && im.onload()); }); // fire load deterministically
+ok('Image: luminance load re-presses the surface (draws again post-load)', clearsOf(icanvas) > iClearsPre, `clears ${iClearsPre} -> ${clearsOf(icanvas)}`);
+ok('Image: took the image aspect ratio (no distortion by default)', !!icanvas && (icanvas.style.aspectRatio || '') !== '', `aspectRatio=${icanvas?.style.aspectRatio || '(none)'}`);
+await act(async () => { iroot.unmount(); });
+ok('Image: unmount cleans up (registry back to baseline)', ictx.size === iBase, `size=${ictx.size}`);
 
 // ---- 5. Two providers hold independent state (blocker 2) -----------------------------------------
 const a = createPressContext({ mode: 'dark' });
