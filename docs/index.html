@@ -2952,7 +2952,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 <div id="toast-pop" role="status"><canvas></canvas><div class="in"><span class="chk">▪</span><span id="toast-msg">Deploy finished</span></div></div>
 
 <script type="module">
-  import { mulberry32, poisson, makeNoise, screenPts, amPts, grainPts, amDot, amRadius, textField, INKS, PAPER, mixHex, tuneInk, tuneMix, drawPress, drawPlates } from '../halftone-kit/core/index.js';
+  import { mulberry32, poisson, makeNoise, screenPts, amPts, grainPts, amDot, amRadius, textField, INKS, PAPER, mixHex, tuneInk, tuneMix, drawPress, drawPlates, createPressContext } from '../halftone-kit/core/index.js';
   // Storage throws under file:// in some browsers and whenever cookies are
   // blocked. These reads run during init, so an unguarded throw would take
   // theme, hue and grain down with it — not just the saved preference.
@@ -2968,7 +2968,19 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
   // All but `am` are FM: a near-fixed dot, thresholded against the point's own
   // value. `am` modulates area instead and has no threshold — see amPts/amDot.
-  const GRAIN = { pattern: 'hatch', scale: 1, ink: 1, wash: 1 };
+  // ONE press context for the whole page — the dogfood. The former module globals (grain dials,
+  // theme, resting seed, decorrelation counter, live-surface registry) are all instance state on
+  // this context now, not bare `let`s (blockers 1 + 2). Two presses on one page could hold
+  // different settings via separate contexts; the docs is one page, so it holds one. Theme/hue/
+  // grain hydrate from localStorage HERE — a browser concern the docs owns — never inside the core,
+  // which stays SSR-clean (V-3). GRAIN/THEME below are aliases onto this context's own objects, so
+  // every existing reference keeps working while the source of truth lives in the core context.
+  const CTX = createPressContext({
+    mode: store.get('stipple-mode') || 'dark',
+    hue: +(store.get('stipple-hue') || 0),
+    reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+  });
+  const GRAIN = CTX.grain;
   try {
     const gs = JSON.parse(store.get('stipple-grain') || '{}');
     const dial = (v, lo, hi) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
@@ -2993,16 +3005,16 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // sits below 1 because dots reach full coverage at r = cell/sqrt(2): a plate
   // that fuses solid stops being a halftone and starts being a rectangle.
 
-  const state = { seed: 1859 };
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = CTX.reduced;
   const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const PAL = {};
   ['green','blue','purple','pink','orange','red','grey'].forEach(c => PAL[c] = cssVar('--' + c));
   let INK = cssVar('--ink'), MUT = cssVar('--mut'), DIM = cssVar('--dim');
   const rethemers = []; // callbacks that re-derive DOM colors after a retheme
 
-  let seedTick = 0; // bump per canvas to decorrelate
-  const registry = [];
+  // Resting seed is CTX.seedValue (= base + roll); decorrelation is CTX.nextOff() (+313 per canvas);
+  // live surfaces live on CTX (_add / surfaces / size). The former state/seedTick/registry module
+  // globals are gone — the context owns them (blockers 1 + 2).
   function fit(cv, cssH) {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const w = cv.clientWidth, h = cssH ?? cv.clientHeight;
@@ -3017,14 +3029,14 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // generic halftone surface: tone(p, W, H, t, x) -> 0..1
   function surface(cv, { h, r = 2.5, color, tone, pre = null, loop = false }) {
     cv.setAttribute('aria-hidden', 'true');
-    const off = (seedTick += 313);
+    const off = CTX.nextOff();
     const s = { cv, x: { boost: 1, t: 0, pr: 1 }, raf: 0, pat: null, kind: 'grain' };
     s.rebuild = () => {
       const f = fit(cv, h);
       if (!f) { s.stale = true; return; }
       s.stale = false; s.ctx = f.ctx; s.W = f.w; s.H = f.h;
-      s.pts = grainPts(f.w, f.h, r * 0.8 * GRAIN.scale, mulberry32(state.seed + off), s.pat || GRAIN.pattern);
-      s.noise = makeNoise(state.seed + off);
+      s.pts = grainPts(f.w, f.h, r * 0.8 * GRAIN.scale, mulberry32(CTX.seedValue + off), s.pat || GRAIN.pattern);
+      s.noise = makeNoise(CTX.seedValue + off);
     };
     s.draw = () => {
       if (s.stale || !s.ctx) return;
@@ -3049,7 +3061,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       const step = () => { s.x.t += 0.0045; s.draw(); s.raf = requestAnimationFrame(step); };
       step();
     };
-    registry.push(s);
+    CTX._add(s);
     if (grainIO) { s.x.pr = 0; cv._grainS = s; grainIO.observe(cv); }
     return s;
   }
@@ -3271,7 +3283,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     let local = k * 977 + 5;
     const colKeys = ['blue', 'purple', 'orange', 'green', 'pink'];
     const s = surface(cv, {
-      h: 56, r: 1.7, color: () => PAL[colKeys[Math.abs(state.seed + local) % colKeys.length]],
+      h: 56, r: 1.7, color: () => PAL[colKeys[Math.abs(CTX.seedValue + local) % colKeys.length]],
       tone: (p, W, H, x, n) => {
         const c = W / 2, dx = Math.abs(p.x - c), dy = p.y - H / 2;
         const rr = Math.hypot(dx, dy) / c;
@@ -3338,9 +3350,9 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         const f = fit(areaCv, 280);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(state.seed + si * 7919), obj.pat || GRAIN.pattern));
+        sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(CTX.seedValue + si * 7919), obj.pat || GRAIN.pattern));
         edge = SERIES.map((s, si) => {
-          const rng = mulberry32(state.seed * 31 + si), out = [];
+          const rng = mulberry32(CTX.seedValue * 31 + si), out = [];
           for (let x = M.l; x <= W - M.r; x += 2.1)
             out.push({ x: x + rng() * 1.4 - 0.7, o: rng() * 2.4 - 1.2, th: rng() });
           return out;
@@ -3454,7 +3466,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     const tbl = document.getElementById('datatable');
     tbl.innerHTML = '<tr><th>Series</th>' + MONTHS.map(m => '<th>' + m + '</th>').join('') + '</tr>' +
       SERIES.map(s => '<tr><td>' + s.label + '</td>' + DATA[s.key].map(v => '<td>' + v + '</td>').join('') + '</tr>').join('');
-    registry.push(obj);
+    CTX._add(obj);
     return obj;
   })();
 
@@ -3476,7 +3488,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         const f = fit(barsCv, 150);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(state.seed + 101), obj.pat || GRAIN.pattern);
+        pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(CTX.seedValue + 101), obj.pat || GRAIN.pattern);
       },
       draw() {
         if (this.stale || !ctx) return;
@@ -3520,7 +3532,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       if (h !== hover) { hover = h; obj.draw(); }
     });
     barsCv.addEventListener('pointerleave', () => { hover = -1; obj.draw(); });
-    registry.push(obj);
+    CTX._add(obj);
     if (grainIO) { obj.x.pr = 0; barsCv._grainS = obj; grainIO.observe(barsCv); }
   })();
 
@@ -3585,7 +3597,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // opts is read live on every rebuild/draw so callers (the Studio) can mutate it and re-render.
   function inkSurface(cv, opts) {
     cv.setAttribute('aria-hidden', 'true');
-    const off = (seedTick += 313);
+    const off = CTX.nextOff();
     const layer = document.createElement('canvas');
     const s = { cv, x: { boost: 1 }, raf: 0, reveal: 1 };
     s.rebuild = () => {
@@ -3599,7 +3611,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       layer.width = cv.width; layer.height = cv.height;
       s.lctx = layer.getContext('2d');
       s.lctx.setTransform(cv.width / f.w, 0, 0, cv.height / f.h, 0, 0);
-      s.noise = makeNoise(state.seed + off);
+      s.noise = makeNoise(CTX.seedValue + off);
       const harm = opts.harmony !== 'off' && opts.harmony !== false;
       const rawA = INKS[inks[0]] || INKS.blue, rawB = INKS[inks[1]] || INKS.orange;
       const A = harm ? tuneInk(rawA) : rawA, B = harm ? tuneInk(rawB) : rawB;
@@ -3611,7 +3623,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         const cols = [B, A, harm ? tuneMix(A, B) : mixHex(A, B), dk ? INKS.white : INKS.black];
         for (let i = 0; i < 4; i++) {
           s.screens.push({
-            pts: screenPts(s.W, s.H, p * 0.78, angles[i], mulberry32(state.seed + off + i * 47), false),
+            pts: screenPts(s.W, s.H, p * 0.78, angles[i], mulberry32(CTX.seedValue + off + i * 47), false),
             color: cols[i], rmax: p * 0.78 * 0.74,
             cov: (d) => iband(sig(d), bands[i][0], bands[i][1]) * 0.62,
             ox: (i % 2) ? misreg * 0.5 : 0, oy: (i > 1) ? misreg * 0.5 : 0,
@@ -3619,9 +3631,9 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         }
       } else {
         const mk = (i, angle) => pattern === 'stipple'
-          ? poisson(s.W, s.H, p * 0.85, mulberry32(state.seed + off + i * 47))
+          ? poisson(s.W, s.H, p * 0.85, mulberry32(CTX.seedValue + off + i * 47))
               .map(q => ({ x: q.x, y: q.y, j: q.th }))
-          : screenPts(s.W, s.H, p, angle, mulberry32(state.seed + off + i * 47), pattern === 'waves');
+          : screenPts(s.W, s.H, p, angle, mulberry32(CTX.seedValue + off + i * 47), pattern === 'waves');
         s.screens.push({ pts: mk(1, 1.94), color: B, rmax: p * 0.74,
           cov: (d) => iband(sig(d), 0.06, 0.86) * 0.95, ox: misreg, oy: -misreg * 0.4 });
         s.screens.push({ pts: mk(0, 0.42), color: A, rmax: p * 0.74,
@@ -3637,7 +3649,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       ctx.fillStyle = PAPER[paper] || PAPER.light;
       ctx.fillRect(0, 0, W, H);
       if (grain) {
-        const rg = mulberry32(state.seed + off + 9);
+        const rg = mulberry32(CTX.seedValue + off + 9);
         ctx.fillStyle = dk ? '#FFFFFF' : '#000000'; ctx.globalAlpha = 0.05;
         for (let i = 0; i < 500; i++) ctx.fillRect(rg() * W, rg() * H, 1, 1);
         ctx.globalAlpha = 1;
@@ -3655,7 +3667,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         })),
       });
     };
-    registry.push(s);
+    CTX._add(s);
     if (inkIO) { s.reveal = 0; cv._inkS = s; inkIO.observe(cv); }
     return s;
   }
@@ -4012,7 +4024,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       cd.setAttribute('aria-selected', String(!preview));
       stage.hidden = !preview;
       codewrap.style.display = preview ? 'none' : 'block';
-      if (preview) registry.forEach(s => {
+      if (preview) CTX.surfaces.forEach(s => {
         if (s.stale && s.cv && stage.contains(s.cv)) {
           s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw();
           if (s.start) s.start();
@@ -4245,7 +4257,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   document.querySelectorAll('[data-dlg]').forEach(b => b.addEventListener('click', () => {
     const d = document.getElementById(b.dataset.dlg);
     d.showModal();
-    registry.forEach(s => {
+    CTX.surfaces.forEach(s => {
       if (s.cv && d.contains(s.cv)) { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); }
     });
   }));
@@ -4472,7 +4484,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // ============ grain pickers — press any example in any grain ============
   const GRAINS = ['stipple', 'lines', 'waves', 'hatch', 'am'];
   document.querySelectorAll('[data-ex]').forEach(ex => {
-    const surfs = registry.filter(s => s.kind === 'grain' && s.cv && ex.contains(s.cv));
+    const surfs = CTX.surfaces.filter(s => s.kind === 'grain' && s.cv && ex.contains(s.cv));
     if (!surfs.length) return;
     const tabs = ex.querySelector('.extabs');
     if (!tabs || tabs.querySelector('.grainpick')) return;
@@ -4553,10 +4565,9 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   };
   const BASE_INKS = Object.assign({}, INKS);
 
-  const THEME = {
-    mode: store.get('stipple-mode') || 'dark',
-    hue: +(store.get('stipple-hue') || 0),
-  };
+  // THEME is the context's own {mode, hue} — hydrated when CTX was built up top. Aliased here so the
+  // theme toggle / hue drag keep mutating it in place; repaintAll re-presses CTX.surfaces.
+  const THEME = CTX.theme;
   const applyTheme = () => {
     const { mode, hue } = THEME;
     const rs = document.documentElement.style;
@@ -4576,7 +4587,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     store.set('stipple-hue', String(hue));
   };
   const repaintAll = () => {
-    registry.forEach(s => { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); });
+    CTX.surfaces.forEach(s => { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); });
   };
   let reLast = 0, reTo = 0;
   const requestRepaint = () => { // full repaint is heavy; coalesce during wheel drags
@@ -4754,7 +4765,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       }
       // the same grid the `am` screen presses on — one press, five ways to wear it
       s.plates = PLATES.map((pl, i) => ({
-        pl, pts: amPts(W, H, PITCH * GRAIN.scale, pl.ang, mulberry32(state.seed + i * 977)),
+        pl, pts: amPts(W, H, PITCH * GRAIN.scale, pl.ang, mulberry32(CTX.seedValue + i * 977)),
       }));
     };
     s.draw = () => {
@@ -4803,7 +4814,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         }),
       });
     };
-    registry.push(s);
+    CTX._add(s);
     if (grainIO) { s.x.pr = 0; mastCv._grainS = s; grainIO.observe(mastCv); }
     // Pull a proof: re-run the press. pressIn owns the reduced-motion case (it
     // snaps to 1) and carries its own generation token, so a mashed button
@@ -4818,9 +4829,13 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // masthead control and the topbar control are deliberately the same action —
   // the point of a seed is that it owns everything you didn't pin down.
   function rollPress() {
-    state.seed = 1000 + Math.floor(Math.random() * 9000);
-    document.querySelectorAll('.seedout').forEach(el => { el.textContent = state.seed; });
-    registry.forEach(s => {
+    // "roll a press" = a page-wide reseed. In the core model the entrance seed is fixed and the
+    // resting geometry rides a mutable `roll` (§7): CTX.seedValue = base + roll, so a fresh roll
+    // re-presses every surface with new geometry, byte-identical to the old `CTX.seedValue = rnd` at
+    // any value. The displayed number is the resulting seedValue.
+    CTX.setRoll(1 + Math.floor(Math.random() * 9000));
+    document.querySelectorAll('.seedout').forEach(el => { el.textContent = CTX.seedValue; });
+    CTX.surfaces.forEach(s => {
       s.rebuild(); if (s.afterRebuild) s.afterRebuild();
       const rc = !reduced && s.kind === 'grain' && s.x && s.cv && s.cv.getBoundingClientRect();
       if (rc && rc.width && rc.bottom > 0 && rc.top < innerHeight) { s.x.pr = 0; pressIn(s, s.ms || 550); }
@@ -4833,10 +4848,10 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   let rto = 0;
   addEventListener('resize', () => {
     clearTimeout(rto);
-    rto = setTimeout(() => { registry.forEach(s => { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); }); }, 180);
+    rto = setTimeout(() => { CTX.surfaces.forEach(s => { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); }); }, 180);
   });
 
-  registry.forEach(s => { s.rebuild(); s.draw(); if (s.start) s.start(); });
+  CTX.surfaces.forEach(s => { s.rebuild(); s.draw(); if (s.start) s.start(); });
   area.enter();
 })();
 </script>

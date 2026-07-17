@@ -34,11 +34,20 @@ export function createPressContext(opts = {}) {
   const pal = { ...(opts.pal || {}) };                // semantic named colors; the adapter fills these from CSS vars
   const reg = new Set();                              // live surfaces (per-context registry, V-2)
   let seedTick = 0;                                   // decorrelation counter
+  let roll = opts.roll || 0;                          // page-wide resting-geometry entropy (see below)
 
   const ctx = {
     // ---- resting-geometry seed base + the entrance seed ----
     base: RESTING_BASE,
     get seed() { return opts.seed ?? RESTING_BASE; }, // entrance transient seed
+    // Shared resting-geometry seed: `base + roll` (§7). Surfaces read `seedValue + off` for their
+    // point geometry, so bumping `roll` re-presses every surface on this context with fresh geometry
+    // while the entrance seed and the roll-0 byte-identical invariant both hold. This is the
+    // context-level analogue of the per-press `roll` opt — a provider default all its surfaces
+    // share, which is exactly what a single page's "roll a press" reseed needs.
+    get roll() { return roll; },
+    get seedValue() { return RESTING_BASE + roll; },
+    setRoll(r) { roll = r; return ctx; },
     grain,
     theme,
     // reduced-motion: a flag, not a matchMedia read (SSR-safe). Adapter sets it at mount.
@@ -68,6 +77,10 @@ export function createPressContext(opts = {}) {
     _add(s) { reg.add(s); },
     _remove(s) { reg.delete(s); },
     get size() { return reg.size; },
+    // A read-only snapshot of the live surfaces, for callers that need to iterate/filter (the docs
+    // repaints on theme/dial/resize with per-surface variations repaint() can't express). Insertion
+    // order is preserved (Set semantics), matching the old registry array.
+    get surfaces() { return [...reg]; },
     // Repaint every live surface (theme change / dial change). A surface destroyed mid-repaint is
     // already out of `reg`, so this never touches a released handle (V-9).
     repaint() { reg.forEach((s) => { s.rebuild(); s.draw(); }); },
