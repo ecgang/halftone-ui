@@ -27,9 +27,9 @@ const entry = `
   import { createRoot } from 'react-dom/client';
   import { act } from 'react-dom/test-utils';
   import { renderToStaticMarkup } from 'react-dom/server';
-  import { HalftoneProvider, Surface, Text, Image, Button, Meter, Card, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
+  import { HalftoneProvider, Surface, Text, Image, Button, Meter, Card, BarChart, LineChart, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
   import { createPressContext } from ${JSON.stringify(coreIndex)};
-  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, Button, Meter, Card, usePress, useHalftoneContext, createPressContext };
+  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, Button, Meter, Card, BarChart, LineChart, usePress, useHalftoneContext, createPressContext };
 `;
 const built = await esbuild.build({
   absWorkingDir: ROOT,
@@ -82,7 +82,7 @@ globalThis.devicePixelRatio = 1;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const m = await import(pathToFileURL(tmp).href);
-const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, Button, Meter, Card, createPressContext } = m;
+const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, Button, Meter, Card, BarChart, LineChart, createPressContext } = m;
 const act = React.act || actLegacy;   // React.act (18.3+) is the non-deprecated path
 const h = React.createElement;
 const clearsOf = (canvas) => (drawnPerCanvas.get(canvas) || []).filter((c) => c === 'clearRect').length;
@@ -213,6 +213,45 @@ await act(async () => { croot.render(h(HalftoneProvider, { context: cctx }, h(Ca
 ok('Card: `as` renders the chosen semantic element (<article>)', !!ccontainer.querySelector('article'));
 await act(async () => { croot.unmount(); });
 ok('Card: unmount cleans up (registry back to baseline)', cctx.size === cBase, `size=${cctx.size}`);
+
+// ---- 4g. <BarChart>/<LineChart>: data in a real accessible <table>, halftone is decorative (V-10) -
+const chctx = createPressContext({});
+const chcontainer = window.document.createElement('div');
+window.document.body.appendChild(chcontainer);
+const chroot = createRoot(chcontainer);
+const chBase = chctx.size;
+await act(async () => { chroot.render(h(HalftoneProvider, { context: chctx }, h(BarChart, { data: [4, 9, 6], caption: 'Weekly impressions' }))); });
+const table = chcontainer.querySelector('table');
+const rows = table ? table.querySelectorAll('tbody tr') : [];
+const chcanvas = chcontainer.querySelector('canvas');
+ok('BarChart: data lives in a real <table> (caption + one row per datum) in the a11y tree, not the canvas',
+  !!table && rows.length === 3 && /Weekly impressions/.test(table.querySelector('caption')?.textContent || '') && !!chcanvas && chcanvas.getAttribute('aria-hidden') === 'true',
+  `rows=${rows.length}`);
+ok('BarChart: each row carries a scoped label + value cell (the accessible readout)',
+  rows.length === 3 && /9/.test(rows[1].textContent || '') && rows[1].querySelector('th[scope="row"]') && rows[1].querySelector('td'),
+  `row1=${rows[1]?.textContent}`);
+ok('BarChart: registered + drew the bars on the shared context', chctx.size === chBase + 1 && clearsOf(chcanvas) >= 1, `size=${chctx.size}`);
+const chClears = clearsOf(chcanvas);
+await act(async () => { chroot.render(h(HalftoneProvider, { context: chctx }, h(BarChart, { data: [4, 9, 6, 12], caption: 'Weekly impressions' }))); });
+ok('BarChart: a data change re-presses (canvas redrew) and the <table> grows a row',
+  clearsOf(chcanvas) > chClears && chcontainer.querySelectorAll('tbody tr').length === 4,
+  `clears ${chClears} -> ${clearsOf(chcanvas)} rows=${chcontainer.querySelectorAll('tbody tr').length}`);
+await act(async () => { chroot.unmount(); });
+ok('BarChart: unmount cleans up (registry back to baseline)', chctx.size === chBase, `size=${chctx.size}`);
+
+const lctx = createPressContext({});
+const lcontainer = window.document.createElement('div');
+window.document.body.appendChild(lcontainer);
+const lroot = createRoot(lcontainer);
+const lBase = lctx.size;
+await act(async () => { lroot.render(h(HalftoneProvider, { context: lctx }, h(LineChart, { data: [{ label: 'Jan', value: 3 }, { label: 'Feb', value: 8 }], area: true, caption: 'Ink-up' }))); });
+const ltable = lcontainer.querySelector('table');
+const lcanvas = lcontainer.querySelector('canvas');
+ok('LineChart: accepts {label,value} rows into the real <table>; canvas is decorative aria-hidden',
+  !!ltable && ltable.querySelectorAll('tbody tr').length === 2 && /Feb/.test(ltable.textContent || '') && lcanvas.getAttribute('aria-hidden') === 'true');
+ok('LineChart: registered + drew the area on the shared context', lctx.size === lBase + 1 && clearsOf(lcanvas) >= 1, `size=${lctx.size}`);
+await act(async () => { lroot.unmount(); });
+ok('LineChart: unmount cleans up (registry back to baseline)', lctx.size === lBase, `size=${lctx.size}`);
 
 // ---- 5. Two providers hold independent state (blocker 2) -----------------------------------------
 const a = createPressContext({ mode: 'dark' });

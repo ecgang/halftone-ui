@@ -2,8 +2,8 @@
 // framework-free ../core: a provider that owns one press context, the usePress bridge, and the
 // pressed-canvas primitives. React authors JSX; the consumer's own bundler compiles this folder.
 //
-// v1 slice: Provider + usePress + Surface + Text + Image + Button/Meter/Card (Surface + real DOM +
-// a11y). The chart family is the next P3 slice.
+// v1 COMPLETE: Provider + usePress + Surface + Text + Image + Button/Meter/Card (Surface + real DOM +
+// a11y) + BarChart/LineChart (data in a real <table>, halftone geometry from the framework-free core).
 
 export { HalftoneProvider, useHalftoneContext, HalftoneContext } from './context.jsx';
 export { usePress } from './use-press.js';
@@ -13,3 +13,4 @@ export { Image } from './image.jsx';
 export { Button } from './button.jsx';
 export { Meter } from './meter.jsx';
 export { Card } from './card.jsx';
+export { BarChart, LineChart } from './chart.jsx';

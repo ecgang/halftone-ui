@@ -22,7 +22,7 @@ const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' 
 const app = `
   import React from 'react';
   import { createRoot } from 'react-dom/client';
-  import { HalftoneProvider, Surface, Text, Image, Button, Meter, Card } from ${JSON.stringify(reactIndex)};
+  import { HalftoneProvider, Surface, Text, Image, Button, Meter, Card, BarChart, LineChart } from ${JSON.stringify(reactIndex)};
 
   const gradient = (u, v) => Math.max(0, Math.min(1, 1 - (u * 0.5 + v * 0.5) + 0.15 * Math.sin(u * 18)));
   const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='220' height='130'>"
@@ -51,6 +51,10 @@ const app = `
           React.createElement(Card, { color: 'blue', screen: 'stipple',
             style: { padding: 16, color: '#F2EFE6', font: '15px system-ui' } },
             React.createElement('h3', { style: { margin: 0 } }, 'Plate registration'))),
+        React.createElement('div', { 'data-box': 'bar' },
+          React.createElement(BarChart, { data: [4, 9, 6, 11, 7], caption: 'Impressions by week', color: 'blue', screen: 'stipple', h: 120 })),
+        React.createElement('div', { 'data-box': 'line' },
+          React.createElement(LineChart, { data: [3, 6, 4, 9, 7, 12], area: true, caption: 'Ink-up over time', color: 'blue', screen: 'stipple', h: 120 })),
       ),
     );
   }
@@ -84,7 +88,7 @@ let inks = [];
 try {
   await page.waitForFunction(() => {
     const cs = [...document.querySelectorAll('canvas')];
-    if (cs.length < 6) return false;
+    if (cs.length < 8) return false;
     return cs.every((cv) => {
       if (!cv.width) return false;
       const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -105,8 +109,8 @@ const pngPath = path.join(HERE, '.verify-react-visual.png');
 await page.screenshot({ path: pngPath, fullPage: true });
 await browser.close();
 
-const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)'];
-ok('six canvases mounted', inks.length === 6, `count=${inks.length}`);
+const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)'];
+ok('eight canvases mounted', inks.length === 8, `count=${inks.length}`);
 inks.forEach((c, i) => ok(`${label[i] || 'canvas ' + i}: real ink drawn`, c.ink > 0, `${c.w}x${c.h}, inkPx=${c.ink}`));
 ok('no console/page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(`\nscreenshot: ${pngPath}`);
