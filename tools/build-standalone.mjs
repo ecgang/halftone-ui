@@ -39,6 +39,11 @@ async function buildHtml() {
 
   // Bundle the module as an IIFE. resolveDir = docs/ so `../halftone-kit/core/index.js` resolves.
   const result = await esbuild.build({
+    // Pin esbuild's working dir to ROOT so the bundle is CWD-INDEPENDENT: esbuild emits its module-
+    // boundary comments (`// halftone-kit/core/rng.js`) relative to absWorkingDir, so a build from
+    // the repo root (the CLI) and one from tools/ (the golden's `cd tools && node …` calling
+    // checkFresh) produce byte-identical output. Without this the freshness gate false-positives.
+    absWorkingDir: ROOT,
     stdin: { contents: inner, resolveDir: path.join(ROOT, 'docs'), loader: 'js', sourcefile: 'docs-module.js' },
     bundle: true,
     format: 'iife',
@@ -57,24 +62,32 @@ async function buildHtml() {
   return html;
 }
 
-const check = process.argv.includes('--check');
-const html = await buildHtml();
+// checkFresh — is the committed dist/index.html exactly what a fresh build of docs/index.html
+// produces? Returns { fresh, reason, bytes }. Exported so the golden can ENFORCE the freshness
+// invariant mechanically (hash the shipped bundle only after proving it matches the source),
+// rather than trusting a human to remember to rebuild — otherwise golden --check can stay green
+// against a stale dist while docs/core moved on.
+export async function checkFresh() {
+  const html = await buildHtml();
+  if (!existsSync(OUT)) return { fresh: false, reason: `${path.relative(ROOT, OUT)} does not exist` };
+  if (readFileSync(OUT, 'utf8') !== html) return { fresh: false, reason: `${path.relative(ROOT, OUT)} differs from a fresh build of docs/index.html` };
+  return { fresh: true, bytes: html.length };
+}
 
-if (check) {
-  if (!existsSync(OUT)) {
-    console.error(`STALE — ${path.relative(ROOT, OUT)} does not exist. Run: node tools/build-standalone.mjs`);
-    process.exit(1);
+// CLI entry — only when run directly (so `import`ing this module for checkFresh() has no side effects).
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  if (process.argv.includes('--check')) {
+    const r = await checkFresh();
+    if (!r.fresh) {
+      console.error(`STALE — ${r.reason}. Rebuild and commit: node tools/build-standalone.mjs`);
+      process.exit(1);
+    }
+    console.log(`FRESH — ${path.relative(ROOT, OUT)} matches docs/index.html (${r.bytes} bytes).`);
+  } else {
+    const html = await buildHtml();
+    mkdirSync(path.dirname(OUT), { recursive: true });
+    writeFileSync(OUT, html);
+    console.log(`wrote ${path.relative(ROOT, OUT)} (${html.length} bytes) — self-contained, file://-openable.`);
   }
-  const committed = readFileSync(OUT, 'utf8');
-  if (committed !== html) {
-    console.error(`STALE — ${path.relative(ROOT, OUT)} differs from a fresh build of docs/index.html.`);
-    console.error('Rebuild and commit: node tools/build-standalone.mjs');
-    process.exit(1);
-  }
-  console.log(`FRESH — ${path.relative(ROOT, OUT)} matches docs/index.html (${html.length} bytes).`);
-} else {
-  mkdirSync(path.dirname(OUT), { recursive: true });
-  writeFileSync(OUT, html);
-  const hasImport = /from ['"]/.test(html.match(MODULE_RE)?.[1] || '');
-  console.log(`wrote ${path.relative(ROOT, OUT)} (${html.length} bytes) — self-contained, file://-openable.`);
 }

@@ -47,6 +47,7 @@ import { createReadStream } from 'node:fs'
 import { stat, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
+import { checkFresh } from './build-standalone.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(HERE, '..')
@@ -356,6 +357,20 @@ function diff(a, b) {
 
 const argv = process.argv.slice(2)
 const mode = argv.find((a) => a.startsWith('--'))?.slice(2) || 'check'
+
+// ENFORCE the freshness invariant mechanically (not by comment): the golden hashes the SHIPPED
+// dist/index.html, and dist is only a valid proxy for the source if it is a fresh build of it. Run
+// build-standalone --check FIRST and refuse to render a stale bundle — otherwise --check could stay
+// green against an old dist while docs/index.html or the core moved on (Codex re-review, medium).
+{
+  const fresh = await checkFresh()
+  if (!fresh.fresh) {
+    console.error(`FAIL — STALE BUILD — ${fresh.reason}.`)
+    console.error('dist/index.html is out of date vs docs/index.html; the golden would hash the wrong file.')
+    console.error('Rebuild and commit before the golden means anything: node tools/build-standalone.mjs')
+    process.exit(1)
+  }
+}
 
 if (mode === 'write') {
   const run = await capture()
