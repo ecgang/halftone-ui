@@ -1,0 +1,150 @@
+// The press lifecycle: resolvePress (pure) + mount (browser) + press (ergonomic wrapper).
+//
+// Liotta #3 — split config resolution from lifecycle. `resolvePress(opts, ctx) -> spec` is PURE:
+// no DOM, no rAF, serializable, unit-testable in Node with no canvas (and the golden oracle hashes
+// spec -> pixels). `mount(el, spec, ctx) -> handle` owns everything impure: the 2d context, the
+// rAF run, the per-context registry entry, the generation token that makes destroy() safe. Nothing
+// here touches window/document/rAF/matchMedia AT MODULE SCOPE, so the import stays SSR-safe (V-3);
+// every browser API is referenced only inside mount() and the functions it returns, which run only
+// after the caller hands us an element (which implies a browser). Blocker 4 dies.
+//
+// The caller owns the lifecycle. destroy() releases the rAF (via the generation token) and removes
+// the surface from the context registry, killing blockers 1 (registry leak) and 5 (DOM scanning —
+// there are none; the caller owns the element) at once.
+
+import { grainPts } from './screens.js';
+import { mulberry32, makeNoise } from './rng.js';
+import { drawPress } from './draw.js';
+import { createPressContext } from './context.js';
+
+// ---- resolvePress: pure three-tier merge (instance opts -> context defaults -> built-ins) --------
+// Structure resolves EAGERLY here (which tier wins). Color stays LAZY — `field` and any color
+// getter close over ctx and resolve at draw (§4b). The returned spec is a plain data object.
+export function resolvePress(opts = {}, ctx = null) {
+  const g = ctx ? ctx.grain : { pattern: 'hatch', scale: 1, ink: 1, wash: 1 };
+  return {
+    field: opts.field,                    // (u,v) => 0..1 (or descriptor) — REQUIRED; normalized (§4a)
+    screen: opts.screen || g.pattern,     // stipple | lines | waves | hatch | am
+    scale: opts.scale ?? g.scale,
+    ink: opts.ink ?? g.ink,
+    wash: opts.wash ?? g.wash,
+    r: opts.r ?? 2.5,                     // base pitch factor; grid pitch = r * 0.8 * scale (docs :3137)
+    h: opts.h ?? null,                    // CSS height override; null = measure clientHeight
+    seed: opts.seed ?? (ctx ? ctx.seed : 1859), // ENTRANCE transient seed (see roll for resting)
+    roll: opts.roll ?? 0,                 // resting-geometry entropy; 0 = canonical (byte-identical)
+    inks: opts.inks || null,              // ink SELECTION (names) frozen here; VALUES stay lazy (V-11)
+    plates: opts.plates || null,          // explicit multi-plate stack (masthead/charts) — P2
+    animate: opts.animate ?? false,       // press-in when the caller triggers it
+    harmony: opts.harmony ?? false,       // per-instance (V-12)
+    pressMs: opts.pressMs ?? 700,         // press-in duration
+  };
+}
+
+// ---- mount: bind a spec to a real canvas and return the imperative handle ------------------------
+export function mount(el, spec, ctx) {
+  if (!ctx) ctx = createPressContext(); // standalone press -> its own isolated context (no global)
+
+  // Per-surface state. `s` is what lives in the registry; the handle closes over it.
+  const off = ctx.nextOff();            // decorrelation offset (docs seedTick += 313)
+  const s = { el, pr: spec.animate ? 0 : 1, stale: false, dead: false, gen: 0, raf: 0 };
+
+  // fit: size the backing store to dpr, install the transform, hand back the 2d context. Operates
+  // ONLY on the caller's element — no DOM lookup (V-8). devicePixelRatio is read here, in a
+  // browser-only function, never at import.
+  function fit() {
+    const dpr = Math.min(typeof devicePixelRatio === 'number' ? devicePixelRatio : 1, 2);
+    const w = el.clientWidth, h = spec.h ?? el.clientHeight;
+    if (!w) return null;
+    el.width = Math.round(w * dpr); el.height = Math.round(h * dpr);
+    el.style.height = h + 'px';
+    const g = el.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { g, w, h };
+  }
+
+  // rebuild: recompute the point grid + noise field. Resting geometry derives from the context
+  // base + decorrelation offset + roll (NOT the entrance seed) so the resting frame is
+  // seed-invariant; roll 0 reproduces docs `mulberry32(state.seed + off)` byte-for-byte (§7, V-4).
+  s.rebuild = () => {
+    const f = fit();
+    if (!f) { s.stale = true; return; }
+    s.stale = false; s.g = f.g; s.W = f.w; s.H = f.h;
+    const restSeed = ctx.base + off + spec.roll;
+    s.pts = grainPts(f.w, f.h, spec.r * 0.8 * spec.scale, mulberry32(restSeed), spec.screen);
+    s.noise = makeNoise(restSeed);
+  };
+
+  // draw: the ONE press. Everything the field needs beyond (u,v) — the noise field, animation
+  // state, geometry — the caller closes into `spec.field`; drawPress only ever asks field(u,v).
+  s.draw = () => {
+    if (s.stale || !s.g) return;
+    s.g.clearRect(0, 0, s.W, s.H);
+    drawPress(s.g, {
+      pts: s.pts, W: s.W, H: s.H,
+      field: spec.field, screen: spec.screen,
+      grain: { ink: spec.ink }, pr: s.pr, roll: spec.roll,
+    });
+  };
+
+  // press-in: ramp pr 0->1 over ms, redrawing each frame. Generation-guarded so a destroy (or a
+  // restart) mid-run stops the old rAF chain dead (V-7). reduced-motion / an un-fitted surface
+  // snap straight to the resting frame.
+  s.pressIn = (ms = spec.pressMs) => {
+    const gen = ++s.gen;
+    if (ctx.reduced || s.stale) { s.pr = 1; if (!s.stale) s.draw(); return; }
+    const t0 = (typeof performance !== 'undefined' ? performance : Date).now();
+    const tick = (t) => {
+      if (s.gen !== gen || s.dead) return;         // superseded or destroyed -> abandon the chain
+      s.pr = Math.min(1, (t - t0) / ms);
+      if (!s.stale) s.draw();
+      if (s.pr < 1) s.raf = requestAnimationFrame(tick);
+    };
+    s.raf = requestAnimationFrame(tick);
+  };
+
+  // set: merge a patch. Geometry-affecting keys force a rebuild; anything else just repaints.
+  const GEOMETRY = ['screen', 'scale', 'r', 'h', 'roll'];
+  s.set = (patch = {}) => {
+    const structural = Object.keys(patch).some((k) => GEOMETRY.includes(k));
+    Object.assign(spec, patch);
+    if (structural) { s.rebuild(); s.draw(); } else { s.draw(); }
+  };
+
+  // proof: one flattened settled frame as a data URL. Forces pr to the resting value, rebuilds and
+  // draws, then exports. Defined for v1 (§4b: define or cut — defined).
+  s.proof = () => {
+    s.pr = 1; s.rebuild(); s.draw();
+    return el.toDataURL();
+  };
+
+  // destroy: idempotent release. Bumps the generation (any in-flight tick sees the mismatch),
+  // cancels the pending frame, and drops out of the registry so ctx.size returns to baseline (V-2).
+  s.destroy = () => {
+    if (s.dead) return;
+    s.dead = true; s.gen++;
+    if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(s.raf);
+    ctx._remove(s);
+  };
+
+  ctx._add(s);
+  s.rebuild();
+  if (spec.animate) s.draw(); // paint the un-pressed frame; caller triggers pressIn() on reveal
+  else s.draw();
+
+  // The public handle — the imperative surface the spec (§4b) promises.
+  return {
+    draw: () => s.draw(),
+    rebuild: () => { s.rebuild(); s.draw(); },
+    set: (patch) => s.set(patch),
+    pressIn: (ms) => s.pressIn(ms),
+    proof: () => s.proof(),
+    destroy: () => s.destroy(),
+    get spec() { return spec; },
+    get stale() { return s.stale; },
+  };
+}
+
+// ---- press: the ergonomic default. mount(el, resolvePress(opts, ctx), ctx). ---------------------
+export function press(el, opts = {}, ctx = null) {
+  return mount(el, resolvePress(opts, ctx), ctx);
+}
