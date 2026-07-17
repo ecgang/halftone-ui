@@ -389,20 +389,39 @@ open halftone-ui/docs/index.html
   /* ---------- theme ---------- */
   const root = document.documentElement;
   const modeBtn = document.getElementById('modebtn');
-  const sysDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
-  let mode = localStorage.getItem('halftone-mode') || (sysDark() ? 'dark' : 'light');
+  // Storage throws outright under file:// in some browsers and whenever cookies
+  // are blocked. The read below runs during init, so an unguarded throw would
+  // take the whole theme down with it, not just the saved preference.
+  const store = {
+    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  // Only 'light' and 'dark' are modes; anything else — absent, corrupt, or a
+  // value some later version writes — means follow the OS. An unvalidated string
+  // must never reach data-theme: CSS would fall through to the dark media query
+  // while drawPress(), which tests === 'dark', kept compositing in `multiply`
+  // and printed mud on a black ground.
+  const saved = store.get('halftone-mode');
+  let mode = saved === 'light' || saved === 'dark' ? saved : null;
+  const theme = () => mode || (mq.matches ? 'dark' : 'light');
   const applyMode = () => {
-    root.dataset.theme = mode;
-    modeBtn.textContent = mode === 'dark' ? '☾' : '☀';
-    modeBtn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light' : 'Switch to dark');
+    const t = theme();
+    root.dataset.theme = t;
+    modeBtn.textContent = t === 'dark' ? '☾' : '☀';
+    modeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to light' : 'Switch to dark');
   };
   applyMode();
   modeBtn.addEventListener('click', () => {
-    mode = mode === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('halftone-mode', mode);
+    mode = theme() === 'dark' ? 'light' : 'dark';
+    store.set('halftone-mode', mode);
     applyMode();
     repaintAll();
   });
+  // Until an explicit choice is stored, follow the OS live. CSS can't carry this
+  // alone: the press picks its composite op from the theme at draw time, so a
+  // system flip has to reprint the ink or it stays in the old one.
+  mq.addEventListener('change', () => { if (!mode) { applyMode(); repaintAll(); } });
   const cssv = (n) => getComputedStyle(root).getPropertyValue(n).trim();
 
   /* ---------- engine ---------- */
@@ -683,9 +702,16 @@ open halftone-ui/docs/index.html
       },
     });
     strip.push(s);
+    // Each glide snapshots `hot` at its start, so without a token a fast in/out
+    // leaves several chains alive at once, all writing `hot` from different
+    // snapshots and redrawing the whole dot surface every frame — the fill
+    // visibly oscillates. Own token, not pressIn's `s.g`: these animate the same
+    // surface but different values, and a hover must not kill a press-in.
+    let glideGen = 0;
     const glide = (to) => {
-      const from = hot, t0 = performance.now();
+      const from = hot, t0 = performance.now(), gen = ++glideGen;
       const tick = (t) => {
+        if (gen !== glideGen) return;
         const k = Math.min(1, (t - t0) / 220);
         hot = from + (to - from) * k;
         s.draw();

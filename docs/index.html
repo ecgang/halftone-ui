@@ -587,7 +587,8 @@
     .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .themectl > button:active { transition: none; transform: none; }
   }
 </style>
-<script>document.documentElement.dataset.mode = localStorage.getItem('stipple-mode') || 'dark';</script>
+<script>try { document.documentElement.dataset.mode = localStorage.getItem('stipple-mode') || 'dark'; }
+catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <div class="topbar">
   <a class="brand" href="#quick-start">stipple<i>·</i>ui</a>
@@ -2917,6 +2918,13 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 <div id="toast-pop" role="status"><canvas></canvas><div class="in"><span class="chk">▪</span><span id="toast-msg">Deploy finished</span></div></div>
 
 <script>
+  // Storage throws under file:// in some browsers and whenever cookies are
+  // blocked. These reads run during init, so an unguarded throw would take
+  // theme, hue and grain down with it — not just the saved preference.
+  const store = {
+    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+  };
 (() => {
   'use strict';
 
@@ -2962,7 +2970,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
   const GRAIN = { pattern: 'hatch', scale: 1, ink: 1, wash: 1 };
   try {
-    const gs = JSON.parse(localStorage.getItem('stipple-grain') || '{}');
+    const gs = JSON.parse(store.get('stipple-grain') || '{}');
     const dial = (v, lo, hi) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
     if (dial(gs.scale, 0.6, 1.8)) GRAIN.scale = gs.scale;
     if (dial(gs.ink, 0.5, 1.5)) GRAIN.ink = gs.ink;
@@ -4063,13 +4071,13 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       b.addEventListener('click', () => {
         langs.querySelectorAll('button').forEach((o, j) => o.setAttribute('aria-selected', String(o === b)));
         pres.forEach(p => { p.hidden = p.dataset.lang !== lang; });
-        localStorage.setItem('stipple-lang', lang);
+        store.set('stipple-lang', lang);
       });
       langs.appendChild(b);
     });
   });
   // restore language preference across all blocks
-  const savedLang = localStorage.getItem('stipple-lang');
+  const savedLang = store.get('stipple-lang');
   if (savedLang === 'react') document.querySelectorAll('.codewrap .langs button:nth-child(2)').forEach(b => b.click());
 
   // ============ round 8: full-parity primitives ============
@@ -4587,8 +4595,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   const BASE_INKS = Object.assign({}, INKS);
 
   const THEME = {
-    mode: localStorage.getItem('stipple-mode') || 'dark',
-    hue: +(localStorage.getItem('stipple-hue') || 0),
+    mode: store.get('stipple-mode') || 'dark',
+    hue: +(store.get('stipple-hue') || 0),
   };
   const applyTheme = () => {
     const { mode, hue } = THEME;
@@ -4605,8 +4613,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       rs.setProperty('--ik-' + k, INKS[k]);
     });
     rethemers.forEach(f => f());
-    localStorage.setItem('stipple-mode', mode);
-    localStorage.setItem('stipple-hue', String(hue));
+    store.set('stipple-mode', mode);
+    store.set('stipple-hue', String(hue));
   };
   const repaintAll = () => {
     registry.forEach(s => { s.rebuild(); if (s.afterRebuild) s.afterRebuild(); s.draw(); });
@@ -4700,7 +4708,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       { id: 'gr-ink', key: 'ink', def: 1, fmt: v => v.toFixed(2) },
       { id: 'gr-wash', key: 'wash', def: 1, fmt: v => v.toFixed(1) },
     ];
-    const saveGrain = () => localStorage.setItem('stipple-grain',
+    const saveGrain = () => store.set('stipple-grain',
       JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash }));
     const setDial = (d, v) => {
       GRAIN[d.key] = v;
