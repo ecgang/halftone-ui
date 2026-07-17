@@ -111,7 +111,7 @@
   table.props td:nth-child(2) { color: var(--mut); }
   table.props td:nth-child(3) { color: var(--dim); }
 
-  /* ---- stipple button ---- */
+  /* ---- halftone button ---- */
   .sbtn {
     position: relative; overflow: hidden; cursor: pointer;
     border: 1px solid var(--bc, var(--line-2)); background: transparent;
@@ -591,7 +591,7 @@
 catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <div class="topbar">
-  <a class="brand" href="#quick-start">stipple<i>·</i>ui</a>
+  <a class="brand" href="#quick-start">halftone<i>·</i>ui</a>
   <a class="docs" href="#quick-start">docs</a>
   <div class="right">
     <div class="themectl">
@@ -720,7 +720,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <section class="doc" id="quick-start">
   <h2>Quick start</h2>
-  <p class="desc">A stippled UI toolkit — charts, primitives and app components on one seed-generative
+  <p class="desc">A halftone UI toolkit — charts, primitives and app components on one seed-generative
   point-cloud engine. The engine is plain TypeScript with no framework in it; <code>@halftone-ui/vue</code>
   and <code>@halftone-ui/react</code> are thin adapters over the same core.</p>
   <div class="ex" data-ex>
@@ -759,7 +759,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
   </div>
   <p class="prose" style="margin-top:18px">Every visual surface is a canvas driven by
   <b>tone(x, y, t) → 0..1</b> evaluated over a seeded blue-noise point cloud — a point is inked when
-  tone beats its threshold. Components are the real DOM (buttons, inputs, tablists); the stipple is a
+  tone beats its threshold. Components are the real DOM (buttons, inputs, tablists); the halftone is a
   decorative layer painted behind them, so semantics and accessibility come for free.</p>
 </section>
 
@@ -951,7 +951,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     <div class="stage tall">
       <div class="apps">
         <div class="anav" data-xgroup="page">
-          <b>⬢ stipple</b>
+          <b>⬢ halftone</b>
           <a href="#app-shell" aria-current="page">Overview</a>
           <a href="#app-shell">Deploys</a>
           <a href="#app-shell">Logs</a>
@@ -1171,7 +1171,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <section class="doc" id="activity-feed">
   <h2>Activity feed</h2>
-  <p class="desc">A stippled dot per event — color is the event type, time keeps to the margin.</p>
+  <p class="desc">A pressed dot per event — color is the event type, time keeps to the margin.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage">
@@ -1283,7 +1283,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <section class="doc" id="sparkline">
   <h2>Sparkline</h2>
-  <p class="desc">A stat tile with a stippled trace — number first, grain second.</p>
+  <p class="desc">A stat tile with a halftone trace — number first, grain second.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage">
@@ -1318,7 +1318,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
   <table class="props">
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
     <tr><td>data</td><td>number[]</td><td>—</td></tr>
-    <tr><td>color</td><td>StippleColor</td><td>&quot;blue&quot;</td></tr>
+    <tr><td>color</td><td>HalftoneColor</td><td>&quot;blue&quot;</td></tr>
     <tr><td>falloff</td><td>number</td><td>0.5</td></tr>
   </table>
 </section>
@@ -1372,7 +1372,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <section class="doc" id="button">
   <h2>Button</h2>
-  <p class="desc">Stippled fill on a native button; hover blooms the grain. Outline variant keeps a
+  <p class="desc">Halftone fill on a native button; hover blooms the grain. Outline variant keeps a
   sparse wash.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
@@ -1395,7 +1395,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
   </div>
   <table class="props">
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
-    <tr><td>color</td><td>StippleColor</td><td>"grey"</td></tr>
+    <tr><td>color</td><td>HalftoneColor</td><td>"grey"</td></tr>
     <tr><td>variant</td><td>"fill" | "outline"</td><td>"fill"</td></tr>
     <tr><td>block</td><td>boolean</td><td>false</td></tr>
   </table>
@@ -1425,7 +1425,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <section class="doc" id="tabs">
   <h2>Tabs</h2>
-  <p class="desc">A roving-tabindex tablist with a stippled underline that slides to the active tab.
+  <p class="desc">A roving-tabindex tablist with a pressed underline that slides to the active tab.
   Arrow keys move selection.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
@@ -1497,7 +1497,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     <tr><td>value</td><td>number</td><td>—</td></tr>
     <tr><td>low</td><td>number</td><td>40</td></tr>
     <tr><td>high</td><td>number</td><td>80</td></tr>
-    <tr><td>color</td><td>StippleColor</td><td>auto</td></tr>
+    <tr><td>color</td><td>HalftoneColor</td><td>auto</td></tr>
   </table>
 </section>
 
@@ -1522,14 +1522,14 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   <table class="props">
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
     <tr><td>message</td><td>string</td><td>—</td></tr>
-    <tr><td>opts.color</td><td>StippleColor</td><td>"blue"</td></tr>
+    <tr><td>opts.color</td><td>HalftoneColor</td><td>"blue"</td></tr>
     <tr><td>opts.duration</td><td>number</td><td>3500</td></tr>
   </table>
 </section>
 
 <section class="doc" id="avatar">
   <h2>Avatar</h2>
-  <p class="desc">Seed-generative identicons — symmetric noise, stippled. Click one to reroll it.</p>
+  <p class="desc">Seed-generative identicons — symmetric noise, screened. Click one to reroll it.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage"><div class="avrow" id="avatars"></div></div>
@@ -1620,7 +1620,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   <table class="props">
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
     <tr><td>modelValue</td><td>boolean</td><td>false</td></tr>
-    <tr><td>color</td><td>StippleColor</td><td>&quot;green&quot;</td></tr>
+    <tr><td>color</td><td>HalftoneColor</td><td>&quot;green&quot;</td></tr>
   </table>
 </section>
 
@@ -1732,7 +1732,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="slider">
   <h2>Slider</h2>
-  <p class="desc">A native range input over a stippled fill — grain pours in behind the thumb.</p>
+  <p class="desc">A native range input over a halftone fill — grain pours in behind the thumb.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage">
@@ -1751,7 +1751,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
     <tr><td>modelValue</td><td>number</td><td>0</td></tr>
     <tr><td>min / max / step</td><td>number</td><td>0 / 100 / 1</td></tr>
-    <tr><td>color</td><td>StippleColor</td><td>&quot;blue&quot;</td></tr>
+    <tr><td>color</td><td>HalftoneColor</td><td>&quot;blue&quot;</td></tr>
   </table>
 </section>
 
@@ -2441,7 +2441,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     <div class="stage tall">
       <div class="apps" style="grid-template-columns:170px 1fr;min-height:230px">
         <div class="anav" data-xgroup="page">
-          <b>⬢ stipple</b>
+          <b>⬢ halftone</b>
           <a href="#sidebar" aria-current="page">Boards</a>
           <a href="#sidebar">Plates</a>
           <a href="#sidebar">Seeds</a>
@@ -2532,7 +2532,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="timeline">
   <h2>Timeline</h2>
-  <p class="desc">Events on a hairline rail, each anchored by a stippled dot.</p>
+  <p class="desc">Events on a hairline rail, each anchored by a pressed dot.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage">
@@ -2554,7 +2554,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="ink">
   <h2>Ink styles</h2>
-  <p class="desc">A second rendering mode for every component — print screens instead of the stipple
+  <p class="desc">A second rendering mode for every component — print screens instead of the halftone
   field. Pass <code>inks</code> to any component and its surface becomes a two-ink press run: each ink
   gets a tonal band and its own screen angle, dots grow past their pitch into Euclidean merge blobs,
   and the layers composite with the plastisol blend — halfway between opaque paint and transparent
@@ -2908,7 +2908,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="palette">
   <h2>Palette</h2>
-  <p class="desc">The seven <code>StippleColor</code> values, rendered by the engine itself.</p>
+  <p class="desc">The seven <code>HalftoneColor</code> values, rendered by the engine itself.</p>
   <div class="palgrid" id="palgrid"></div>
 </section>
 
@@ -2966,8 +2966,10 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     }
     return pts;
   }
-  // grain patterns — any surface can press as stipple, lines, waves, or hatch.
+  // grain patterns — any surface can press as stipple, lines, waves, hatch or am.
   // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
+  // All but `am` are FM: a near-fixed dot, thresholded against the point's own
+  // value. `am` modulates area instead and has no threshold — see amPts/amDot.
   const GRAIN = { pattern: 'hatch', scale: 1, ink: 1, wash: 1 };
   try {
     const gs = JSON.parse(store.get('stipple-grain') || '{}');
@@ -3052,7 +3054,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     return { ctx, w, h };
   }
 
-  // generic stipple surface: tone(p, W, H, t, x) -> 0..1
+  // generic halftone surface: tone(p, W, H, t, x) -> 0..1
   function surface(cv, { h, r = 2.5, color, tone, pre = null, loop = false }) {
     cv.setAttribute('aria-hidden', 'true');
     const off = (seedTick += 313);
@@ -4202,7 +4204,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     });
   });
 
-  // rating — five stipple stars
+  // rating — five pressed stars
   document.querySelectorAll('[data-rate]').forEach(row => {
     const btns = [...row.querySelectorAll('button')];
     const surfs = btns.map((b, i) => {
