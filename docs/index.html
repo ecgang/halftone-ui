@@ -2951,7 +2951,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <div id="toast-pop" role="status"><canvas></canvas><div class="in"><span class="chk">▪</span><span id="toast-msg">Deploy finished</span></div></div>
 
-<script>
+<script type="module">
+  import { mulberry32, poisson, makeNoise, screenPts, amPts, grainPts, amDot, textField, INKS, PAPER, mixHex, tuneInk, tuneMix } from '../halftone-kit/core/index.js';
   // Storage throws under file:// in some browsers and whenever cookies are
   // blocked. These reads run during init, so an unguarded throw would take
   // theme, hue and grain down with it — not just the saved preference.
@@ -2963,43 +2964,6 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   'use strict';
 
   // ============ engine ============
-  const mulberry32 = (s) => () => {
-    s |= 0; s = (s + 0x6D2B79F5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-  function poisson(w, h, r, rng) {
-    const cell = r / Math.SQRT2, gw = Math.ceil(w / cell), gh = Math.ceil(h / cell);
-    const grid = new Int32Array(gw * gh).fill(-1);
-    const pts = [], active = [];
-    const put = (x, y) => {
-      const p = { x, y, th: rng() };
-      grid[Math.floor(y / cell) * gw + Math.floor(x / cell)] = pts.length;
-      pts.push(p); active.push(p);
-    };
-    put(rng() * w, rng() * h);
-    while (active.length) {
-      const idx = (rng() * active.length) | 0, base = active[idx];
-      let placed = false;
-      for (let n = 0; n < 24; n++) {
-        const a = rng() * 6.283, d = r * (1 + rng());
-        const x = base.x + Math.cos(a) * d, y = base.y + Math.sin(a) * d;
-        if (x < 0 || y < 0 || x >= w || y >= h) continue;
-        const gx = Math.floor(x / cell), gy = Math.floor(y / cell);
-        let ok = true;
-        for (let yy = Math.max(0, gy - 2); ok && yy <= Math.min(gh - 1, gy + 2); yy++)
-          for (let xx = Math.max(0, gx - 2); xx <= Math.min(gw - 1, gx + 2); xx++) {
-            const q = grid[yy * gw + xx];
-            if (q >= 0) { const dx = pts[q].x - x, dy = pts[q].y - y;
-              if (dx * dx + dy * dy < r * r) { ok = false; break; } }
-          }
-        if (ok) { put(x, y); placed = true; break; }
-      }
-      if (!placed) active.splice(idx, 1);
-    }
-    return pts;
-  }
   // grain patterns — any surface can press as stipple, lines, waves, hatch or am.
   // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
   // All but `am` are FM: a near-fixed dot, thresholded against the point's own
@@ -3012,18 +2976,6 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     if (dial(gs.ink, 0.5, 1.5)) GRAIN.ink = gs.ink;
     if (dial(gs.wash, 0, 2)) GRAIN.wash = gs.wash;
   } catch (e) { /* corrupt storage: keep defaults */ }
-  function grainPts(W, H, r, rng, pat) {
-    if (!pat || pat === 'stipple') return poisson(W, H, r, rng);
-    if (pat === 'am') return amPts(W, H, Math.max(4.4, r * 3.4), 0.785, rng);
-    const pts = [], pitch = Math.max(2.8, r * 2.2);
-    const fams = pat === 'hatch'
-      ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1.0]]
-      : [[pat === 'waves' ? 0 : -0.62, 0.05, 1.0]];
-    for (const [a, lo, hi] of fams)
-      for (const q of screenPts(W, H, pitch, a, rng, pat === 'waves'))
-        pts.push({ x: q.x, y: q.y, th: lo + q.j * (hi - lo) });
-    return pts;
-  }
 
   // amplitude modulation — a square grid at the classic 45 degree key-plate angle.
   // A dot has to grow from nothing to full coverage inside its own cell, so this
@@ -3031,78 +2983,15 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   // size in `c`, and that is what tells the press to modulate area rather than
   // threshold. `th` here is the press-in reveal order ONLY — am has no tone
   // threshold, which is the whole point of it.
-  function amPts(W, H, pitch, ang, rng) {
-    const pts = [], R = Math.hypot(W, H) / 2 + pitch;
-    const ca = Math.cos(ang), sa = Math.sin(ang);
-    for (let u = -R; u < R; u += pitch)
-      for (let v = -R; v < R; v += pitch) {
-        const x = W / 2 + u * ca - v * sa, y = H / 2 + u * sa + v * ca;
-        if (x < -pitch || y < -pitch || x > W + pitch || y > H + pitch) continue;
-        pts.push({ x, y, c: pitch, th: rng() });
-      }
-    return pts;
-  }
 
   // Rasterise type once, then read it back as a tone field. Everything the press
   // needs to know about a wordmark is "how dark is the ink at this point?".
-  function textField(text, W) {
-    const o = document.createElement('canvas');
-    const c = o.getContext('2d', { willReadFrequently: true });
-    const setFont = (px) => {
-      c.font = `900 ${px}px "Helvetica Neue", "Arial Black", Inter, system-ui, sans-serif`;
-      try { c.letterSpacing = `${-px * 0.035}px`; } catch (e) {}
-    };
-    // width scales linearly with size (tracking is proportional), so one measure fits it
-    setFont(400);
-    const size = Math.max(24, Math.floor(400 * (W * 0.94) / c.measureText(text).width));
-    setFont(size);
-    const m = c.measureText(text);
-    const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
-    const H = Math.round((asc + desc) * 1.34);
-    o.width = W; o.height = H;
-    setFont(size); // sizing a canvas resets every ctx property, including the font
-    c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
-    c.fillStyle = '#fff';
-    c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillText(text, W / 2, (H + asc - desc) / 2);
-    const d = c.getImageData(0, 0, W, H).data;
-    const at = (x, y) => {
-      if (x < 0 || y < 0 || x >= W || y >= H) return 0;
-      return d[(((y | 0) * W) + (x | 0)) * 4] / 255;
-    };
-    // Average over the cell rather than point-sample it. A real screen resolves an
-    // edge into partial dots; a point sample would stair-step the letterforms.
-    const sample = (x, y, r) => {
-      let s = 0;
-      for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) s += at(x + i * r * 0.66, y + j * r * 0.66);
-      return s / 9;
-    };
-    return { H, sample };
-  }
 
   // The am press, shared by every draw that can wear the screen. Tone drives dot
   // AREA, so radius goes as sqrt — that, plus having no threshold at all, is the
   // difference between a texture laid over a shape and a printed image. The cap
   // sits below 1 because dots reach full coverage at r = cell/sqrt(2): a plate
   // that fuses solid stops being a halftone and starts being a rectangle.
-  function amDot(ctx, p, v) {
-    const t = Math.min(0.92, v);
-    if (t <= 0.012) return;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.c * 0.56 * Math.sqrt(t), 0, 6.283); ctx.fill();
-  }
-  function makeNoise(seed) {
-    const h = (x, y) => {
-      const s = Math.sin(x * 127.1 + y * 311.7 + seed * 0.618) * 43758.5453;
-      return s - Math.floor(s);
-    };
-    const sm = (x, y) => {
-      const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
-      const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
-      return h(ix, iy) * (1 - ux) * (1 - uy) + h(ix + 1, iy) * ux * (1 - uy) +
-             h(ix, iy + 1) * (1 - ux) * uy + h(ix + 1, iy + 1) * ux * uy;
-    };
-    return (x, y) => 0.66 * sm(x, y) + 0.34 * sm(x * 2.1 + 40, y * 2.1 + 40);
-  }
 
   const state = { seed: 1859 };
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3654,15 +3543,6 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   })();
 
   // ============ ink engine (print screens) ============
-  const INKS = { blue: '#3D5FB8', orange: '#D07030', purple: '#7A66E0', pink: '#C24E9C', yellow: '#D9A833',
-                 red: '#C24538', green: '#3F8A5C', black: '#23252C', white: '#F2EFE6' };
-  const PAPER = { light: '#EDE9DE', dark: '#141519' };
-  const mixHex = (a, b) => {
-    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
-    const ch = (sa, sb) => Math.round((sa * sb) / 255);
-    return '#' + ((1 << 24) + (ch(pa >> 16, pb >> 16) << 16) +
-      (ch((pa >> 8) & 255, (pb >> 8) & 255) << 8) + ch(pa & 255, pb & 255)).toString(16).slice(1);
-  };
   const iband = (d, lo, hi) => {
     const t = Math.max(0, Math.min(1, (d - lo) / (hi - lo)));
     return t * t * (3 - 2 * t);
@@ -3693,33 +3573,9 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   };
   const band = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   // pull both inks into one lightness/chroma band so neither plate dominates the press
-  const tuneInk = (hex) => {
-    const [h, s, l] = rgb2hsl(...hex2rgb(hex));
-    if (s < 0.18) return hex; // the black key and white base stay put
-    return hsl2hex(h, band(s, 0.44, 0.62), band(l, 0.42, 0.52));
-  };
   // soften the multiply on the mix plate — real inks sort-of-multiply, and a pure
   // multiply of two saturated inks crushes to mud; lift it into a rich overprint
-  const tuneMix = (a, b) => {
-    const [h, s, l] = rgb2hsl(...hex2rgb(mixHex(a, b)));
-    return hsl2hex(h, band(s, 0.30, 0.55), band(l, 0.26, 0.38));
-  };
   // points along a rotated line screen (waves add a phase-shifted sine)
-  function screenPts(W, H, pitch, angle, rng, wave) {
-    const pts = [], ca = Math.cos(angle), sa = Math.sin(angle);
-    const R = Math.hypot(W, H) / 2 + pitch, cx = W / 2, cy = H / 2;
-    const step = Math.max(1.6, pitch * 0.26);
-    for (let v = -R; v <= R; v += pitch) {
-      const ph = rng() * 6.283;
-      for (let u = -R; u <= R; u += step) {
-        const vv = v + (wave ? pitch * 0.85 * Math.sin(u / (pitch * 2.6) + ph) : 0);
-        const x = cx + u * ca - vv * sa, y = cy + u * sa + vv * ca;
-        if (x < -2 || y < -2 || x > W + 2 || y > H + 2) continue;
-        pts.push({ x, y, j: rng() });
-      }
-    }
-    return pts;
-  }
 
   // ink surface: field(x, y, W, H, noise, st) -> darkness 0..1, printed as screened ink layers.
   // opts is read live on every rebuild/draw so callers (the Studio) can mutate it and re-render.
@@ -4892,7 +4748,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       // window to a second monitor and every other surface re-fits, so this must.
       const dpr = Math.min(devicePixelRatio || 1, 2);
       if (w !== W || dpr !== lastDpr || !T) {
-        T = textField('HALFTONE UI', w);
+        T = textField('HALFTONE UI', w, () => document.createElement('canvas'));
         W = w; H = T.H; lastDpr = dpr;
         mastCv.width = Math.round(W * dpr); mastCv.height = Math.round(H * dpr);
         mastCv.style.height = H + 'px';
