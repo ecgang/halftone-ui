@@ -106,7 +106,8 @@ function serve(root) {
 // Runs in the page. Keyed by nearest ancestor section id + index within it: only 18 of the 150
 // canvases in markup carry an id (172 exist at runtime), and raw document order would renumber
 // everything the moment a section gains a canvas. 2 canvases (the masthead) precede any section.
-function readAllCanvases() {
+function readAllCanvases(loopKeys) {
+  const looping = new Set(loopKeys)
   const seen = new Map()
   const out = []
   for (const cv of document.querySelectorAll('canvas')) {
@@ -127,7 +128,8 @@ function readAllCanvases() {
     } catch (e) {
       url = 'ERR:' + e.message
     }
-    out.push({ key: `${base}[${n}]`, id: cv.id || null, w: cv.width, h: cv.height, cssW: Math.round(r.width), cssH: Math.round(r.height), vis, url })
+    const key = `${base}[${n}]`
+    out.push({ key, id: cv.id || null, w: cv.width, h: cv.height, cssW: Math.round(r.width), cssH: Math.round(r.height), vis, loop: looping.has(key), url })
   }
   return out
 }
@@ -207,19 +209,28 @@ async function capture() {
       // Freeze the perpetual-drift surfaces (loop:true — #wash gradient :3240, the pulse/progress/
       // spinner) to a deterministic frame. They NEVER settle: s.x.t += 0.0045 per rAF forever, so
       // their hash is an arbitrary drift frame whose value depends on the exact fake-clock tick
-      // count — reproducible only by luck. A live rAF handle (s.raf) is exactly what marks a
-      // looper; non-loopers never set it. Pin t to 2.5 (the same value s.start() gives every
-      // non-looping surface) and redraw once, so a golden pins a fixed frame instead of a moving one.
-      const froze = await page.evaluate(() => {
-        let n = 0
+      // count — reproducible only by luck. A live rAF handle (s.raf) marks a currently-animating
+      // surface; non-loopers never set it. Pin t to 2.5 (the value s.start() gives every non-looping
+      // surface) and redraw, so the golden pins a fixed frame. Return the keyed looper set BEFORE
+      // cancelling raf: because the frozen frame equals a non-looper's frame, hash alone cannot tell
+      // "loop:true was removed" from "always static" -- so the loop CLASS is recorded per canvas and
+      // compared by diff(). Same section+index keying as readAllCanvases so the sets align.
+      const loopKeys = await page.evaluate(() => {
+        const seen = new Map()
+        const loopers = []
         for (const cv of document.querySelectorAll('canvas')) {
+          const sec = cv.closest('section[id]')
+          const base = sec ? sec.id : '~doc'
+          const n = seen.get(base) || 0
+          seen.set(base, n + 1)
           const s = cv._grainS
-          if (s && s.raf) { cancelAnimationFrame(s.raf); s.raf = 0; s.x.t = 2.5; s.draw(); n++ }
+          if (s && s.raf) { loopers.push(`${base}[${n}]`); cancelAnimationFrame(s.raf); s.raf = 0; s.x.t = 2.5; s.draw() }
         }
-        return n
+        return loopers
       })
+      const froze = loopKeys.length
 
-      const shots = await page.evaluate(readAllCanvases)
+      const shots = await page.evaluate(readAllCanvases, loopKeys)
       frames[mode] = {}
       const hidden = []
       for (const s of shots) {
@@ -234,6 +245,7 @@ async function capture() {
           cssW: s.cssW,
           cssH: s.cssH,
           vis: s.vis,
+          loop: s.loop,
           bytes: payload.length,
           hash: createHash('sha256').update(s.url).digest('hex').slice(0, 16),
         }
@@ -289,17 +301,28 @@ function trustworthy(run, label) {
   return false
 }
 
+// Compare EVERY recorded field, not just the hash. A matching hash is necessary but not
+// sufficient: a canvas can keep its backing pixels while its animation class, visibility, layout
+// size, or identity changes -- each a real regression that a hash-only diff prints as PASS.
+//   loop  : freezing loopers to t=2.5 makes their frame equal a non-looper's, so removal of
+//           loop:true is hash-invisible; the class is the only thing that catches it.
+//   vis   : display:none with an intact backing store keeps the hash; the UI canvas vanishes.
+//   cssW/cssH : a CSS-only resize leaves the bitmap (w/h) and hash unchanged.
+//   w/h/id: backing-size or identity drift.
+const COMPARED = ['hash', 'loop', 'vis', 'w', 'h', 'cssW', 'cssH', 'id']
 function diff(a, b) {
   const out = []
   for (const mode of CONFIG.modes) {
     const A = a.frames[mode] || {}, B = b.frames[mode] || {}
     for (const k of Object.keys(A)) {
-      if (!(k in B)) out.push(`- ${mode} ${k}: MISSING`)
-      else if (A[k].hash !== B[k].hash) {
-        const dim = A[k].w !== B[k].w || A[k].h !== B[k].h ? ` [${A[k].w}x${A[k].h} -> ${B[k].w}x${B[k].h}]` : ''
-        // A hash moves on any AA nudge; a big swing in bytes means a different render config.
+      if (!(k in B)) { out.push(`- ${mode} ${k}: MISSING`); continue }
+      const changed = COMPARED.filter((f) => A[k][f] !== B[k][f])
+      if (changed.length) {
+        const parts = changed.map((f) => `${f} ${A[k][f]}→${B[k][f]}`)
         const pct = A[k].bytes ? Math.round(((B[k].bytes - A[k].bytes) / A[k].bytes) * 100) : 0
-        out.push(`~ ${mode} ${k}: ${A[k].hash} -> ${B[k].hash}${dim} (bytes ${pct >= 0 ? '+' : ''}${pct}%)`)
+        // Magnitude tell: a big byte swing = different render config, an AA nudge barely moves it.
+        const tail = changed.includes('hash') ? ` (bytes ${pct >= 0 ? '+' : ''}${pct}%)` : ''
+        out.push(`~ ${mode} ${k}: ${parts.join(', ')}${tail}`)
       }
     }
     for (const k of Object.keys(B)) if (!(k in A)) out.push(`+ ${mode} ${k}: NEW`)
