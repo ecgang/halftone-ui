@@ -2567,7 +2567,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   <table class="props">
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
     <tr><td>inks</td><td>[InkColor, InkColor] — press order; enables ink mode</td><td>—</td></tr>
-    <tr><td>pattern</td><td>"stipple" | "lines" | "waves" | "hatch"</td><td>"stipple"</td></tr>
+    <tr><td>pattern</td><td>"stipple" | "lines" | "waves" | "hatch" | "am"</td><td>"stipple"</td></tr>
     <tr><td>body</td><td>number 0–1 — 0 opaque paint · 1 transparent ink</td><td>0.55</td></tr>
     <tr><td>misreg</td><td>number (px of plate misregistration)</td><td>1</td></tr>
     <tr><td>scale</td><td>number (screen pitch, px)</td><td>6</td></tr>
@@ -2978,6 +2978,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   } catch (e) { /* corrupt storage: keep defaults */ }
   function grainPts(W, H, r, rng, pat) {
     if (!pat || pat === 'stipple') return poisson(W, H, r, rng);
+    if (pat === 'am') return amPts(W, H, Math.max(4.4, r * 3.4), 0.785, rng);
     const pts = [], pitch = Math.max(2.8, r * 2.2);
     const fams = pat === 'hatch'
       ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1.0]]
@@ -2986,6 +2987,35 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       for (const q of screenPts(W, H, pitch, a, rng, pat === 'waves'))
         pts.push({ x: q.x, y: q.y, th: lo + q.j * (hi - lo) });
     return pts;
+  }
+
+  // amplitude modulation — a square grid at the classic 45 degree key-plate angle.
+  // A dot has to grow from nothing to full coverage inside its own cell, so this
+  // screen is coarser than the line families' 2.2x. Every point carries its cell
+  // size in `c`, and that is what tells the press to modulate area rather than
+  // threshold. `th` here is the press-in reveal order ONLY — am has no tone
+  // threshold, which is the whole point of it.
+  function amPts(W, H, pitch, ang, rng) {
+    const pts = [], R = Math.hypot(W, H) / 2 + pitch;
+    const ca = Math.cos(ang), sa = Math.sin(ang);
+    for (let u = -R; u < R; u += pitch)
+      for (let v = -R; v < R; v += pitch) {
+        const x = W / 2 + u * ca - v * sa, y = H / 2 + u * sa + v * ca;
+        if (x < -pitch || y < -pitch || x > W + pitch || y > H + pitch) continue;
+        pts.push({ x, y, c: pitch, th: rng() });
+      }
+    return pts;
+  }
+
+  // The am press, shared by every draw that can wear the screen. Tone drives dot
+  // AREA, so radius goes as sqrt — that, plus having no threshold at all, is the
+  // difference between a texture laid over a shape and a printed image. The cap
+  // sits below 1 because dots reach full coverage at r = cell/sqrt(2): a plate
+  // that fuses solid stops being a halftone and starts being a rectangle.
+  function amDot(ctx, p, v) {
+    const t = Math.min(0.92, v);
+    if (t <= 0.012) return;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.c * 0.56 * Math.sqrt(t), 0, 6.283); ctx.fill();
   }
   function makeNoise(seed) {
     const h = (x, y) => {
@@ -3044,6 +3074,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
         for (const p of s.pts) {
           if (p.th > x.pr) continue;
           const v = tone(p, W, H, x, s.noise) * GRAIN.ink;
+          if (p.c) { amDot(ctx, p, v); continue; }
           if (v > p.th) {
             const d = 1.05 + 0.75 * Math.min(1.15, v);
             ctx.fillRect(p.x - d / 2, p.y - d / 2, d, d);
@@ -3386,6 +3417,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
             const yc = curveY(vals, p.x);
             if (p.y < yc) continue;
             const tone = Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9 * GRAIN.ink;
+            if (p.c) { amDot(ctx, p, tone); continue; }
             if (tone <= p.th) continue;
             ctx.beginPath(); ctx.arc(p.x, p.y, 0.45 + 0.9 * Math.min(1.15, tone), 0, 6.283); ctx.fill();
           }
@@ -3501,7 +3533,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
             if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
             const boost = hover === i ? 1.3 : 1;
             const tone = Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost * GRAIN.ink;
-            if (tone > p.th) { ctx.beginPath(); ctx.arc(p.x, p.y, 0.5 + 1.05 * Math.min(1.1, tone), 0, 6.283); ctx.fill(); }
+            if (p.c) amDot(ctx, p, tone);
+            else if (tone > p.th) { ctx.beginPath(); ctx.arc(p.x, p.y, 0.5 + 1.05 * Math.min(1.1, tone), 0, 6.283); ctx.fill(); }
             break;
           }
         }
@@ -4511,7 +4544,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   }
 
   // ============ grain pickers — press any example in any grain ============
-  const GRAINS = ['stipple', 'lines', 'waves', 'hatch'];
+  const GRAINS = ['stipple', 'lines', 'waves', 'hatch', 'am'];
   document.querySelectorAll('[data-ex]').forEach(ex => {
     const surfs = registry.filter(s => s.kind === 'grain' && s.cv && ex.contains(s.cv));
     if (!surfs.length) return;
