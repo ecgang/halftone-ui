@@ -23,12 +23,12 @@
 
 stipple-ui renders every fill in the interface — buttons, badges, charts, switches, sliders, washes — as a cloud of Poisson-disk-sampled ink dots on a canvas, the way a printing press lays down grain. Nothing is a flat CSS background; everything is *pressed*. Each surface holds a seed, so the grain is deterministic: reload and you get the same ten thousand dots, reroll and the whole page reprints at once.
 
-It's inspired by (and a loving riff on) [dither-ui.com](https://dither-ui.com/) — same docs-site format, different printmaking tradition: stippling and Retratone-style four-plate crosshatch instead of dithering.
+It's inspired by (and a loving riff on) [dither-ui.com](https://dither-ui.com/) — same docs-site format, different printmaking tradition: halftone — stippling and Retratone-style four-plate crosshatch screens instead of dithering.
 
 ## Features
 
 - **~90 documented components** — primitives (switch, slider, OTP field, dialogs, menus, combobox…), charts (line, pie, radar, area, bars, sparkline), full page examples (dashboard, pricing, sign-in flows), and a set of four-plate crosshatch "ink styles"
-- **Four grains everywhere** — every pressed example carries a picker in its tab row: re-press it as stipple, lines, waves, or crosshatch, live
+- **Halftone grains everywhere** — every pressed example leads with a tonal crosshatch screen and carries a picker in its tab row: re-press it as stipple, lines, waves, or hatch, live
 - **Real light & dark themes** — a designed print-shop-cream light mode and an archival-black dark mode, not an inversion filter
 - **OKLCH hue wheel** — drag a ring in the topbar and every pigment on the page rotates through OKLCH hue space live; neutrals stay neutral
 - **Seeded & deterministic** — one seed drives every surface; `reroll` reprints the world

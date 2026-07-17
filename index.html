@@ -2924,15 +2924,16 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   }
   // grain patterns — any surface can press as stipple, lines, waves, or hatch.
   // screenPts (the ink press sampler, hoisted) supplies the line-family grains.
-  const GRAIN = { pattern: 'stipple' };
+  const GRAIN = { pattern: 'hatch' };
   function grainPts(W, H, r, rng, pat) {
     if (!pat || pat === 'stipple') return poisson(W, H, r, rng);
-    const pts = [], pitch = r * 2.7;
-    const fams = pat === 'hatch' ? [0.26, 1.83] : [pat === 'waves' ? 0 : -0.62];
-    const pp = pat === 'hatch' ? pitch * 1.4 : pitch;
-    for (const a of fams)
-      for (const q of screenPts(W, H, pp, a, rng, pat === 'waves'))
-        pts.push({ x: q.x, y: q.y, th: q.j });
+    const pts = [], pitch = Math.max(2.8, r * 2.2);
+    const fams = pat === 'hatch'
+      ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1.0]]
+      : [[pat === 'waves' ? 0 : -0.62, 0.05, 1.0]];
+    for (const [a, lo, hi] of fams)
+      for (const q of screenPts(W, H, pitch, a, rng, pat === 'waves'))
+        pts.push({ x: q.x, y: q.y, th: lo + q.j * (hi - lo) });
     return pts;
   }
   function makeNoise(seed) {
@@ -2988,12 +2989,20 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       ctx.clearRect(0, 0, W, H);
       if (pre) pre(ctx, W, H);
       ctx.fillStyle = typeof color === 'function' ? color() : color;
-      const lg = (s.pat || GRAIN.pattern) !== 'stipple';
-      const r0 = lg ? 0.40 : 0.42, r1 = lg ? 0.62 : 0.85;
-      for (const p of s.pts) {
-        const v = tone(p, W, H, x, s.noise);
-        if (v > p.th) {
-          ctx.beginPath(); ctx.arc(p.x, p.y, r0 + r1 * Math.min(1.15, v), 0, 6.283); ctx.fill();
+      if ((s.pat || GRAIN.pattern) !== 'stipple') {
+        for (const p of s.pts) {
+          const v = tone(p, W, H, x, s.noise);
+          if (v > p.th) {
+            const d = 1.05 + 0.75 * Math.min(1.15, v);
+            ctx.fillRect(p.x - d / 2, p.y - d / 2, d, d);
+          }
+        }
+      } else {
+        for (const p of s.pts) {
+          const v = tone(p, W, H, x, s.noise);
+          if (v > p.th) {
+            ctx.beginPath(); ctx.arc(p.x, p.y, 0.42 + 0.85 * Math.min(1.15, v), 0, 6.283); ctx.fill();
+          }
         }
       }
     };
@@ -4435,7 +4444,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     GRAINS.forEach(g => {
       const b = document.createElement('button');
       b.type = 'button'; b.textContent = g;
-      b.setAttribute('aria-pressed', String(g === 'stipple'));
+      b.setAttribute('aria-pressed', String(g === GRAIN.pattern));
       b.addEventListener('click', () => {
         box.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
         surfs.forEach(s => {
