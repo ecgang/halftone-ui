@@ -49,7 +49,7 @@ It's a loving riff on [dither-ui](https://dither-ui.com/) — same docs-site for
 
 ## Features
 
-- **~90 documented components** — primitives (switch, slider, OTP field, dialogs, menus, combobox), charts (line, pie, radar, area, bars, heatmap, donut, sparkline), and whole page examples (dashboard, pricing, billing, sign-in flows)
+- **88 documented sections** — primitives (switch, slider, OTP field, dialogs, menus, combobox), charts (line, pie, radar, area, bars, heatmap, donut, sparkline), and whole page examples (dashboard, pricing, billing, sign-in flows)
 - **Four halftone screens** — `hatch` (crosshatch, the default), `stipple` (stochastic/FM), `lines` (line screen), `waves`. Every pressed example carries a picker: re-press it live. Swap the screen and the whole page changes character — the tone field underneath never moves
 - **A real four-plate press** — CMYK separation at the true process screen angles (C 15°, M 75°, Y 0°, K 45°), with plate order and adjustable misregistration
 - **Global grain dials** — one `▦` control rescales the screen, the ink weight and the washes across every surface on the page at once
