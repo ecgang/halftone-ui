@@ -49,6 +49,18 @@
   .seedctl button:hover { border-color: var(--accent); color: var(--accent); }
   .seedctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  /* ---- masthead ---- */
+  .masthead { margin: 0 0 66px; }
+  .masthead canvas { display: block; width: 100%; }
+  /* The wordmark is ink on a canvas, so the real heading is here and hidden.
+     The page had no h1 at all before this. */
+  .masthead h1 {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  .mast-sub { color: var(--mut); margin: 16px 0 0; max-width: 60ch; }
+  .mast-sub b { color: var(--ink); font-weight: 400; }
+
   /* ---- layout ---- */
   .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
   nav.side {
@@ -717,6 +729,14 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 </nav>
 
 <main>
+
+<div class="masthead">
+  <h1>Halftone UI</h1>
+  <canvas id="mast-cv" aria-hidden="true"></canvas>
+  <p class="mast-sub">A component library that ships its own printing press. This wordmark is not a
+  font rendering — it is <b>four ink plates</b> at the true process screen angles, each dot sized by
+  the tone underneath it. Every surface below is pressed by the same engine.</p>
+</div>
 
 <section class="doc" id="quick-start">
   <h2>Quick start</h2>
@@ -3009,6 +3029,43 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     return pts;
   }
 
+  // Rasterise type once, then read it back as a tone field. Everything the press
+  // needs to know about a wordmark is "how dark is the ink at this point?".
+  function textField(text, W) {
+    const o = document.createElement('canvas');
+    const c = o.getContext('2d', { willReadFrequently: true });
+    const setFont = (px) => {
+      c.font = `900 ${px}px "Helvetica Neue", "Arial Black", Inter, system-ui, sans-serif`;
+      try { c.letterSpacing = `${-px * 0.035}px`; } catch (e) {}
+    };
+    // width scales linearly with size (tracking is proportional), so one measure fits it
+    setFont(400);
+    const size = Math.max(24, Math.floor(400 * (W * 0.94) / c.measureText(text).width));
+    setFont(size);
+    const m = c.measureText(text);
+    const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+    const H = Math.round((asc + desc) * 1.34);
+    o.width = W; o.height = H;
+    setFont(size); // sizing a canvas resets every ctx property, including the font
+    c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#fff';
+    c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    c.fillText(text, W / 2, (H + asc - desc) / 2);
+    const d = c.getImageData(0, 0, W, H).data;
+    const at = (x, y) => {
+      if (x < 0 || y < 0 || x >= W || y >= H) return 0;
+      return d[(((y | 0) * W) + (x | 0)) * 4] / 255;
+    };
+    // Average over the cell rather than point-sample it. A real screen resolves an
+    // edge into partial dots; a point sample would stair-step the letterforms.
+    const sample = (x, y, r) => {
+      let s = 0;
+      for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) s += at(x + i * r * 0.66, y + j * r * 0.66);
+      return s / 9;
+    };
+    return { H, sample };
+  }
+
   // The am press, shared by every draw that can wear the screen. Tone drives dot
   // AREA, so radius goes as sqrt — that, plus having no threshold at all, is the
   // difference between a texture laid over a shape and a printed image. The cap
@@ -4774,6 +4831,82 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   }
   setModeLabel();
   applyTheme();
+
+  // ============ masthead — the wordmark, pressed as a four-plate run ============
+  {
+    const mastCv = document.getElementById('mast-cv');
+    // The real process screen angles — Y 0, C 15, M 75, K 45 degrees. Those
+    // particular offsets are why a press yields a rosette and not a moire. w()
+    // sweeps each plate across the sheet, so the wordmark shifts hue as you read
+    // it and no dot is quite the size of its neighbour. dx/dy are the plates'
+    // misregistration — the whole reason the word "registration" exists.
+    // Yellow stays a whisper: on cream it reads as mud rather than colour, and
+    // its only real job is warming the cyan. The sweep is carried blue -> pink.
+    // Inks come from INKS, not hardcoded CMYK, so the hue wheel turns the
+    // masthead with everything else.
+    const PLATES = [
+      { ink: 'yellow', ang: 0.0, dx: 0.9, dy: 1.0, w: (u) => 0.10 + 0.18 * (1 - u) },
+      { ink: 'blue', ang: 0.262, dx: -1.4, dy: 0.7, w: (u) => 0.12 + 0.72 * (1 - u) },
+      { ink: 'pink', ang: 1.309, dx: 1.2, dy: -0.9, w: (u) => 0.12 + 0.72 * u },
+      { ink: null, ang: 0.785, dx: 0, dy: 0, w: (u, v) => 0.10 + 0.26 * v }, // key
+    ];
+    // The docs masthead is a third the width of the landing hero, so it gets a
+    // finer screen: pitch is chosen against the CAP HEIGHT, not the canvas. Below
+    // roughly ten dots per letter the screen stops resolving the letterform and
+    // starts eating it — the counters of A and O fill in first.
+    const PITCH = 8;
+    let T = null, W = 0, H = 0, ctx = null, lastDpr = 0;
+    const s = { cv: mastCv, kind: 'grain', pat: null, x: { pr: 1 } };
+    s.rebuild = () => {
+      const w = mastCv.clientWidth;
+      if (!w) { s.stale = true; return; }
+      s.stale = false;
+      // Every repaint lands here — a hue drag and the grain dials both re-press
+      // live. The tone field depends on the width and the pixel ratio, nothing
+      // else, so rasterising the type and reading it back is only redone when one
+      // of those moves; the plates below are cheap and rebuild every time. dpr is
+      // in the key because it can change without the width changing — drag the
+      // window to a second monitor and every other surface re-fits, so this must.
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      if (w !== W || dpr !== lastDpr || !T) {
+        T = textField('HALFTONE UI', w);
+        W = w; H = T.H; lastDpr = dpr;
+        mastCv.width = Math.round(W * dpr); mastCv.height = Math.round(H * dpr);
+        mastCv.style.height = H + 'px';
+        ctx = mastCv.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      // the same grid the `am` screen presses on — one press, five ways to wear it
+      s.plates = PLATES.map((pl, i) => ({
+        pl, pts: amPts(W, H, PITCH * GRAIN.scale, pl.ang, mulberry32(state.seed + i * 977)),
+      }));
+    };
+    s.draw = () => {
+      if (s.stale || !ctx) return;
+      ctx.clearRect(0, 0, W, H);
+      // ink on paper darkens where plates overlap; ink on a black ground adds light
+      ctx.globalCompositeOperation = THEME.mode === 'dark' ? 'lighter' : 'multiply';
+      const cell = PITCH * GRAIN.scale;
+      for (const { pl, pts } of s.plates) {
+        ctx.fillStyle = pl.ink ? INKS[pl.ink] : (THEME.mode === 'dark' ? INKS.white : INKS.black);
+        ctx.beginPath();
+        for (const p of pts) {
+          if (p.th > s.x.pr) continue;
+          const lum = T.sample(p.x - pl.dx, p.y - pl.dy, cell * 0.5);
+          if (lum < 0.02) continue;
+          const t = Math.min(0.92, lum * pl.w(p.x / W, p.y / H) * 1.2 * GRAIN.ink);
+          if (t <= 0.012) continue;
+          const r = cell * 0.56 * Math.sqrt(t);
+          ctx.moveTo(p.x + r, p.y);
+          ctx.arc(p.x, p.y, r, 0, 6.283);
+        }
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    };
+    registry.push(s);
+    if (grainIO) { s.x.pr = 0; mastCv._grainS = s; grainIO.observe(mastCv); }
+  }
 
   // ============ reroll + boot ============
   document.getElementById('reroll').addEventListener('click', () => {
