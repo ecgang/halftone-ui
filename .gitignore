@@ -8,3 +8,6 @@
 .env.*
 !.env.example
 !.env.template
+
+# Dev-only harness deps (tools/). The site itself is static and has no build.
+node_modules

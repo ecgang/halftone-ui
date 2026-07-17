@@ -1,0 +1,3134 @@
+{
+  "meta": {
+    "capturedAt": "2026-07-17T09:06:06.689Z",
+    "browser": "chromium 149.0.7827.55",
+    "platform": "darwin arm64",
+    "node": "v20.19.6"
+  },
+  "config": {
+    "page": "/docs/index.html",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "deviceScaleFactor": 1,
+    "reducedMotion": "no-preference",
+    "clock": "installed at t=0; advanced only via runFor()",
+    "scrollStep": 700,
+    "scrollTickMs": 60,
+    "settleMs": 4000,
+    "modes": [
+      "dark",
+      "light"
+    ],
+    "seed": 1859,
+    "storage": "cleared; then stipple-mode=<mode>. hue/grain/lang left at source defaults."
+  },
+  "frames": {
+    "dark": {
+      "~doc[0]": {
+        "id": "wheelcv",
+        "w": 148,
+        "h": 148,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 1440,
+        "hash": "8afb8d7d0976ded5"
+      },
+      "~doc[1]": {
+        "id": "mast-cv",
+        "w": 740,
+        "h": 110,
+        "cssW": 740,
+        "cssH": 110,
+        "bytes": 153384,
+        "hash": "94b0d449958405e3"
+      },
+      "quick-start[0]": {
+        "id": null,
+        "w": 153,
+        "h": 33,
+        "cssW": 153,
+        "cssH": 33,
+        "bytes": 20132,
+        "hash": "cae6f41d1702cdeb"
+      },
+      "quick-start[1]": {
+        "id": null,
+        "w": 112,
+        "h": 10,
+        "cssW": 112,
+        "cssH": 10,
+        "bytes": 2924,
+        "hash": "8bb7b2fb094ad5cb"
+      },
+      "styling[0]": {
+        "id": null,
+        "w": 59,
+        "h": 26,
+        "cssW": 59,
+        "cssH": 26,
+        "bytes": 6604,
+        "hash": "3a6e92d2f453af75"
+      },
+      "styling[1]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5772,
+        "hash": "a1a34dcafac7e892"
+      },
+      "styling[2]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7256,
+        "hash": "188244fb05894c3d"
+      },
+      "styling[3]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5832,
+        "hash": "cd934bd2c34e17df"
+      },
+      "styling[4]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7444,
+        "hash": "c4c349fb3227dbae"
+      },
+      "styling[5]": {
+        "id": null,
+        "w": 45,
+        "h": 26,
+        "cssW": 45,
+        "cssH": 26,
+        "bytes": 5120,
+        "hash": "7cf5b8d623f9fc1c"
+      },
+      "styling[6]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5744,
+        "hash": "753913e31228170a"
+      },
+      "composition[0]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7296,
+        "hash": "90fedfdaadf943ab"
+      },
+      "composition[1]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7248,
+        "hash": "e81b2bd8ffe7630b"
+      },
+      "composition[2]": {
+        "id": null,
+        "w": 138,
+        "h": 10,
+        "cssW": 138,
+        "cssH": 10,
+        "bytes": 3316,
+        "hash": "10bef35c84f20294"
+      },
+      "composition[3]": {
+        "id": null,
+        "w": 284,
+        "h": 33,
+        "cssW": 284,
+        "cssH": 33,
+        "bytes": 37188,
+        "hash": "58245b9b9272cfab"
+      },
+      "motion[0]": {
+        "id": "motion-cv",
+        "w": 430,
+        "h": 120,
+        "cssW": 430,
+        "cssH": 120,
+        "bytes": 175612,
+        "hash": "612c7dcce1235b23"
+      },
+      "motion[1]": {
+        "id": null,
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "bytes": 12256,
+        "hash": "6f89431089fb65d8"
+      },
+      "sign-up[0]": {
+        "id": null,
+        "w": 358,
+        "h": 342,
+        "cssW": 358,
+        "cssH": 342,
+        "bytes": 60744,
+        "hash": "bd4e9d6283371dac"
+      },
+      "sign-up[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 101,
+        "cssH": 37,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "sign-up[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 101,
+        "cssH": 37,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "sign-up[3]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 101,
+        "cssH": 37,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "sign-up[4]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 39888,
+        "hash": "764a838d8b815505"
+      },
+      "monitoring[0]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 4316,
+        "hash": "d24cb3010d912ed7"
+      },
+      "monitoring[1]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 7944,
+        "hash": "69e55c0df80a612f"
+      },
+      "monitoring[2]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 10296,
+        "hash": "fb0751d11cdb8baa"
+      },
+      "dashboard[0]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6364,
+        "hash": "dd98e518b4d6b5e1"
+      },
+      "dashboard[1]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 8408,
+        "hash": "73c4e0ce32f2320c"
+      },
+      "dashboard[2]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6988,
+        "hash": "d13b0772a6d17c27"
+      },
+      "dashboard[3]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 5060,
+        "hash": "ec08e2e09fc3d548"
+      },
+      "dashboard[4]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 8300,
+        "hash": "7ef490ae5f2801c8"
+      },
+      "app-shell[0]": {
+        "id": null,
+        "w": 72,
+        "h": 26,
+        "cssW": 72,
+        "cssH": 26,
+        "bytes": 8040,
+        "hash": "c9e606c96532d079"
+      },
+      "app-shell[1]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6536,
+        "hash": "bf1ad60308867137"
+      },
+      "app-shell[2]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6928,
+        "hash": "9cc54abfd389154b"
+      },
+      "team[0]": {
+        "id": null,
+        "w": 66,
+        "h": 21,
+        "cssW": 66,
+        "cssH": 21,
+        "bytes": 5984,
+        "hash": "cb016d339f1e9d09"
+      },
+      "team[1]": {
+        "id": null,
+        "w": 66,
+        "h": 21,
+        "cssW": 66,
+        "cssH": 21,
+        "bytes": 6052,
+        "hash": "38446470d8470003"
+      },
+      "team[2]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 4728,
+        "hash": "b9f82afa64cc9d57"
+      },
+      "team[3]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 4812,
+        "hash": "045cfe5d8fdf330c"
+      },
+      "billing[0]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 7220,
+        "hash": "b3ab9442e8309421"
+      },
+      "billing[1]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 9380,
+        "hash": "d21b0720de2dc42a"
+      },
+      "billing[2]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 4840,
+        "hash": "aac8623430d6afdd"
+      },
+      "billing[3]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 4772,
+        "hash": "b8fd0b3444a85197"
+      },
+      "billing[4]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 4776,
+        "hash": "fe56aba37ce2efa7"
+      },
+      "sign-in[0]": {
+        "id": null,
+        "w": 358,
+        "h": 244,
+        "cssW": 358,
+        "cssH": 244,
+        "bytes": 47232,
+        "hash": "43d083ec5dbb78bd"
+      },
+      "sign-in[1]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 39448,
+        "hash": "02f26adc4546d750"
+      },
+      "magic-link[0]": {
+        "id": null,
+        "w": 358,
+        "h": 197,
+        "cssW": 358,
+        "cssH": 197,
+        "bytes": 40492,
+        "hash": "2c24051631cec62f"
+      },
+      "magic-link[1]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 40244,
+        "hash": "ba173476c5dbf9d7"
+      },
+      "two-factor[0]": {
+        "id": null,
+        "w": 358,
+        "h": 206,
+        "cssW": 358,
+        "cssH": 206,
+        "bytes": 41300,
+        "hash": "b1b3a83bf2f83a83"
+      },
+      "two-factor[1]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 40484,
+        "hash": "3377124f5a6b5eec"
+      },
+      "pricing[0]": {
+        "id": null,
+        "w": 175,
+        "h": 33,
+        "cssW": 175,
+        "cssH": 33,
+        "bytes": 7556,
+        "hash": "092c51fad79e826d"
+      },
+      "pricing[1]": {
+        "id": null,
+        "w": 175,
+        "h": 33,
+        "cssW": 175,
+        "cssH": 33,
+        "bytes": 23028,
+        "hash": "b663a35f1a03eebe"
+      },
+      "pricing[2]": {
+        "id": null,
+        "w": 175,
+        "h": 33,
+        "cssW": 175,
+        "cssH": 33,
+        "bytes": 6992,
+        "hash": "54744d34f9f3726b"
+      },
+      "activity-feed[0]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 736,
+        "hash": "355073a8c59077de"
+      },
+      "activity-feed[1]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 728,
+        "hash": "b12ee149ced20cdf"
+      },
+      "activity-feed[2]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 736,
+        "hash": "81419cc946662e82"
+      },
+      "activity-feed[3]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 724,
+        "hash": "79db6cd4726e69be"
+      },
+      "activity-feed[4]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 732,
+        "hash": "8539846017de8f68"
+      },
+      "changelog[0]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7248,
+        "hash": "84313ba2d1ecf0cb"
+      },
+      "changelog[1]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7240,
+        "hash": "8647e739d7c44cce"
+      },
+      "changelog[2]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7204,
+        "hash": "adc1ea692df9d82f"
+      },
+      "area-chart[0]": {
+        "id": "area",
+        "w": 674,
+        "h": 280,
+        "cssW": 674,
+        "cssH": 280,
+        "bytes": 256196,
+        "hash": "8d3e2bbb8eb1cf04"
+      },
+      "bar-chart[0]": {
+        "id": "bars",
+        "w": 674,
+        "h": 150,
+        "cssW": 674,
+        "cssH": 150,
+        "bytes": 95644,
+        "hash": "3d54e7298ad73cc8"
+      },
+      "sparkline[0]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6144,
+        "hash": "7638cdd258ed32c9"
+      },
+      "sparkline[1]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6648,
+        "hash": "7da330a281d6e706"
+      },
+      "sparkline[2]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6264,
+        "hash": "c8e0cf291cfecb0c"
+      },
+      "line-chart[0]": {
+        "id": "sline-cv",
+        "w": 674,
+        "h": 220,
+        "cssW": 674,
+        "cssH": 220,
+        "bytes": 128664,
+        "hash": "83b1012708653c63"
+      },
+      "pie-chart[0]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 50804,
+        "hash": "e8b068da9902345f"
+      },
+      "pie-chart[1]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 31992,
+        "hash": "aa605805a3dcddeb"
+      },
+      "pie-chart[2]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 25224,
+        "hash": "91dbc5bce3e82f45"
+      },
+      "pie-chart[3]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 19548,
+        "hash": "55ebb50df86cea62"
+      },
+      "pie-chart[4]": {
+        "id": null,
+        "w": 72,
+        "h": 26,
+        "cssW": 72,
+        "cssH": 26,
+        "bytes": 7888,
+        "hash": "55d75f734713d009"
+      },
+      "pie-chart[5]": {
+        "id": null,
+        "w": 72,
+        "h": 26,
+        "cssW": 72,
+        "cssH": 26,
+        "bytes": 8024,
+        "hash": "3a1a34c4fc9dcaca"
+      },
+      "pie-chart[6]": {
+        "id": null,
+        "w": 79,
+        "h": 26,
+        "cssW": 79,
+        "cssH": 26,
+        "bytes": 8764,
+        "hash": "3ba33b021cca662c"
+      },
+      "pie-chart[7]": {
+        "id": null,
+        "w": 86,
+        "h": 26,
+        "cssW": 86,
+        "cssH": 26,
+        "bytes": 9340,
+        "hash": "41851f6497f3d790"
+      },
+      "radar-chart[0]": {
+        "id": "sradar-cv",
+        "w": 340,
+        "h": 240,
+        "cssW": 340,
+        "cssH": 240,
+        "bytes": 69192,
+        "hash": "fbf6f4e304cc7463"
+      },
+      "button[0]": {
+        "id": null,
+        "w": 75,
+        "h": 33,
+        "cssW": 75,
+        "cssH": 33,
+        "bytes": 10116,
+        "hash": "60430cca0f47068e"
+      },
+      "button[1]": {
+        "id": null,
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "bytes": 12356,
+        "hash": "5ef2d5cd52ce74e3"
+      },
+      "button[2]": {
+        "id": null,
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "bytes": 3744,
+        "hash": "e934b492d537573d"
+      },
+      "badge[0]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7404,
+        "hash": "cd21c7606f78825e"
+      },
+      "badge[1]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7288,
+        "hash": "dc90097af6d18402"
+      },
+      "badge[2]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5816,
+        "hash": "7fe2ff3627355329"
+      },
+      "badge[3]": {
+        "id": null,
+        "w": 79,
+        "h": 26,
+        "cssW": 79,
+        "cssH": 26,
+        "bytes": 8796,
+        "hash": "4f34d3d04a31c0e9"
+      },
+      "badge[4]": {
+        "id": null,
+        "w": 86,
+        "h": 26,
+        "cssW": 86,
+        "cssH": 26,
+        "bytes": 9332,
+        "hash": "3c61da1a968571df"
+      },
+      "tabs[0]": {
+        "id": null,
+        "w": 460,
+        "h": 5,
+        "cssW": 460,
+        "cssH": 5,
+        "bytes": 1344,
+        "hash": "aea3c21f6d693efb"
+      },
+      "tabs[1]": {
+        "id": null,
+        "w": 86,
+        "h": 35,
+        "cssW": 86,
+        "cssH": 35,
+        "bytes": 328,
+        "hash": "f74d6cd3f1553100"
+      },
+      "tabs[2]": {
+        "id": null,
+        "w": 79,
+        "h": 35,
+        "cssW": 79,
+        "cssH": 35,
+        "bytes": 11396,
+        "hash": "ea1a47a46c027594"
+      },
+      "tabs[3]": {
+        "id": null,
+        "w": 57,
+        "h": 35,
+        "cssW": 57,
+        "cssH": 35,
+        "bytes": 252,
+        "hash": "dee181393ffc9b73"
+      },
+      "tabs[4]": {
+        "id": null,
+        "w": 86,
+        "h": 35,
+        "cssW": 86,
+        "cssH": 35,
+        "bytes": 328,
+        "hash": "f74d6cd3f1553100"
+      },
+      "tabs[5]": {
+        "id": null,
+        "w": 79,
+        "h": 35,
+        "cssW": 79,
+        "cssH": 35,
+        "bytes": 11564,
+        "hash": "92fedbb292e498a2"
+      },
+      "tabs[6]": {
+        "id": null,
+        "w": 57,
+        "h": 35,
+        "cssW": 57,
+        "cssH": 35,
+        "bytes": 252,
+        "hash": "dee181393ffc9b73"
+      },
+      "tabs[7]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 20708,
+        "hash": "e9d9b15fcb818e31"
+      },
+      "tabs[8]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 400,
+        "hash": "bfa5ec0df8a015de"
+      },
+      "tabs[9]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 400,
+        "hash": "bfa5ec0df8a015de"
+      },
+      "tabs[10]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 400,
+        "hash": "bfa5ec0df8a015de"
+      },
+      "meter[0]": {
+        "id": null,
+        "w": 272,
+        "h": 10,
+        "cssW": 272,
+        "cssH": 10,
+        "bytes": 5328,
+        "hash": "73c8d3cfb705715e"
+      },
+      "toast[0]": {
+        "id": null,
+        "w": 122,
+        "h": 33,
+        "cssW": 122,
+        "cssH": 33,
+        "bytes": 16060,
+        "hash": "a9d6ddf28c89c836"
+      },
+      "avatar[0]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 8864,
+        "hash": "a10c5e08831b56e5"
+      },
+      "avatar[1]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 8492,
+        "hash": "230eaa17ec1c59ed"
+      },
+      "avatar[2]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 9072,
+        "hash": "890450373676352c"
+      },
+      "avatar[3]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 8908,
+        "hash": "b32ccde94bf345a2"
+      },
+      "avatar[4]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 9204,
+        "hash": "0a05920a633f56b4"
+      },
+      "skeleton[0]": {
+        "id": null,
+        "w": 236,
+        "h": 14,
+        "cssW": 236,
+        "cssH": 14,
+        "bytes": 10688,
+        "hash": "21f5ea66b3fd71cc"
+      },
+      "skeleton[1]": {
+        "id": null,
+        "w": 365,
+        "h": 14,
+        "cssW": 365,
+        "cssH": 14,
+        "bytes": 17332,
+        "hash": "e5742571a58a9a8f"
+      },
+      "skeleton[2]": {
+        "id": null,
+        "w": 319,
+        "h": 14,
+        "cssW": 319,
+        "cssH": 14,
+        "bytes": 15300,
+        "hash": "7885f0de04f0d011"
+      },
+      "gradient[0]": {
+        "id": "wash",
+        "w": 738,
+        "h": 170,
+        "cssW": 738,
+        "cssH": 170,
+        "bytes": 416244,
+        "hash": "c01ef3c17606bebe"
+      },
+      "image[0]": {
+        "id": "simg-cv",
+        "w": 188,
+        "h": 240,
+        "cssW": 190,
+        "cssH": 240,
+        "bytes": 139988,
+        "hash": "d697a0505e14e9e6"
+      },
+      "switch[0]": {
+        "id": null,
+        "w": 44,
+        "h": 22,
+        "cssW": 44,
+        "cssH": 22,
+        "bytes": 3368,
+        "hash": "6ce319b249961ead"
+      },
+      "switch[1]": {
+        "id": null,
+        "w": 44,
+        "h": 22,
+        "cssW": 44,
+        "cssH": 22,
+        "bytes": 464,
+        "hash": "4f3d9a03a639b89b"
+      },
+      "checkbox[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1048,
+        "hash": "e6c6f1c7f53e312e"
+      },
+      "checkbox-group[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1028,
+        "hash": "5c7ac90a40e2ac9d"
+      },
+      "checkbox-group[1]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1032,
+        "hash": "adef2c93da98e911"
+      },
+      "checkbox-group[2]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 272,
+        "hash": "118f1ec83cbbe542"
+      },
+      "radio[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 820,
+        "hash": "2a6e6349084bf76c"
+      },
+      "radio[1]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 152,
+        "hash": "391c124cd494f1ba"
+      },
+      "radio[2]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 152,
+        "hash": "391c124cd494f1ba"
+      },
+      "slider[0]": {
+        "id": null,
+        "w": 250,
+        "h": 26,
+        "cssW": 250,
+        "cssH": 26,
+        "bytes": 14588,
+        "hash": "9f09b1955c256fa8"
+      },
+      "progress[0]": {
+        "id": null,
+        "w": 300,
+        "h": 10,
+        "cssW": 300,
+        "cssH": 10,
+        "bytes": 8504,
+        "hash": "318980156029823f"
+      },
+      "spinner[0]": {
+        "id": null,
+        "w": 44,
+        "h": 44,
+        "cssW": 44,
+        "cssH": 44,
+        "bytes": 3096,
+        "hash": "a017f47d53a47f76"
+      },
+      "spinner[1]": {
+        "id": null,
+        "w": 44,
+        "h": 44,
+        "cssW": 44,
+        "cssH": 44,
+        "bytes": 3212,
+        "hash": "b2d371d518293aae"
+      },
+      "fieldset[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1036,
+        "hash": "caa8cdcf44d7c0ff"
+      },
+      "fieldset[1]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 356,
+        "hash": "9c912b03f4d2fd2b"
+      },
+      "form[0]": {
+        "id": null,
+        "w": 298,
+        "h": 33,
+        "cssW": 298,
+        "cssH": 33,
+        "bytes": 39452,
+        "hash": "8a008d179d77c617"
+      },
+      "separator[0]": {
+        "id": null,
+        "w": 300,
+        "h": 12,
+        "cssW": 300,
+        "cssH": 12,
+        "bytes": 7856,
+        "hash": "e920dd24a0507c59"
+      },
+      "dialog[0]": {
+        "id": null,
+        "w": 130,
+        "h": 33,
+        "cssW": 130,
+        "cssH": 33,
+        "bytes": 17024,
+        "hash": "6a6d5905015d2727"
+      },
+      "dialog[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "dialog[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "alert-dialog[0]": {
+        "id": null,
+        "w": 153,
+        "h": 33,
+        "cssW": 153,
+        "cssH": 33,
+        "bytes": 20296,
+        "hash": "9386aaf22884fb86"
+      },
+      "alert-dialog[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "alert-dialog[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "drawer[0]": {
+        "id": null,
+        "w": 130,
+        "h": 33,
+        "cssW": 130,
+        "cssH": 33,
+        "bytes": 17168,
+        "hash": "14cbb3e371c2998a"
+      },
+      "drawer[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "preview-card[0]": {
+        "id": null,
+        "w": 66,
+        "h": 21,
+        "cssW": 66,
+        "cssH": 21,
+        "bytes": 6016,
+        "hash": "8d81e2e65e64fc1f"
+      },
+      "sidebar[0]": {
+        "id": null,
+        "w": 38,
+        "h": 26,
+        "cssW": 38,
+        "cssH": 26,
+        "bytes": 4320,
+        "hash": "03e8732548924641"
+      },
+      "rating[0]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1976,
+        "hash": "6d6fb475da55e7de"
+      },
+      "rating[1]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1976,
+        "hash": "6d6fb475da55e7de"
+      },
+      "rating[2]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1976,
+        "hash": "6d6fb475da55e7de"
+      },
+      "rating[3]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1140,
+        "hash": "4ba435cad5568bcc"
+      },
+      "rating[4]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1228,
+        "hash": "00974e48cc903de3"
+      },
+      "stepper[0]": {
+        "id": null,
+        "w": 75,
+        "h": 33,
+        "cssW": 75,
+        "cssH": 33,
+        "bytes": 3144,
+        "hash": "2b5a26a53be752cd"
+      },
+      "stepper[1]": {
+        "id": null,
+        "w": 106,
+        "h": 33,
+        "cssW": 106,
+        "cssH": 33,
+        "bytes": 14020,
+        "hash": "5dd93c593888986d"
+      },
+      "timeline[0]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 736,
+        "hash": "355073a8c59077de"
+      },
+      "timeline[1]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 728,
+        "hash": "b12ee149ced20cdf"
+      },
+      "timeline[2]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 728,
+        "hash": "5727f5cfb4e4fc55"
+      },
+      "ink-studio[0]": {
+        "id": "studio-cv",
+        "w": 738,
+        "h": 260,
+        "cssW": 738,
+        "cssH": 260,
+        "bytes": 645448,
+        "hash": "525e5cb40c678f29"
+      },
+      "ink-signin[0]": {
+        "id": "inkcard-cv",
+        "w": 358,
+        "h": 290,
+        "cssW": 358,
+        "cssH": 290,
+        "bytes": 275296,
+        "hash": "251094a9b476b587"
+      },
+      "ink-signin[1]": {
+        "id": null,
+        "w": 304,
+        "h": 45,
+        "cssW": 304,
+        "cssH": 45,
+        "bytes": 36096,
+        "hash": "c32ace9bc14baffb"
+      },
+      "ink-chart[0]": {
+        "id": "inkchart-cv",
+        "w": 738,
+        "h": 210,
+        "cssW": 738,
+        "cssH": 210,
+        "bytes": 279152,
+        "hash": "cfd717770779a1f3"
+      },
+      "ink-bars[0]": {
+        "id": "inkbars-cv",
+        "w": 738,
+        "h": 200,
+        "cssW": 738,
+        "cssH": 200,
+        "bytes": 218952,
+        "hash": "cbacfc276d58587f"
+      },
+      "ink-line[0]": {
+        "id": "inkline-cv",
+        "w": 738,
+        "h": 190,
+        "cssW": 738,
+        "cssH": 190,
+        "bytes": 186004,
+        "hash": "d1fc35c1501fe944"
+      },
+      "ink-donut[0]": {
+        "id": "inkdonut-cv",
+        "w": 738,
+        "h": 210,
+        "cssW": 738,
+        "cssH": 210,
+        "bytes": 66100,
+        "hash": "f021d8736723f852"
+      },
+      "ink-heat[0]": {
+        "id": "inkheat-cv",
+        "w": 738,
+        "h": 150,
+        "cssW": 738,
+        "cssH": 150,
+        "bytes": 199400,
+        "hash": "c5c25fd4ee08d7ab"
+      },
+      "ink-button[0]": {
+        "id": null,
+        "w": 83,
+        "h": 45,
+        "cssW": 83,
+        "cssH": 45,
+        "bytes": 8028,
+        "hash": "410fd5b6343d27ef"
+      },
+      "ink-button[1]": {
+        "id": null,
+        "w": 99,
+        "h": 45,
+        "cssW": 99,
+        "cssH": 45,
+        "bytes": 10796,
+        "hash": "26add7436d2e81c5"
+      },
+      "ink-button[2]": {
+        "id": null,
+        "w": 114,
+        "h": 45,
+        "cssW": 114,
+        "cssH": 45,
+        "bytes": 14008,
+        "hash": "3007377f52c5b4a9"
+      },
+      "ink-button[3]": {
+        "id": null,
+        "w": 107,
+        "h": 45,
+        "cssW": 107,
+        "cssH": 45,
+        "bytes": 10616,
+        "hash": "e7bf9d0526c42133"
+      },
+      "ink-button[4]": {
+        "id": null,
+        "w": 114,
+        "h": 45,
+        "cssW": 114,
+        "cssH": 45,
+        "bytes": 12696,
+        "hash": "c0a2892bd935aabb"
+      },
+      "ink-meter[0]": {
+        "id": null,
+        "w": 172,
+        "h": 18,
+        "cssW": 172,
+        "cssH": 18,
+        "bytes": 9248,
+        "hash": "528f2ab49153ff9d"
+      },
+      "ink-meter[1]": {
+        "id": null,
+        "w": 172,
+        "h": 18,
+        "cssW": 172,
+        "cssH": 18,
+        "bytes": 5240,
+        "hash": "60d79bc5281e7a2c"
+      },
+      "ink-marks[0]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 7036,
+        "hash": "b753e288f9724c64"
+      },
+      "ink-marks[1]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 3948,
+        "hash": "9eed9a6e3f8e2934"
+      },
+      "ink-marks[2]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 5512,
+        "hash": "0e320fe470162292"
+      },
+      "ink-marks[3]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 7916,
+        "hash": "6f11b2d73652b04f"
+      },
+      "ink-marks[4]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 9440,
+        "hash": "995e2d6493db3951"
+      },
+      "ink-comic[0]": {
+        "id": "inkcomic-cv",
+        "w": 374,
+        "h": 534,
+        "cssW": 374,
+        "cssH": 534,
+        "bytes": 718368,
+        "hash": "7259fabf1088fc6f"
+      },
+      "ink-smudge[0]": {
+        "id": "smudge-cv",
+        "w": 360,
+        "h": 280,
+        "cssW": 360,
+        "cssH": 280,
+        "bytes": 74152,
+        "hash": "60bd515766130b36"
+      },
+      "palette[0]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19452,
+        "hash": "8829a8c460edae1b"
+      },
+      "palette[1]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19048,
+        "hash": "82889cab5565ba99"
+      },
+      "palette[2]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 18860,
+        "hash": "eb67a8a57b26f8ab"
+      },
+      "palette[3]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19136,
+        "hash": "c5f3b2b459acbd90"
+      },
+      "palette[4]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19260,
+        "hash": "865a182d12026247"
+      },
+      "palette[5]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19312,
+        "hash": "40160951f8926664"
+      },
+      "palette[6]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 18924,
+        "hash": "97d133ab6404eab0"
+      },
+      "~doc[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      }
+    },
+    "light": {
+      "~doc[0]": {
+        "id": "wheelcv",
+        "w": 148,
+        "h": 148,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 1440,
+        "hash": "8afb8d7d0976ded5"
+      },
+      "~doc[1]": {
+        "id": "mast-cv",
+        "w": 740,
+        "h": 110,
+        "cssW": 740,
+        "cssH": 110,
+        "bytes": 169484,
+        "hash": "70460d41b79e5702"
+      },
+      "quick-start[0]": {
+        "id": null,
+        "w": 153,
+        "h": 33,
+        "cssW": 153,
+        "cssH": 33,
+        "bytes": 20448,
+        "hash": "85a1c12e13ee81da"
+      },
+      "quick-start[1]": {
+        "id": null,
+        "w": 112,
+        "h": 10,
+        "cssW": 112,
+        "cssH": 10,
+        "bytes": 2900,
+        "hash": "1bd0d29c6380ada4"
+      },
+      "styling[0]": {
+        "id": null,
+        "w": 59,
+        "h": 26,
+        "cssW": 59,
+        "cssH": 26,
+        "bytes": 6728,
+        "hash": "38397dbf53c5c2e6"
+      },
+      "styling[1]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5884,
+        "hash": "9ca85ce8d70c2178"
+      },
+      "styling[2]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7408,
+        "hash": "d0236def1c774600"
+      },
+      "styling[3]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5812,
+        "hash": "92e9903adb4227b3"
+      },
+      "styling[4]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 7380,
+        "hash": "742d38082419b4f1"
+      },
+      "styling[5]": {
+        "id": null,
+        "w": 45,
+        "h": 26,
+        "cssW": 45,
+        "cssH": 26,
+        "bytes": 5176,
+        "hash": "5b4219bfd1548823"
+      },
+      "styling[6]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 5808,
+        "hash": "ef9a608c4dc1223f"
+      },
+      "composition[0]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5484,
+        "hash": "b7380e440685b510"
+      },
+      "composition[1]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5444,
+        "hash": "881cb5770cd2f45d"
+      },
+      "composition[2]": {
+        "id": null,
+        "w": 138,
+        "h": 10,
+        "cssW": 138,
+        "cssH": 10,
+        "bytes": 3292,
+        "hash": "ebdf65b08ea4dff5"
+      },
+      "composition[3]": {
+        "id": null,
+        "w": 284,
+        "h": 33,
+        "cssW": 284,
+        "cssH": 33,
+        "bytes": 37904,
+        "hash": "9813ed3cd3ee0940"
+      },
+      "motion[0]": {
+        "id": "motion-cv",
+        "w": 430,
+        "h": 120,
+        "cssW": 430,
+        "cssH": 120,
+        "bytes": 176712,
+        "hash": "0d0fbd1c236c9e82"
+      },
+      "motion[1]": {
+        "id": null,
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "bytes": 12296,
+        "hash": "0e6bce4c782f24e1"
+      },
+      "sign-up[0]": {
+        "id": null,
+        "w": 358,
+        "h": 342,
+        "cssW": 358,
+        "cssH": 342,
+        "bytes": 61520,
+        "hash": "bbc2769b78a98b33"
+      },
+      "sign-up[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 101,
+        "cssH": 37,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "sign-up[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 101,
+        "cssH": 37,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "sign-up[3]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 101,
+        "cssH": 37,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "sign-up[4]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 40616,
+        "hash": "1d83174d129f402e"
+      },
+      "monitoring[0]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 4364,
+        "hash": "4246c624ca93a97f"
+      },
+      "monitoring[1]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 7940,
+        "hash": "a6426f46748f90d5"
+      },
+      "monitoring[2]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 10408,
+        "hash": "1b14ec3328e7218e"
+      },
+      "dashboard[0]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6540,
+        "hash": "84ccf3005b537547"
+      },
+      "dashboard[1]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 8504,
+        "hash": "ddb56e8185ddc454"
+      },
+      "dashboard[2]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 7136,
+        "hash": "ba15bbc5e113010b"
+      },
+      "dashboard[3]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 5048,
+        "hash": "8be8d5a21fecb246"
+      },
+      "dashboard[4]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 8308,
+        "hash": "dd003e34c90316d8"
+      },
+      "app-shell[0]": {
+        "id": null,
+        "w": 72,
+        "h": 26,
+        "cssW": 72,
+        "cssH": 26,
+        "bytes": 6100,
+        "hash": "5a3e837c6039292f"
+      },
+      "app-shell[1]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6624,
+        "hash": "4e10aec4fa7e0b03"
+      },
+      "app-shell[2]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 7044,
+        "hash": "e221021f0e094ba6"
+      },
+      "team[0]": {
+        "id": null,
+        "w": 66,
+        "h": 21,
+        "cssW": 66,
+        "cssH": 21,
+        "bytes": 4540,
+        "hash": "ac354f667759a1bd"
+      },
+      "team[1]": {
+        "id": null,
+        "w": 66,
+        "h": 21,
+        "cssW": 66,
+        "cssH": 21,
+        "bytes": 4408,
+        "hash": "c362d34cd562f7cf"
+      },
+      "team[2]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 3448,
+        "hash": "84ae6eed9c52c99c"
+      },
+      "team[3]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 3592,
+        "hash": "a3c327c3633c2695"
+      },
+      "billing[0]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 7224,
+        "hash": "ea939fec11648fce"
+      },
+      "billing[1]": {
+        "id": null,
+        "w": 332,
+        "h": 10,
+        "cssW": 332,
+        "cssH": 10,
+        "bytes": 9496,
+        "hash": "d1019ecd7839d067"
+      },
+      "billing[2]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 3696,
+        "hash": "a80f47a6fa6403fb"
+      },
+      "billing[3]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 3656,
+        "hash": "b5db478dea70fbc5"
+      },
+      "billing[4]": {
+        "id": null,
+        "w": 52,
+        "h": 21,
+        "cssW": 52,
+        "cssH": 21,
+        "bytes": 3668,
+        "hash": "1fd90eb763992076"
+      },
+      "sign-in[0]": {
+        "id": null,
+        "w": 358,
+        "h": 244,
+        "cssW": 358,
+        "cssH": 244,
+        "bytes": 47840,
+        "hash": "81adfc7643277fd9"
+      },
+      "sign-in[1]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 40212,
+        "hash": "63054547371a7dd4"
+      },
+      "magic-link[0]": {
+        "id": null,
+        "w": 358,
+        "h": 197,
+        "cssW": 358,
+        "cssH": 197,
+        "bytes": 40416,
+        "hash": "7b8c63b4dbab0d98"
+      },
+      "magic-link[1]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 40680,
+        "hash": "d18d03c9b1b0b167"
+      },
+      "two-factor[0]": {
+        "id": null,
+        "w": 358,
+        "h": 206,
+        "cssW": 358,
+        "cssH": 206,
+        "bytes": 41044,
+        "hash": "5f225b0a906404e2"
+      },
+      "two-factor[1]": {
+        "id": null,
+        "w": 304,
+        "h": 33,
+        "cssW": 304,
+        "cssH": 33,
+        "bytes": 40292,
+        "hash": "87f5cff9aab9b2d5"
+      },
+      "pricing[0]": {
+        "id": null,
+        "w": 175,
+        "h": 33,
+        "cssW": 175,
+        "cssH": 33,
+        "bytes": 7456,
+        "hash": "008eb120bf05e64f"
+      },
+      "pricing[1]": {
+        "id": null,
+        "w": 175,
+        "h": 33,
+        "cssW": 175,
+        "cssH": 33,
+        "bytes": 23424,
+        "hash": "343b9584c4fcec98"
+      },
+      "pricing[2]": {
+        "id": null,
+        "w": 175,
+        "h": 33,
+        "cssW": 175,
+        "cssH": 33,
+        "bytes": 6996,
+        "hash": "ed2daabcf90e114e"
+      },
+      "activity-feed[0]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 740,
+        "hash": "40eefe93c0f3dc84"
+      },
+      "activity-feed[1]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 732,
+        "hash": "dfceddf996cf3770"
+      },
+      "activity-feed[2]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 728,
+        "hash": "8c068de970547fc6"
+      },
+      "activity-feed[3]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 744,
+        "hash": "09b3d41c5c14d85a"
+      },
+      "activity-feed[4]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 732,
+        "hash": "7cf7a62bd601439c"
+      },
+      "changelog[0]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5632,
+        "hash": "264fb665b009c057"
+      },
+      "changelog[1]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5604,
+        "hash": "a467c1e00b350e16"
+      },
+      "changelog[2]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5252,
+        "hash": "77219ebc4f46c8e6"
+      },
+      "area-chart[0]": {
+        "id": "area",
+        "w": 674,
+        "h": 280,
+        "cssW": 674,
+        "cssH": 280,
+        "bytes": 256168,
+        "hash": "b53e83087c0746f4"
+      },
+      "bar-chart[0]": {
+        "id": "bars",
+        "w": 674,
+        "h": 150,
+        "cssW": 674,
+        "cssH": 150,
+        "bytes": 97376,
+        "hash": "b9446b505e30deeb"
+      },
+      "sparkline[0]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6240,
+        "hash": "f90bdc66de186aa5"
+      },
+      "sparkline[1]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6708,
+        "hash": "f37a0a844ff96ba9"
+      },
+      "sparkline[2]": {
+        "id": null,
+        "w": 120,
+        "h": 34,
+        "cssW": 120,
+        "cssH": 34,
+        "bytes": 6344,
+        "hash": "e2b8835e971c1b7a"
+      },
+      "line-chart[0]": {
+        "id": "sline-cv",
+        "w": 674,
+        "h": 220,
+        "cssW": 674,
+        "cssH": 220,
+        "bytes": 129892,
+        "hash": "8558eae0f6e34a3c"
+      },
+      "pie-chart[0]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 51472,
+        "hash": "e7e8e708d0273796"
+      },
+      "pie-chart[1]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 32096,
+        "hash": "35e529f9518c7156"
+      },
+      "pie-chart[2]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 25508,
+        "hash": "72aea81af6d1f08d"
+      },
+      "pie-chart[3]": {
+        "id": null,
+        "w": 300,
+        "h": 230,
+        "cssW": 300,
+        "cssH": 230,
+        "bytes": 19592,
+        "hash": "ca10ed2d953bfcc0"
+      },
+      "pie-chart[4]": {
+        "id": null,
+        "w": 72,
+        "h": 26,
+        "cssW": 72,
+        "cssH": 26,
+        "bytes": 5904,
+        "hash": "dde9843bff5d237d"
+      },
+      "pie-chart[5]": {
+        "id": null,
+        "w": 72,
+        "h": 26,
+        "cssW": 72,
+        "cssH": 26,
+        "bytes": 6072,
+        "hash": "665d23efe7a5dca5"
+      },
+      "pie-chart[6]": {
+        "id": null,
+        "w": 79,
+        "h": 26,
+        "cssW": 79,
+        "cssH": 26,
+        "bytes": 6916,
+        "hash": "eff285d672561230"
+      },
+      "pie-chart[7]": {
+        "id": null,
+        "w": 86,
+        "h": 26,
+        "cssW": 86,
+        "cssH": 26,
+        "bytes": 6632,
+        "hash": "108009f80bbacc71"
+      },
+      "radar-chart[0]": {
+        "id": "sradar-cv",
+        "w": 340,
+        "h": 240,
+        "cssW": 340,
+        "cssH": 240,
+        "bytes": 69324,
+        "hash": "841adc70a7db1947"
+      },
+      "button[0]": {
+        "id": null,
+        "w": 75,
+        "h": 33,
+        "cssW": 75,
+        "cssH": 33,
+        "bytes": 10308,
+        "hash": "3f5c491f89e0679e"
+      },
+      "button[1]": {
+        "id": null,
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "bytes": 12400,
+        "hash": "0c60b107c51366b3"
+      },
+      "button[2]": {
+        "id": null,
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "bytes": 3760,
+        "hash": "ba926285dbd6375a"
+      },
+      "badge[0]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5804,
+        "hash": "ea77728bc929000b"
+      },
+      "badge[1]": {
+        "id": null,
+        "w": 66,
+        "h": 26,
+        "cssW": 66,
+        "cssH": 26,
+        "bytes": 5480,
+        "hash": "fa968a60f8637508"
+      },
+      "badge[2]": {
+        "id": null,
+        "w": 52,
+        "h": 26,
+        "cssW": 52,
+        "cssH": 26,
+        "bytes": 4328,
+        "hash": "20797577ccc6bb83"
+      },
+      "badge[3]": {
+        "id": null,
+        "w": 79,
+        "h": 26,
+        "cssW": 79,
+        "cssH": 26,
+        "bytes": 6500,
+        "hash": "447a57d46a5bee4e"
+      },
+      "badge[4]": {
+        "id": null,
+        "w": 86,
+        "h": 26,
+        "cssW": 86,
+        "cssH": 26,
+        "bytes": 7196,
+        "hash": "0e977a930bda5286"
+      },
+      "tabs[0]": {
+        "id": null,
+        "w": 460,
+        "h": 5,
+        "cssW": 460,
+        "cssH": 5,
+        "bytes": 1364,
+        "hash": "03ea9a5b84f64e96"
+      },
+      "tabs[1]": {
+        "id": null,
+        "w": 86,
+        "h": 35,
+        "cssW": 86,
+        "cssH": 35,
+        "bytes": 328,
+        "hash": "f74d6cd3f1553100"
+      },
+      "tabs[2]": {
+        "id": null,
+        "w": 79,
+        "h": 35,
+        "cssW": 79,
+        "cssH": 35,
+        "bytes": 11428,
+        "hash": "11b974040fa07310"
+      },
+      "tabs[3]": {
+        "id": null,
+        "w": 57,
+        "h": 35,
+        "cssW": 57,
+        "cssH": 35,
+        "bytes": 252,
+        "hash": "dee181393ffc9b73"
+      },
+      "tabs[4]": {
+        "id": null,
+        "w": 86,
+        "h": 35,
+        "cssW": 86,
+        "cssH": 35,
+        "bytes": 328,
+        "hash": "f74d6cd3f1553100"
+      },
+      "tabs[5]": {
+        "id": null,
+        "w": 79,
+        "h": 35,
+        "cssW": 79,
+        "cssH": 35,
+        "bytes": 11784,
+        "hash": "0540db128c969695"
+      },
+      "tabs[6]": {
+        "id": null,
+        "w": 57,
+        "h": 35,
+        "cssW": 57,
+        "cssH": 35,
+        "bytes": 252,
+        "hash": "dee181393ffc9b73"
+      },
+      "tabs[7]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 20860,
+        "hash": "4268b20b338b1368"
+      },
+      "tabs[8]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 400,
+        "hash": "bfa5ec0df8a015de"
+      },
+      "tabs[9]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 400,
+        "hash": "bfa5ec0df8a015de"
+      },
+      "tabs[10]": {
+        "id": null,
+        "w": 150,
+        "h": 33,
+        "cssW": 150,
+        "cssH": 33,
+        "bytes": 400,
+        "hash": "bfa5ec0df8a015de"
+      },
+      "meter[0]": {
+        "id": null,
+        "w": 272,
+        "h": 10,
+        "cssW": 272,
+        "cssH": 10,
+        "bytes": 5292,
+        "hash": "5d7fec236af9cff2"
+      },
+      "toast[0]": {
+        "id": null,
+        "w": 122,
+        "h": 33,
+        "cssW": 122,
+        "cssH": 33,
+        "bytes": 16240,
+        "hash": "b9703c57c11512ec"
+      },
+      "avatar[0]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 8896,
+        "hash": "6d11124221eb482d"
+      },
+      "avatar[1]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 8568,
+        "hash": "3af4185c23c51ec6"
+      },
+      "avatar[2]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 9116,
+        "hash": "f5fec926cf08fa98"
+      },
+      "avatar[3]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 9128,
+        "hash": "37f28c8aac5a780f"
+      },
+      "avatar[4]": {
+        "id": null,
+        "w": 54,
+        "h": 56,
+        "cssW": 56,
+        "cssH": 56,
+        "bytes": 9200,
+        "hash": "e15c4dee5f5bd228"
+      },
+      "skeleton[0]": {
+        "id": null,
+        "w": 236,
+        "h": 14,
+        "cssW": 236,
+        "cssH": 14,
+        "bytes": 10608,
+        "hash": "a7d3deeedcc8d645"
+      },
+      "skeleton[1]": {
+        "id": null,
+        "w": 365,
+        "h": 14,
+        "cssW": 365,
+        "cssH": 14,
+        "bytes": 17104,
+        "hash": "ecf6ec3998c6b21c"
+      },
+      "skeleton[2]": {
+        "id": null,
+        "w": 319,
+        "h": 14,
+        "cssW": 319,
+        "cssH": 14,
+        "bytes": 15056,
+        "hash": "126b30d7333e6c2c"
+      },
+      "gradient[0]": {
+        "id": "wash",
+        "w": 738,
+        "h": 170,
+        "cssW": 738,
+        "cssH": 170,
+        "bytes": 423316,
+        "hash": "a13bedcd29865b71"
+      },
+      "image[0]": {
+        "id": "simg-cv",
+        "w": 188,
+        "h": 240,
+        "cssW": 190,
+        "cssH": 240,
+        "bytes": 142420,
+        "hash": "f3aea7999b3aae44"
+      },
+      "switch[0]": {
+        "id": null,
+        "w": 44,
+        "h": 22,
+        "cssW": 44,
+        "cssH": 22,
+        "bytes": 3420,
+        "hash": "0e4feefd763f395f"
+      },
+      "switch[1]": {
+        "id": null,
+        "w": 44,
+        "h": 22,
+        "cssW": 44,
+        "cssH": 22,
+        "bytes": 468,
+        "hash": "4250cc51e7cde546"
+      },
+      "checkbox[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1048,
+        "hash": "11f715ebcbff79c6"
+      },
+      "checkbox-group[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1048,
+        "hash": "08705a600c870c46"
+      },
+      "checkbox-group[1]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1056,
+        "hash": "2aa5b425ccdd23d9"
+      },
+      "checkbox-group[2]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 252,
+        "hash": "9e296cda88a87299"
+      },
+      "radio[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 828,
+        "hash": "daec43783e7f3e8f"
+      },
+      "radio[1]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 152,
+        "hash": "391c124cd494f1ba"
+      },
+      "radio[2]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 152,
+        "hash": "391c124cd494f1ba"
+      },
+      "slider[0]": {
+        "id": null,
+        "w": 250,
+        "h": 26,
+        "cssW": 250,
+        "cssH": 26,
+        "bytes": 14804,
+        "hash": "329fa9d6ebb9d6d3"
+      },
+      "progress[0]": {
+        "id": null,
+        "w": 300,
+        "h": 10,
+        "cssW": 300,
+        "cssH": 10,
+        "bytes": 8604,
+        "hash": "6ee8534e24557e66"
+      },
+      "spinner[0]": {
+        "id": null,
+        "w": 44,
+        "h": 44,
+        "cssW": 44,
+        "cssH": 44,
+        "bytes": 3144,
+        "hash": "d6fcd426a8204e12"
+      },
+      "spinner[1]": {
+        "id": null,
+        "w": 44,
+        "h": 44,
+        "cssW": 44,
+        "cssH": 44,
+        "bytes": 3208,
+        "hash": "c4e718b7d8c18edb"
+      },
+      "fieldset[0]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 1052,
+        "hash": "06e4200af81fc523"
+      },
+      "fieldset[1]": {
+        "id": null,
+        "w": 16,
+        "h": 16,
+        "cssW": 16,
+        "cssH": 16,
+        "bytes": 352,
+        "hash": "fe979a028b0cbfd4"
+      },
+      "form[0]": {
+        "id": null,
+        "w": 298,
+        "h": 33,
+        "cssW": 298,
+        "cssH": 33,
+        "bytes": 39748,
+        "hash": "1ec63074a74fb4f2"
+      },
+      "separator[0]": {
+        "id": null,
+        "w": 300,
+        "h": 12,
+        "cssW": 300,
+        "cssH": 12,
+        "bytes": 7776,
+        "hash": "cb2cfa11bddd9a99"
+      },
+      "dialog[0]": {
+        "id": null,
+        "w": 130,
+        "h": 33,
+        "cssW": 130,
+        "cssH": 33,
+        "bytes": 17328,
+        "hash": "4637f4bc875dddcf"
+      },
+      "dialog[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "dialog[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "alert-dialog[0]": {
+        "id": null,
+        "w": 153,
+        "h": 33,
+        "cssW": 153,
+        "cssH": 33,
+        "bytes": 20460,
+        "hash": "d4cc0e5b073d1a93"
+      },
+      "alert-dialog[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "alert-dialog[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "drawer[0]": {
+        "id": null,
+        "w": 130,
+        "h": 33,
+        "cssW": 130,
+        "cssH": 33,
+        "bytes": 17496,
+        "hash": "c8235cd09f435a72"
+      },
+      "drawer[1]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      },
+      "preview-card[0]": {
+        "id": null,
+        "w": 66,
+        "h": 21,
+        "cssW": 66,
+        "cssH": 21,
+        "bytes": 4416,
+        "hash": "f9226e0435ef56e1"
+      },
+      "sidebar[0]": {
+        "id": null,
+        "w": 38,
+        "h": 26,
+        "cssW": 38,
+        "cssH": 26,
+        "bytes": 3260,
+        "hash": "d4f5fa0ffce2d952"
+      },
+      "rating[0]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1984,
+        "hash": "b60706cfa7779466"
+      },
+      "rating[1]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1984,
+        "hash": "b60706cfa7779466"
+      },
+      "rating[2]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1984,
+        "hash": "b60706cfa7779466"
+      },
+      "rating[3]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1112,
+        "hash": "b17c6f10e28e3665"
+      },
+      "rating[4]": {
+        "id": null,
+        "w": 30,
+        "h": 30,
+        "cssW": 30,
+        "cssH": 30,
+        "bytes": 1216,
+        "hash": "23b9aa83c403d398"
+      },
+      "stepper[0]": {
+        "id": null,
+        "w": 75,
+        "h": 33,
+        "cssW": 75,
+        "cssH": 33,
+        "bytes": 3144,
+        "hash": "38536ae106422881"
+      },
+      "stepper[1]": {
+        "id": null,
+        "w": 106,
+        "h": 33,
+        "cssW": 106,
+        "cssH": 33,
+        "bytes": 14316,
+        "hash": "857f6c8cfb3a9c3c"
+      },
+      "timeline[0]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 740,
+        "hash": "40eefe93c0f3dc84"
+      },
+      "timeline[1]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 732,
+        "hash": "dfceddf996cf3770"
+      },
+      "timeline[2]": {
+        "id": null,
+        "w": 14,
+        "h": 14,
+        "cssW": 14,
+        "cssH": 14,
+        "bytes": 732,
+        "hash": "76d67239c2326244"
+      },
+      "ink-studio[0]": {
+        "id": "studio-cv",
+        "w": 738,
+        "h": 260,
+        "cssW": 738,
+        "cssH": 260,
+        "bytes": 645448,
+        "hash": "525e5cb40c678f29"
+      },
+      "ink-signin[0]": {
+        "id": "inkcard-cv",
+        "w": 358,
+        "h": 290,
+        "cssW": 358,
+        "cssH": 290,
+        "bytes": 275296,
+        "hash": "251094a9b476b587"
+      },
+      "ink-signin[1]": {
+        "id": null,
+        "w": 304,
+        "h": 45,
+        "cssW": 304,
+        "cssH": 45,
+        "bytes": 36096,
+        "hash": "c32ace9bc14baffb"
+      },
+      "ink-chart[0]": {
+        "id": "inkchart-cv",
+        "w": 738,
+        "h": 210,
+        "cssW": 738,
+        "cssH": 210,
+        "bytes": 279152,
+        "hash": "cfd717770779a1f3"
+      },
+      "ink-bars[0]": {
+        "id": "inkbars-cv",
+        "w": 738,
+        "h": 200,
+        "cssW": 738,
+        "cssH": 200,
+        "bytes": 218952,
+        "hash": "cbacfc276d58587f"
+      },
+      "ink-line[0]": {
+        "id": "inkline-cv",
+        "w": 738,
+        "h": 190,
+        "cssW": 738,
+        "cssH": 190,
+        "bytes": 186004,
+        "hash": "d1fc35c1501fe944"
+      },
+      "ink-donut[0]": {
+        "id": "inkdonut-cv",
+        "w": 738,
+        "h": 210,
+        "cssW": 738,
+        "cssH": 210,
+        "bytes": 66100,
+        "hash": "f021d8736723f852"
+      },
+      "ink-heat[0]": {
+        "id": "inkheat-cv",
+        "w": 738,
+        "h": 150,
+        "cssW": 738,
+        "cssH": 150,
+        "bytes": 199400,
+        "hash": "c5c25fd4ee08d7ab"
+      },
+      "ink-button[0]": {
+        "id": null,
+        "w": 83,
+        "h": 45,
+        "cssW": 83,
+        "cssH": 45,
+        "bytes": 8028,
+        "hash": "410fd5b6343d27ef"
+      },
+      "ink-button[1]": {
+        "id": null,
+        "w": 99,
+        "h": 45,
+        "cssW": 99,
+        "cssH": 45,
+        "bytes": 10796,
+        "hash": "26add7436d2e81c5"
+      },
+      "ink-button[2]": {
+        "id": null,
+        "w": 114,
+        "h": 45,
+        "cssW": 114,
+        "cssH": 45,
+        "bytes": 14008,
+        "hash": "3007377f52c5b4a9"
+      },
+      "ink-button[3]": {
+        "id": null,
+        "w": 107,
+        "h": 45,
+        "cssW": 107,
+        "cssH": 45,
+        "bytes": 10616,
+        "hash": "e7bf9d0526c42133"
+      },
+      "ink-button[4]": {
+        "id": null,
+        "w": 114,
+        "h": 45,
+        "cssW": 114,
+        "cssH": 45,
+        "bytes": 12696,
+        "hash": "c0a2892bd935aabb"
+      },
+      "ink-meter[0]": {
+        "id": null,
+        "w": 172,
+        "h": 18,
+        "cssW": 172,
+        "cssH": 18,
+        "bytes": 9248,
+        "hash": "528f2ab49153ff9d"
+      },
+      "ink-meter[1]": {
+        "id": null,
+        "w": 172,
+        "h": 18,
+        "cssW": 172,
+        "cssH": 18,
+        "bytes": 5240,
+        "hash": "60d79bc5281e7a2c"
+      },
+      "ink-marks[0]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 7036,
+        "hash": "b753e288f9724c64"
+      },
+      "ink-marks[1]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 3948,
+        "hash": "9eed9a6e3f8e2934"
+      },
+      "ink-marks[2]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 5512,
+        "hash": "0e320fe470162292"
+      },
+      "ink-marks[3]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 7916,
+        "hash": "6f11b2d73652b04f"
+      },
+      "ink-marks[4]": {
+        "id": null,
+        "w": 56,
+        "h": 58,
+        "cssW": 58,
+        "cssH": 58,
+        "bytes": 9440,
+        "hash": "995e2d6493db3951"
+      },
+      "ink-comic[0]": {
+        "id": "inkcomic-cv",
+        "w": 374,
+        "h": 534,
+        "cssW": 374,
+        "cssH": 534,
+        "bytes": 718368,
+        "hash": "7259fabf1088fc6f"
+      },
+      "ink-smudge[0]": {
+        "id": "smudge-cv",
+        "w": 360,
+        "h": 280,
+        "cssW": 360,
+        "cssH": 280,
+        "bytes": 74152,
+        "hash": "60bd515766130b36"
+      },
+      "palette[0]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19536,
+        "hash": "5567c3bb486a939c"
+      },
+      "palette[1]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19396,
+        "hash": "49d3e0c47b27ef37"
+      },
+      "palette[2]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19240,
+        "hash": "b0483bb067f2a20d"
+      },
+      "palette[3]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19124,
+        "hash": "89ce731f17cc6076"
+      },
+      "palette[4]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19100,
+        "hash": "803a3315d53b7ded"
+      },
+      "palette[5]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19352,
+        "hash": "0b76f1a3e7b0ad3f"
+      },
+      "palette[6]": {
+        "id": null,
+        "w": 92,
+        "h": 54,
+        "cssW": 94,
+        "cssH": 54,
+        "bytes": 19028,
+        "hash": "de7797c53cbbd66f"
+      },
+      "~doc[2]": {
+        "id": null,
+        "w": 300,
+        "h": 150,
+        "cssW": 0,
+        "cssH": 0,
+        "bytes": 2096,
+        "hash": "222b690cf21b5729"
+      }
+    }
+  },
+  "problems": [],
+  "notes": [
+    "[dark] 145 observed · 6 blank-by-design (closed dialog/drawer)",
+    "[light] 145 observed · 6 blank-by-design (closed dialog/drawer)"
+  ]
+}
