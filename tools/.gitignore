@@ -1,0 +1,5 @@
+# transient harness artifacts (bundles + screenshots written during verify runs)
+.verify-react.bundle.mjs
+.verify-react-visual.html
+.verify-react-visual.png
+node_modules/

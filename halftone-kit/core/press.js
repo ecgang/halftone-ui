@@ -17,6 +17,16 @@ import { mulberry32, makeNoise } from './rng.js';
 import { drawPress } from './draw.js';
 import { createPressContext } from './context.js';
 
+// Resolve a press's `color` opt to a concrete CSS color at DRAW time (lazy — V-11). A function is a
+// (ctx)=>color resolver; a string is a palette name, then an ink name, else a literal CSS color; a
+// null/absent color falls to the theme foreground. drawPress itself sets no fillStyle — the docs'
+// surface() wrapper set it before the loop (:3046), and mount() is that wrapper for the core.
+function resolveColor(color, ctx) {
+  if (typeof color === 'function') return color(ctx);
+  if (typeof color === 'string') return ctx.palette(color) || ctx.ink(color) || color;
+  return ctx.fore();
+}
+
 // ---- resolvePress: pure three-tier merge (instance opts -> context defaults -> built-ins) --------
 // Structure resolves EAGERLY here (which tier wins). Color stays LAZY — `field` and any color
 // getter close over ctx and resolve at draw (§4b). The returned spec is a plain data object.
@@ -37,6 +47,9 @@ export function resolvePress(opts = {}, ctx = null) {
     // number (incl. 0) OVERRIDES the context roll for that one surface. Resolved live in rebuild(),
     // not frozen here, so ctx.setRoll() after mount takes effect on the next rebuild()/repaint().
     roll: opts.roll ?? null,
+    color: opts.color ?? null,            // fill ink: a CSS color, a palette/ink NAME, a (ctx)=>color
+                                          // resolver, or null = the theme foreground (ctx.fore()).
+                                          // Resolved LAZILY at draw (V-11), never frozen here.
     inks: opts.inks || null,              // ink SELECTION (names) frozen here; VALUES stay lazy (V-11)
     plates: opts.plates || null,          // explicit multi-plate stack (masthead/charts) — P2
     animate: opts.animate ?? false,       // press-in when the caller triggers it
@@ -60,7 +73,12 @@ export function mount(el, spec, ctx) {
     const dpr = Math.min(typeof devicePixelRatio === 'number' ? devicePixelRatio : 1, 2);
     const w = el.clientWidth, h = spec.h ?? el.clientHeight;
     if (!w) return null;
-    el.width = Math.round(w * dpr); el.height = Math.round(h * dpr);
+    // Only reassign the backing store when the size actually changes. Setting el.width/height
+    // reallocates and CLEARS the canvas, so doing it on every rebuild thrashes the buffer (the docs
+    // guarded this the same way, :4758). s.draw clears explicitly, so an unchanged-size rebuild must
+    // leave el.width alone or repeated repaints (theme/dial/palette) lose the last frame.
+    const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+    if (el.width !== bw || el.height !== bh) { el.width = bw; el.height = bh; }
     el.style.height = h + 'px';
     const g = el.getContext('2d');
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -87,6 +105,7 @@ export function mount(el, spec, ctx) {
   s.draw = () => {
     if (s.stale || !s.g) return;
     s.g.clearRect(0, 0, s.W, s.H);
+    s.g.fillStyle = resolveColor(spec.color, ctx); // lazy ink — the docs' surface() wrapper (:3046)
     drawPress(s.g, {
       pts: s.pts, W: s.W, H: s.H,
       field: spec.field, screen: spec.screen,

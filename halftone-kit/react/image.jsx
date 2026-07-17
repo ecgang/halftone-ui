@@ -13,7 +13,7 @@ import { usePress } from './use-press.js';
 export function Image({
   src,
   gamma = 1.3, gain = 1.35, resolution = 160,
-  screen, scale, r, ink, wash, roll, h,
+  screen, scale, r, ink, wash, roll, h, color,
   animate, pressMs,
   className, style,
   ...rest
@@ -34,8 +34,8 @@ export function Image({
 
   const press = usePress(
     ref,
-    { field, screen, scale, r, ink, wash, roll, h, pressMs },
-    [screen, scale, r, ink, wash, roll, h],
+    { field, screen, scale, r, ink, wash, roll, h, color, pressMs },
+    [screen, scale, r, ink, wash, roll, h, color],
   );
 
   // Load + rasterise luminance (browser only). Cover-fit into a grid sized to `resolution` on the

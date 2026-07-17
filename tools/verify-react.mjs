@@ -57,7 +57,7 @@ HC.prototype.getContext = function () {
   };
   return new Proxy(target, {
     get(t, k) { return k in t ? t[k] : (() => { calls.push(String(k)); }); },
-    set() { return true; },
+    set(t, k, v) { if (k === 'fillStyle') calls.push('fillStyle=' + v); return true; },
   });
 };
 Object.defineProperty(HC.prototype, 'clientWidth', { configurable: true, get() { return 300; } });
@@ -86,6 +86,7 @@ const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvide
 const act = React.act || actLegacy;   // React.act (18.3+) is the non-deprecated path
 const h = React.createElement;
 const clearsOf = (canvas) => (drawnPerCanvas.get(canvas) || []).filter((c) => c === 'clearRect').length;
+const fillsOf = (canvas) => (drawnPerCanvas.get(canvas) || []).filter((c) => c.startsWith('fillStyle=')).map((c) => c.slice(10));
 
 // ---- 3. SSR safety: server-render the adapter, no crash, no canvas access -----------------------
 try {
@@ -112,6 +113,10 @@ ok('mount: bound to the caller ref and drew (clearRect on that canvas)', canvas 
 const clearsBefore = clearsOf(canvas);
 await render({ field: () => 0.5, h: 80, screen: 'stipple' });
 ok('set: a scalar-dial change (screen) re-presses via handle.set()', clearsOf(canvas) > clearsBefore, `clears ${clearsBefore} -> ${clearsOf(canvas)}`);
+
+ok('color: a plain surface inks with a resolved fill (theme foreground, not default black)', fillsOf(canvas).length > 0 && fillsOf(canvas).every((c) => c && c !== '#000000'), `fills=${[...new Set(fillsOf(canvas))].join(',')}`);
+await render({ field: () => 0.5, h: 80, screen: 'stipple', color: '#ff00ff' });
+ok('color: an explicit color prop resolves to the canvas fillStyle', fillsOf(canvas).includes('#ff00ff'), `fills=${[...new Set(fillsOf(canvas))].join(',')}`);
 
 await act(async () => { root.unmount(); });
 ok('destroy: unmount drops the surface from the registry (size back to baseline — leak retired)', ctx.size === baseSize, `size=${ctx.size}`);

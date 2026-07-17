@@ -59,6 +59,12 @@ export function createPressContext(opts = {}) {
     // ---- color, LAZY, closing over THIS context's inks/pal/theme (V-11) ----
     ink(name) { return inks[name]; },                 // raw plate color by name
     paper() { return paper[theme.mode]; },            // ground for the current mode
+    // The default FOREGROUND ink — the contrast to paper(). A press with no explicit color inks
+    // with this, so a plain <Surface> is visible without the caller naming a color. The docs drove
+    // this off the `--ink` CSS var (:3012), light on a dark ground and dark on paper; the adapter
+    // overrides it via setPal('fore', <--ink>). The fallback here reproduces that swing (white on
+    // dark, near-black on light) so the core is usable even before any CSS is wired.
+    fore() { return pal.fore ?? (theme.mode === 'dark' ? inks.white : inks.black); },
     palette(name) { return name == null ? { ...pal } : pal[name]; },
     setInk(name, hex) { inks[name] = hex; return ctx; },
     setPal(name, hex) { pal[name] = hex; return ctx; },

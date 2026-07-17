@@ -14,7 +14,7 @@ import { useHalftoneContext } from './context.jsx';
 
 export function Text({
   text,
-  screen, scale, r, ink, wash, roll,
+  screen, scale, r, ink, wash, roll, color,
   animate, pressMs,
   className, style,
   ...rest
@@ -37,8 +37,8 @@ export function Text({
   // still-empty field and finish before the type exists.
   const press = usePress(
     ref,
-    { field, screen, scale, r, ink, wash, roll, pressMs },
-    [screen, scale, r, ink, wash, roll],
+    { field, screen, scale, r, ink, wash, roll, color, pressMs },
+    [screen, scale, r, ink, wash, roll, color],
   );
 
   // (re)rasterise at a CSS width, then push the wordmark's natural height so the canvas aspect

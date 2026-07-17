@@ -36,6 +36,23 @@ export function HalftoneProvider({
     return () => mq.removeEventListener?.('change', apply);
   }, [ctx]);
 
+  // Palette from CSS (the docs' model — ink comes from --ink, named colors from --blue/--orange/…).
+  // This is the adapter's job (the core stays DOM-free): read the page's custom properties and fill
+  // the shared palette, so a plain <Surface> inks with --ink and color="blue" resolves to --blue.
+  // Best-effort — only sets what the page actually defines. Re-read on mode change (a theme swap can
+  // swing every var). Runs after the children's mount effects (React fires effects child-first), so
+  // the repaint re-inks surfaces that first drew with the pre-CSS fallback.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !document.documentElement) return;
+    const cs = window.getComputedStyle(document.documentElement);
+    const read = (v) => cs.getPropertyValue(v).trim();
+    const fore = read('--ink'); if (fore) ctx.setPal('fore', fore);
+    for (const name of ['blue', 'orange', 'green', 'grey', 'gray', 'purple', 'red', 'yellow', 'pink', 'teal']) {
+      const c = read('--' + name); if (c) ctx.setPal(name, c);
+    }
+    ctx.repaint();
+  }, [ctx, mode]);
+
   // Controlled theme: when mode/hue props change, push them onto the shared context and repaint
   // every live surface. Skipped entirely when the caller doesn't drive theme via props.
   useEffect(() => {

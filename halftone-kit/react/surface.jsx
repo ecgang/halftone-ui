@@ -13,17 +13,17 @@ import { usePress } from './use-press.js';
 
 export function Surface({
   field,
-  screen, scale, r, ink, wash, roll, h, seed,
+  screen, scale, r, ink, wash, roll, h, seed, color,
   animate, pressMs,
   deps,
   className, style,
   ...rest
 }) {
   const ref = useRef(null);
-  const opts = { field, screen, scale, r, ink, wash, roll, h, seed, animate, pressMs };
+  const opts = { field, screen, scale, r, ink, wash, roll, h, seed, color, animate, pressMs };
   // Default dep list = the scalar dials. `field` identity is intentionally excluded (it is usually a
   // fresh closure every render); to redraw on data change, drive it through `deps`.
-  usePress(ref, opts, deps ?? [screen, scale, r, ink, wash, roll, h, seed]);
+  usePress(ref, opts, deps ?? [screen, scale, r, ink, wash, roll, h, seed, color]);
 
   return (
     <canvas
