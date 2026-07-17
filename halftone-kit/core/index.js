@@ -9,3 +9,4 @@ export { mulberry32, poisson, makeNoise } from './rng.js';
 export { screenPts, amPts, grainPts, amDot } from './screens.js';
 export { INKS, PAPER, mixHex, iband, tuneInk, tuneMix } from './color.js';
 export { textField } from './fields.js';
+export { drawPress } from './draw.js';
