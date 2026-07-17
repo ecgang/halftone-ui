@@ -116,12 +116,16 @@ function readAllCanvases(loopKeys) {
     const n = seen.get(base) || 0
     seen.set(base, n + 1)
     const r = cv.getBoundingClientRect()
-    // checkVisibility() is NOT a readback (no pixel access), so it does not poison the hash.
-    // A hidden canvas is still hashed (its blank backing store) but flagged so --write can
-    // disclose it: a rendering regression INSIDE a canvas that is hidden on both sides would
-    // otherwise stay masked. Dialogs/drawers are opened before this runs; what stays hidden
-    // here is the genuinely-never-shown remainder (orphan templates).
-    const vis = cv.checkVisibility ? cv.checkVisibility() : r.width > 0
+    // A matching backing-pixel hash is necessary but not sufficient: a canvas can keep its pixels
+    // while it is MOVED, made transparent, transformed, filtered, or clipped away. So capture
+    // presentation too. None of these are pixel readbacks (getComputedStyle / getBoundingClientRect
+    // / checkVisibility read layout+style, not the canvas backing store), so the one-readback
+    // invariant is preserved. checkVisibility with checkOpacity + checkVisibilityCSS so opacity:0
+    // and visibility:hidden count as hidden. x/y are viewport-relative at a fixed scroll(0,0).
+    const vis = cv.checkVisibility
+      ? cv.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })
+      : r.width > 0
+    const cs = getComputedStyle(cv)
     let url
     try {
       url = cv.toDataURL() // THE ONE readback. Do not add another.
@@ -129,7 +133,14 @@ function readAllCanvases(loopKeys) {
       url = 'ERR:' + e.message
     }
     const key = `${base}[${n}]`
-    out.push({ key, id: cv.id || null, w: cv.width, h: cv.height, cssW: Math.round(r.width), cssH: Math.round(r.height), vis, loop: looping.has(key), url })
+    out.push({
+      key, id: cv.id || null,
+      w: cv.width, h: cv.height,
+      cssW: Math.round(r.width), cssH: Math.round(r.height),
+      x: Math.round(r.x), y: Math.round(r.y),
+      opacity: cs.opacity, transform: cs.transform, filter: cs.filter, clipPath: cs.clipPath,
+      vis, loop: looping.has(key), url,
+    })
   }
   return out
 }
@@ -244,6 +255,12 @@ async function capture() {
           h: s.h,
           cssW: s.cssW,
           cssH: s.cssH,
+          x: s.x,
+          y: s.y,
+          opacity: s.opacity,
+          transform: s.transform,
+          filter: s.filter,
+          clipPath: s.clipPath,
           vis: s.vis,
           loop: s.loop,
           bytes: payload.length,
@@ -306,10 +323,13 @@ function trustworthy(run, label) {
 // size, or identity changes -- each a real regression that a hash-only diff prints as PASS.
 //   loop  : freezing loopers to t=2.5 makes their frame equal a non-looper's, so removal of
 //           loop:true is hash-invisible; the class is the only thing that catches it.
-//   vis   : display:none with an intact backing store keeps the hash; the UI canvas vanishes.
-//   cssW/cssH : a CSS-only resize leaves the bitmap (w/h) and hash unchanged.
+//   vis   : display:none / opacity:0 / visibility:hidden with an intact backing store keeps the
+//           hash; the UI canvas vanishes. (checkVisibility runs with checkOpacity+checkVisibilityCSS.)
+//   cssW/cssH/x/y : a CSS-only resize or reposition leaves the bitmap (w/h) and hash unchanged.
+//   opacity/transform/filter/clipPath : compositing changes that displace/hide/distort with no
+//           pixel edit. This makes the PASS a claim about presentation, not just backing pixels.
 //   w/h/id: backing-size or identity drift.
-const COMPARED = ['hash', 'loop', 'vis', 'w', 'h', 'cssW', 'cssH', 'id']
+const COMPARED = ['hash', 'loop', 'vis', 'w', 'h', 'cssW', 'cssH', 'x', 'y', 'opacity', 'transform', 'filter', 'clipPath', 'id']
 function diff(a, b) {
   const out = []
   for (const mode of CONFIG.modes) {
