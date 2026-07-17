@@ -56,12 +56,23 @@ export function grainPts(W, H, r, rng, pat) {
   return pts;
 }
 
-// The am dot: tone drives AREA, so radius goes as sqrt(t). The cap sits below 1 because dots
-// reach full coverage at r = cell/sqrt(2) — a plate that fuses solid stops being a halftone.
-// Takes an already-styled 2D context (fillStyle set by the caller). This is one of the two
-// primitive marks the single drawPress is built from.
+// The AM area-law radius — the ONE place tone becomes a dot size for the amplitude family (V-5,
+// AM half). Tone drives AREA, so radius goes as sqrt(tone); `base` sets full-coverage size and
+// `wobble` is an optional per-dot size jitter (1 = none). Three surfaces reduce to this call and
+// nothing else: amDot (`base = p.c*0.56`), the masthead plate (`base = cell*0.56`, tone already
+// swept), and the Studio ink surface (`base = rmax`, `wobble = 0.82 + 0.36*j`). It is the AM
+// sibling of drawPress's FM law `base + span*min(cap, v)`: FM thresholds a fixed dot, AM grows one.
+export function amRadius(base, tone, wobble = 1) {
+  return base * Math.sqrt(tone) * wobble;
+}
+
+// The am dot: an amplitude mark at cell size `p.c`. The 0.92 cap sits below 1 because dots reach
+// full coverage at r = cell/sqrt(2) — a plate that fuses solid stops being a halftone. The 0.012
+// floor drops dots too faint to matter. Takes an already-styled 2D context (fillStyle set by the
+// caller). This is one of the two primitive marks the presses are built from; its radius is
+// `amRadius` so the AM law lives in exactly one place.
 export function amDot(ctx, p, v) {
   const t = Math.min(0.92, v);
   if (t <= 0.012) return;
-  ctx.beginPath(); ctx.arc(p.x, p.y, p.c * 0.56 * Math.sqrt(t), 0, 6.283); ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y, amRadius(p.c * 0.56, t), 0, 6.283); ctx.fill();
 }

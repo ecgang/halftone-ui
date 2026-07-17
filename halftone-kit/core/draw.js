@@ -24,7 +24,7 @@
 // Every non-am screen thresholds the near-fixed dot against the point's own value (v > p.th) —
 // that FM threshold is what makes a line screen a line screen.
 
-import { amDot } from './screens.js';
+import { amDot, amRadius } from './screens.js';
 
 // The FM dot geometry: a near-fixed mark whose size eases with the field value. Different surfaces
 // legitimately want different dot weights (a chart reads better with a heavier dot than a button),
@@ -47,26 +47,15 @@ export function fieldSampler(field) {
 //   W, H   : the surface's CSS pixel size, so drawPress can normalize p.x/W, p.y/H
 //   field  : (u,v) => 0..1  BEFORE the ink dial — REQUIRED (scalar or descriptor)
 //   screen : stipple | lines | waves | hatch | am  (falsy = stipple)
-//   plates : optional multi-plate stack (masthead / depth-stacked charts) — see the P2 seam below
 //   grain  : { ink } render dials; drawPress applies grain.ink to the field value
 //   pr     : press-in progress 0..1 (the entrance transient; 1 = fully pressed / resting frame)
 //   roll   : resting-geometry entropy — consumed at point generation (mount/rebuild), accepted
 //            here for signature stability across the 4->1 collapse (§4a); the draw loop is
 //            seed/roll-invariant given its pts.
-export function drawPress(ctx, { pts, W, H, field, plates = null, screen, grain = {}, pr = 1, roll = 0, dot = null }) {
+export function drawPress(ctx, { pts, W, H, field, screen, grain = {}, pr = 1, roll = 0, dot = null }) {
   const ink = grain.ink ?? 1;
   const d = dot ? { ...DOT, ...dot } : DOT;   // merge so a caller can override just `round` or `cap`
   const [rb, rs] = d.round, [sb, ss] = d.square, cap = d.cap;
-
-  if (plates && plates.length) {
-    // P2 SEAM. The masthead batches all arcs into ONE path per plate and fills once under a
-    // multiply/lighter composite (docs:4907-4951); that batched+composited draw is NOT pixel-
-    // equivalent to per-dot fills (overlaps double-composite), and its field sampling offsets the
-    // wordmark per plate at a pitch-derived radius — a contract that only the golden can pin down.
-    // So the plate BODY is authored in P2 wired + byte-verified, never guessed blind. The signature
-    // and this one call site are what land in P1; P2 replaces this throw with the verified loop.
-    throw new Error('drawPress: multi-plate rendering lands in P2 (golden-gated); see plans/halftone-kit-extraction.md §4a/§5');
-  }
 
   const sample = fieldSampler(field);
   const round = !screen || screen === 'stipple';
@@ -83,4 +72,64 @@ export function drawPress(ctx, { pts, W, H, field, plates = null, screen, grain 
       }
     }
   }
+}
+
+// drawPlates — the AM/composite press: the second (and last) tone->radius site in core (V-5, the
+// AM half; drawPress is the FM half). A stack of ink plates, each a lattice of amplitude dots
+// (radius via `amRadius`), composited. The two composite strategies the engine uses both live
+// here — nowhere else — so no surface reimplements a plate loop:
+//
+//   'batch'  (masthead)  — every dot of a plate is one path, filled once under a global
+//                          composite (lighter on a dark ground so overlaps add light, multiply on
+//                          paper so they darken). Filling once per plate is load-bearing: per-dot
+//                          fills would double-composite a plate's own overlaps and it would no
+//                          longer be pixel-equal to the shipped masthead.
+//   'layer'  (Studio)    — each plate is rendered to its own offscreen `lctx`, then drawn onto the
+//                          page twice (a `multiply` pass at ink `k`, a `source-over` pass at 1-k)
+//                          scaled by the plate's `reveal` — a real overprint that presses in order.
+//
+// drawPlates owns only the LOOP and the COMPOSITE. Everything surface-specific — where a dot
+// samples its tone, the entrance sweep/ease, misregistration offsets, the ink color — is resolved
+// by the caller into pure per-plate closures (`dot(p) -> radius|0`, `cov(q) -> coverage`) and the
+// resolved plate fields. That keeps the AM law + compositing in one place while the DOM/theme/
+// animation state stays out of core (V-6/V-8). Each mode is byte-identical to the loop it replaced.
+//
+// spec (batch): { composite:'batch', gco, plates:[{ ink, pts, dot(p)->r|0 }] }
+// spec (layer): { composite:'layer', lctx, W, H, reveal, k, plates:[{ color, pts, ox, oy, rmax, cov(q)->c }] }
+export function drawPlates(ctx, spec) {
+  if (spec.composite === 'layer') {
+    const { plates, lctx, W, H, reveal = 1, k } = spec;
+    const nsc = plates.length;
+    for (let si = 0; si < nsc; si++) {
+      const sc = plates[si];
+      const rv = Math.max(0, Math.min(1, reveal * nsc - si)); // plates print in press order
+      if (rv <= 0.01) continue;
+      lctx.clearRect(0, 0, W, H);
+      lctx.fillStyle = sc.color;
+      for (const q of sc.pts) {
+        const c = sc.cov(q);
+        if (c <= 0.02) continue;
+        const r = amRadius(sc.rmax, Math.min(1, c), 0.82 + 0.36 * q.j);
+        lctx.beginPath(); lctx.arc(q.x + sc.ox, q.y + sc.oy, r, 0, 6.283); lctx.fill();
+      }
+      if (k > 0.02) { ctx.globalAlpha = k * rv; ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(lctx.canvas, 0, 0, W, H); }
+      if (k < 0.98) { ctx.globalAlpha = (1 - k) * rv; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(lctx.canvas, 0, 0, W, H); }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    }
+    return;
+  }
+  // 'batch' — one path per plate, filled once under the shared composite.
+  ctx.globalCompositeOperation = spec.gco;
+  for (const plate of spec.plates) {
+    ctx.fillStyle = plate.ink;
+    ctx.beginPath();
+    for (const p of plate.pts) {
+      const r = plate.dot(p);
+      if (!(r > 0)) continue;
+      ctx.moveTo(p.x + r, p.y);
+      ctx.arc(p.x, p.y, r, 0, 6.283);
+    }
+    ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
 }
