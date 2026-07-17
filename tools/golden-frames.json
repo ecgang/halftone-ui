@@ -1,6 +1,6 @@
 {
   "meta": {
-    "capturedAt": "2026-07-17T09:06:06.689Z",
+    "capturedAt": "2026-07-17T15:59:31.996Z",
     "browser": "chromium 149.0.7827.55",
     "platform": "darwin arm64",
     "node": "v20.19.6"
@@ -17,6 +17,7 @@
     "scrollStep": 700,
     "scrollTickMs": 60,
     "settleMs": 4000,
+    "dialogPressMs": 1600,
     "modes": [
       "dark",
       "light"
@@ -32,6 +33,7 @@
         "h": 148,
         "cssW": 0,
         "cssH": 0,
+        "vis": false,
         "bytes": 1440,
         "hash": "8afb8d7d0976ded5"
       },
@@ -41,6 +43,7 @@
         "h": 110,
         "cssW": 740,
         "cssH": 110,
+        "vis": true,
         "bytes": 153384,
         "hash": "94b0d449958405e3"
       },
@@ -50,6 +53,7 @@
         "h": 33,
         "cssW": 153,
         "cssH": 33,
+        "vis": true,
         "bytes": 20132,
         "hash": "cae6f41d1702cdeb"
       },
@@ -59,6 +63,7 @@
         "h": 10,
         "cssW": 112,
         "cssH": 10,
+        "vis": true,
         "bytes": 2924,
         "hash": "8bb7b2fb094ad5cb"
       },
@@ -68,6 +73,7 @@
         "h": 26,
         "cssW": 59,
         "cssH": 26,
+        "vis": true,
         "bytes": 6604,
         "hash": "3a6e92d2f453af75"
       },
@@ -77,6 +83,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5772,
         "hash": "a1a34dcafac7e892"
       },
@@ -86,6 +93,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7256,
         "hash": "188244fb05894c3d"
       },
@@ -95,6 +103,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5832,
         "hash": "cd934bd2c34e17df"
       },
@@ -104,6 +113,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7444,
         "hash": "c4c349fb3227dbae"
       },
@@ -113,6 +123,7 @@
         "h": 26,
         "cssW": 45,
         "cssH": 26,
+        "vis": true,
         "bytes": 5120,
         "hash": "7cf5b8d623f9fc1c"
       },
@@ -122,6 +133,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5744,
         "hash": "753913e31228170a"
       },
@@ -131,6 +143,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7296,
         "hash": "90fedfdaadf943ab"
       },
@@ -140,6 +153,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7248,
         "hash": "e81b2bd8ffe7630b"
       },
@@ -149,6 +163,7 @@
         "h": 10,
         "cssW": 138,
         "cssH": 10,
+        "vis": true,
         "bytes": 3316,
         "hash": "10bef35c84f20294"
       },
@@ -158,6 +173,7 @@
         "h": 33,
         "cssW": 284,
         "cssH": 33,
+        "vis": true,
         "bytes": 37188,
         "hash": "58245b9b9272cfab"
       },
@@ -167,6 +183,7 @@
         "h": 120,
         "cssW": 430,
         "cssH": 120,
+        "vis": true,
         "bytes": 175612,
         "hash": "612c7dcce1235b23"
       },
@@ -176,6 +193,7 @@
         "h": 33,
         "cssW": 91,
         "cssH": 33,
+        "vis": true,
         "bytes": 12256,
         "hash": "6f89431089fb65d8"
       },
@@ -185,6 +203,7 @@
         "h": 342,
         "cssW": 358,
         "cssH": 342,
+        "vis": true,
         "bytes": 60744,
         "hash": "bd4e9d6283371dac"
       },
@@ -194,6 +213,7 @@
         "h": 150,
         "cssW": 101,
         "cssH": 37,
+        "vis": true,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       },
@@ -203,6 +223,7 @@
         "h": 150,
         "cssW": 101,
         "cssH": 37,
+        "vis": true,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       },
@@ -212,6 +233,7 @@
         "h": 150,
         "cssW": 101,
         "cssH": 37,
+        "vis": true,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       },
@@ -221,6 +243,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 39888,
         "hash": "764a838d8b815505"
       },
@@ -230,6 +253,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 4316,
         "hash": "d24cb3010d912ed7"
       },
@@ -239,6 +263,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 7944,
         "hash": "69e55c0df80a612f"
       },
@@ -248,6 +273,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 10296,
         "hash": "fb0751d11cdb8baa"
       },
@@ -257,6 +283,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6364,
         "hash": "dd98e518b4d6b5e1"
       },
@@ -266,6 +293,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 8408,
         "hash": "73c4e0ce32f2320c"
       },
@@ -275,6 +303,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6988,
         "hash": "d13b0772a6d17c27"
       },
@@ -284,6 +313,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 5060,
         "hash": "ec08e2e09fc3d548"
       },
@@ -293,6 +323,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 8300,
         "hash": "7ef490ae5f2801c8"
       },
@@ -302,6 +333,7 @@
         "h": 26,
         "cssW": 72,
         "cssH": 26,
+        "vis": true,
         "bytes": 8040,
         "hash": "c9e606c96532d079"
       },
@@ -311,6 +343,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6536,
         "hash": "bf1ad60308867137"
       },
@@ -320,6 +353,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6928,
         "hash": "9cc54abfd389154b"
       },
@@ -329,6 +363,7 @@
         "h": 21,
         "cssW": 66,
         "cssH": 21,
+        "vis": true,
         "bytes": 5984,
         "hash": "cb016d339f1e9d09"
       },
@@ -338,6 +373,7 @@
         "h": 21,
         "cssW": 66,
         "cssH": 21,
+        "vis": true,
         "bytes": 6052,
         "hash": "38446470d8470003"
       },
@@ -347,6 +383,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 4728,
         "hash": "b9f82afa64cc9d57"
       },
@@ -356,6 +393,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 4812,
         "hash": "045cfe5d8fdf330c"
       },
@@ -365,6 +403,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 7220,
         "hash": "b3ab9442e8309421"
       },
@@ -374,6 +413,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 9380,
         "hash": "d21b0720de2dc42a"
       },
@@ -383,6 +423,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 4840,
         "hash": "aac8623430d6afdd"
       },
@@ -392,6 +433,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 4772,
         "hash": "b8fd0b3444a85197"
       },
@@ -401,6 +443,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 4776,
         "hash": "fe56aba37ce2efa7"
       },
@@ -410,6 +453,7 @@
         "h": 244,
         "cssW": 358,
         "cssH": 244,
+        "vis": true,
         "bytes": 47232,
         "hash": "43d083ec5dbb78bd"
       },
@@ -419,6 +463,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 39448,
         "hash": "02f26adc4546d750"
       },
@@ -428,6 +473,7 @@
         "h": 197,
         "cssW": 358,
         "cssH": 197,
+        "vis": true,
         "bytes": 40492,
         "hash": "2c24051631cec62f"
       },
@@ -437,6 +483,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 40244,
         "hash": "ba173476c5dbf9d7"
       },
@@ -446,6 +493,7 @@
         "h": 206,
         "cssW": 358,
         "cssH": 206,
+        "vis": true,
         "bytes": 41300,
         "hash": "b1b3a83bf2f83a83"
       },
@@ -455,6 +503,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 40484,
         "hash": "3377124f5a6b5eec"
       },
@@ -464,6 +513,7 @@
         "h": 33,
         "cssW": 175,
         "cssH": 33,
+        "vis": true,
         "bytes": 7556,
         "hash": "092c51fad79e826d"
       },
@@ -473,6 +523,7 @@
         "h": 33,
         "cssW": 175,
         "cssH": 33,
+        "vis": true,
         "bytes": 23028,
         "hash": "b663a35f1a03eebe"
       },
@@ -482,6 +533,7 @@
         "h": 33,
         "cssW": 175,
         "cssH": 33,
+        "vis": true,
         "bytes": 6992,
         "hash": "54744d34f9f3726b"
       },
@@ -491,6 +543,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 736,
         "hash": "355073a8c59077de"
       },
@@ -500,6 +553,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 728,
         "hash": "b12ee149ced20cdf"
       },
@@ -509,6 +563,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 736,
         "hash": "81419cc946662e82"
       },
@@ -518,6 +573,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 724,
         "hash": "79db6cd4726e69be"
       },
@@ -527,6 +583,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 732,
         "hash": "8539846017de8f68"
       },
@@ -536,6 +593,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7248,
         "hash": "84313ba2d1ecf0cb"
       },
@@ -545,6 +603,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7240,
         "hash": "8647e739d7c44cce"
       },
@@ -554,6 +613,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7204,
         "hash": "adc1ea692df9d82f"
       },
@@ -563,6 +623,7 @@
         "h": 280,
         "cssW": 674,
         "cssH": 280,
+        "vis": true,
         "bytes": 256196,
         "hash": "8d3e2bbb8eb1cf04"
       },
@@ -572,6 +633,7 @@
         "h": 150,
         "cssW": 674,
         "cssH": 150,
+        "vis": true,
         "bytes": 95644,
         "hash": "3d54e7298ad73cc8"
       },
@@ -581,6 +643,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6144,
         "hash": "7638cdd258ed32c9"
       },
@@ -590,6 +653,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6648,
         "hash": "7da330a281d6e706"
       },
@@ -599,6 +663,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6264,
         "hash": "c8e0cf291cfecb0c"
       },
@@ -608,6 +673,7 @@
         "h": 220,
         "cssW": 674,
         "cssH": 220,
+        "vis": true,
         "bytes": 128664,
         "hash": "83b1012708653c63"
       },
@@ -617,6 +683,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 50804,
         "hash": "e8b068da9902345f"
       },
@@ -626,6 +693,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 31992,
         "hash": "aa605805a3dcddeb"
       },
@@ -635,6 +703,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 25224,
         "hash": "91dbc5bce3e82f45"
       },
@@ -644,6 +713,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 19548,
         "hash": "55ebb50df86cea62"
       },
@@ -653,6 +723,7 @@
         "h": 26,
         "cssW": 72,
         "cssH": 26,
+        "vis": true,
         "bytes": 7888,
         "hash": "55d75f734713d009"
       },
@@ -662,6 +733,7 @@
         "h": 26,
         "cssW": 72,
         "cssH": 26,
+        "vis": true,
         "bytes": 8024,
         "hash": "3a1a34c4fc9dcaca"
       },
@@ -671,6 +743,7 @@
         "h": 26,
         "cssW": 79,
         "cssH": 26,
+        "vis": true,
         "bytes": 8764,
         "hash": "3ba33b021cca662c"
       },
@@ -680,6 +753,7 @@
         "h": 26,
         "cssW": 86,
         "cssH": 26,
+        "vis": true,
         "bytes": 9340,
         "hash": "41851f6497f3d790"
       },
@@ -689,6 +763,7 @@
         "h": 240,
         "cssW": 340,
         "cssH": 240,
+        "vis": true,
         "bytes": 69192,
         "hash": "fbf6f4e304cc7463"
       },
@@ -698,6 +773,7 @@
         "h": 33,
         "cssW": 75,
         "cssH": 33,
+        "vis": true,
         "bytes": 10116,
         "hash": "60430cca0f47068e"
       },
@@ -707,6 +783,7 @@
         "h": 33,
         "cssW": 91,
         "cssH": 33,
+        "vis": true,
         "bytes": 12356,
         "hash": "5ef2d5cd52ce74e3"
       },
@@ -716,6 +793,7 @@
         "h": 33,
         "cssW": 91,
         "cssH": 33,
+        "vis": true,
         "bytes": 3744,
         "hash": "e934b492d537573d"
       },
@@ -725,6 +803,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7404,
         "hash": "cd21c7606f78825e"
       },
@@ -734,6 +813,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7288,
         "hash": "dc90097af6d18402"
       },
@@ -743,6 +823,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5816,
         "hash": "7fe2ff3627355329"
       },
@@ -752,6 +833,7 @@
         "h": 26,
         "cssW": 79,
         "cssH": 26,
+        "vis": true,
         "bytes": 8796,
         "hash": "4f34d3d04a31c0e9"
       },
@@ -761,6 +843,7 @@
         "h": 26,
         "cssW": 86,
         "cssH": 26,
+        "vis": true,
         "bytes": 9332,
         "hash": "3c61da1a968571df"
       },
@@ -770,6 +853,7 @@
         "h": 5,
         "cssW": 460,
         "cssH": 5,
+        "vis": true,
         "bytes": 1344,
         "hash": "aea3c21f6d693efb"
       },
@@ -779,6 +863,7 @@
         "h": 35,
         "cssW": 86,
         "cssH": 35,
+        "vis": true,
         "bytes": 328,
         "hash": "f74d6cd3f1553100"
       },
@@ -788,6 +873,7 @@
         "h": 35,
         "cssW": 79,
         "cssH": 35,
+        "vis": true,
         "bytes": 11396,
         "hash": "ea1a47a46c027594"
       },
@@ -797,6 +883,7 @@
         "h": 35,
         "cssW": 57,
         "cssH": 35,
+        "vis": true,
         "bytes": 252,
         "hash": "dee181393ffc9b73"
       },
@@ -806,6 +893,7 @@
         "h": 35,
         "cssW": 86,
         "cssH": 35,
+        "vis": true,
         "bytes": 328,
         "hash": "f74d6cd3f1553100"
       },
@@ -815,6 +903,7 @@
         "h": 35,
         "cssW": 79,
         "cssH": 35,
+        "vis": true,
         "bytes": 11564,
         "hash": "92fedbb292e498a2"
       },
@@ -824,6 +913,7 @@
         "h": 35,
         "cssW": 57,
         "cssH": 35,
+        "vis": true,
         "bytes": 252,
         "hash": "dee181393ffc9b73"
       },
@@ -833,6 +923,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 20708,
         "hash": "e9d9b15fcb818e31"
       },
@@ -842,6 +933,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 400,
         "hash": "bfa5ec0df8a015de"
       },
@@ -851,6 +943,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 400,
         "hash": "bfa5ec0df8a015de"
       },
@@ -860,6 +953,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 400,
         "hash": "bfa5ec0df8a015de"
       },
@@ -869,6 +963,7 @@
         "h": 10,
         "cssW": 272,
         "cssH": 10,
+        "vis": true,
         "bytes": 5328,
         "hash": "73c8d3cfb705715e"
       },
@@ -878,6 +973,7 @@
         "h": 33,
         "cssW": 122,
         "cssH": 33,
+        "vis": true,
         "bytes": 16060,
         "hash": "a9d6ddf28c89c836"
       },
@@ -887,6 +983,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 8864,
         "hash": "a10c5e08831b56e5"
       },
@@ -896,6 +993,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 8492,
         "hash": "230eaa17ec1c59ed"
       },
@@ -905,6 +1003,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 9072,
         "hash": "890450373676352c"
       },
@@ -914,6 +1013,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 8908,
         "hash": "b32ccde94bf345a2"
       },
@@ -923,6 +1023,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 9204,
         "hash": "0a05920a633f56b4"
       },
@@ -932,8 +1033,9 @@
         "h": 14,
         "cssW": 236,
         "cssH": 14,
-        "bytes": 10688,
-        "hash": "21f5ea66b3fd71cc"
+        "vis": true,
+        "bytes": 11628,
+        "hash": "1ff929ef01195cf4"
       },
       "skeleton[1]": {
         "id": null,
@@ -941,8 +1043,9 @@
         "h": 14,
         "cssW": 365,
         "cssH": 14,
-        "bytes": 17332,
-        "hash": "e5742571a58a9a8f"
+        "vis": true,
+        "bytes": 17716,
+        "hash": "9f1fecbf151d8c53"
       },
       "skeleton[2]": {
         "id": null,
@@ -950,8 +1053,9 @@
         "h": 14,
         "cssW": 319,
         "cssH": 14,
-        "bytes": 15300,
-        "hash": "7885f0de04f0d011"
+        "vis": true,
+        "bytes": 15132,
+        "hash": "054f2cab87ca510b"
       },
       "gradient[0]": {
         "id": "wash",
@@ -959,8 +1063,9 @@
         "h": 170,
         "cssW": 738,
         "cssH": 170,
-        "bytes": 416244,
-        "hash": "c01ef3c17606bebe"
+        "vis": true,
+        "bytes": 409332,
+        "hash": "73db645c609f026b"
       },
       "image[0]": {
         "id": "simg-cv",
@@ -968,6 +1073,7 @@
         "h": 240,
         "cssW": 190,
         "cssH": 240,
+        "vis": true,
         "bytes": 139988,
         "hash": "d697a0505e14e9e6"
       },
@@ -977,6 +1083,7 @@
         "h": 22,
         "cssW": 44,
         "cssH": 22,
+        "vis": true,
         "bytes": 3368,
         "hash": "6ce319b249961ead"
       },
@@ -986,6 +1093,7 @@
         "h": 22,
         "cssW": 44,
         "cssH": 22,
+        "vis": true,
         "bytes": 464,
         "hash": "4f3d9a03a639b89b"
       },
@@ -995,6 +1103,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1048,
         "hash": "e6c6f1c7f53e312e"
       },
@@ -1004,6 +1113,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1028,
         "hash": "5c7ac90a40e2ac9d"
       },
@@ -1013,6 +1123,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1032,
         "hash": "adef2c93da98e911"
       },
@@ -1022,6 +1133,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 272,
         "hash": "118f1ec83cbbe542"
       },
@@ -1031,6 +1143,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 820,
         "hash": "2a6e6349084bf76c"
       },
@@ -1040,6 +1153,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 152,
         "hash": "391c124cd494f1ba"
       },
@@ -1049,6 +1163,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 152,
         "hash": "391c124cd494f1ba"
       },
@@ -1058,6 +1173,7 @@
         "h": 26,
         "cssW": 250,
         "cssH": 26,
+        "vis": true,
         "bytes": 14588,
         "hash": "9f09b1955c256fa8"
       },
@@ -1067,8 +1183,9 @@
         "h": 10,
         "cssW": 300,
         "cssH": 10,
-        "bytes": 8504,
-        "hash": "318980156029823f"
+        "vis": true,
+        "bytes": 9296,
+        "hash": "6ebf3286dfc8f630"
       },
       "spinner[0]": {
         "id": null,
@@ -1076,8 +1193,9 @@
         "h": 44,
         "cssW": 44,
         "cssH": 44,
-        "bytes": 3096,
-        "hash": "a017f47d53a47f76"
+        "vis": true,
+        "bytes": 3156,
+        "hash": "b132e23c44677e9c"
       },
       "spinner[1]": {
         "id": null,
@@ -1085,8 +1203,9 @@
         "h": 44,
         "cssW": 44,
         "cssH": 44,
-        "bytes": 3212,
-        "hash": "b2d371d518293aae"
+        "vis": true,
+        "bytes": 3192,
+        "hash": "ac01f903066f1960"
       },
       "fieldset[0]": {
         "id": null,
@@ -1094,6 +1213,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1036,
         "hash": "caa8cdcf44d7c0ff"
       },
@@ -1103,6 +1223,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 356,
         "hash": "9c912b03f4d2fd2b"
       },
@@ -1112,6 +1233,7 @@
         "h": 33,
         "cssW": 298,
         "cssH": 33,
+        "vis": true,
         "bytes": 39452,
         "hash": "8a008d179d77c617"
       },
@@ -1121,6 +1243,7 @@
         "h": 12,
         "cssW": 300,
         "cssH": 12,
+        "vis": true,
         "bytes": 7856,
         "hash": "e920dd24a0507c59"
       },
@@ -1130,26 +1253,29 @@
         "h": 33,
         "cssW": 130,
         "cssH": 33,
+        "vis": true,
         "bytes": 17024,
         "hash": "6a6d5905015d2727"
       },
       "dialog[1]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 3972,
+        "hash": "f6816f82ede8ccae"
       },
       "dialog[2]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 12096,
+        "hash": "db1b301d480e5808"
       },
       "alert-dialog[0]": {
         "id": null,
@@ -1157,26 +1283,29 @@
         "h": 33,
         "cssW": 153,
         "cssH": 33,
+        "vis": true,
         "bytes": 20296,
         "hash": "9386aaf22884fb86"
       },
       "alert-dialog[1]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 98,
+        "h": 33,
+        "cssW": 98,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 3940,
+        "hash": "5478c7e240382332"
       },
       "alert-dialog[2]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 153,
+        "h": 33,
+        "cssW": 153,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 20292,
+        "hash": "51703f039e198704"
       },
       "drawer[0]": {
         "id": null,
@@ -1184,17 +1313,19 @@
         "h": 33,
         "cssW": 130,
         "cssH": 33,
+        "vis": true,
         "bytes": 17168,
         "hash": "14cbb3e371c2998a"
       },
       "drawer[1]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 75,
+        "h": 33,
+        "cssW": 75,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 9988,
+        "hash": "3be97441fffe9849"
       },
       "preview-card[0]": {
         "id": null,
@@ -1202,6 +1333,7 @@
         "h": 21,
         "cssW": 66,
         "cssH": 21,
+        "vis": true,
         "bytes": 6016,
         "hash": "8d81e2e65e64fc1f"
       },
@@ -1211,6 +1343,7 @@
         "h": 26,
         "cssW": 38,
         "cssH": 26,
+        "vis": true,
         "bytes": 4320,
         "hash": "03e8732548924641"
       },
@@ -1220,6 +1353,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1976,
         "hash": "6d6fb475da55e7de"
       },
@@ -1229,6 +1363,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1976,
         "hash": "6d6fb475da55e7de"
       },
@@ -1238,6 +1373,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1976,
         "hash": "6d6fb475da55e7de"
       },
@@ -1247,6 +1383,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1140,
         "hash": "4ba435cad5568bcc"
       },
@@ -1256,6 +1393,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1228,
         "hash": "00974e48cc903de3"
       },
@@ -1265,6 +1403,7 @@
         "h": 33,
         "cssW": 75,
         "cssH": 33,
+        "vis": true,
         "bytes": 3144,
         "hash": "2b5a26a53be752cd"
       },
@@ -1274,6 +1413,7 @@
         "h": 33,
         "cssW": 106,
         "cssH": 33,
+        "vis": true,
         "bytes": 14020,
         "hash": "5dd93c593888986d"
       },
@@ -1283,6 +1423,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 736,
         "hash": "355073a8c59077de"
       },
@@ -1292,6 +1433,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 728,
         "hash": "b12ee149ced20cdf"
       },
@@ -1301,6 +1443,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 728,
         "hash": "5727f5cfb4e4fc55"
       },
@@ -1310,6 +1453,7 @@
         "h": 260,
         "cssW": 738,
         "cssH": 260,
+        "vis": true,
         "bytes": 645448,
         "hash": "525e5cb40c678f29"
       },
@@ -1319,6 +1463,7 @@
         "h": 290,
         "cssW": 358,
         "cssH": 290,
+        "vis": true,
         "bytes": 275296,
         "hash": "251094a9b476b587"
       },
@@ -1328,6 +1473,7 @@
         "h": 45,
         "cssW": 304,
         "cssH": 45,
+        "vis": true,
         "bytes": 36096,
         "hash": "c32ace9bc14baffb"
       },
@@ -1337,6 +1483,7 @@
         "h": 210,
         "cssW": 738,
         "cssH": 210,
+        "vis": true,
         "bytes": 279152,
         "hash": "cfd717770779a1f3"
       },
@@ -1346,6 +1493,7 @@
         "h": 200,
         "cssW": 738,
         "cssH": 200,
+        "vis": true,
         "bytes": 218952,
         "hash": "cbacfc276d58587f"
       },
@@ -1355,6 +1503,7 @@
         "h": 190,
         "cssW": 738,
         "cssH": 190,
+        "vis": true,
         "bytes": 186004,
         "hash": "d1fc35c1501fe944"
       },
@@ -1364,6 +1513,7 @@
         "h": 210,
         "cssW": 738,
         "cssH": 210,
+        "vis": true,
         "bytes": 66100,
         "hash": "f021d8736723f852"
       },
@@ -1373,6 +1523,7 @@
         "h": 150,
         "cssW": 738,
         "cssH": 150,
+        "vis": true,
         "bytes": 199400,
         "hash": "c5c25fd4ee08d7ab"
       },
@@ -1382,6 +1533,7 @@
         "h": 45,
         "cssW": 83,
         "cssH": 45,
+        "vis": true,
         "bytes": 8028,
         "hash": "410fd5b6343d27ef"
       },
@@ -1391,6 +1543,7 @@
         "h": 45,
         "cssW": 99,
         "cssH": 45,
+        "vis": true,
         "bytes": 10796,
         "hash": "26add7436d2e81c5"
       },
@@ -1400,6 +1553,7 @@
         "h": 45,
         "cssW": 114,
         "cssH": 45,
+        "vis": true,
         "bytes": 14008,
         "hash": "3007377f52c5b4a9"
       },
@@ -1409,6 +1563,7 @@
         "h": 45,
         "cssW": 107,
         "cssH": 45,
+        "vis": true,
         "bytes": 10616,
         "hash": "e7bf9d0526c42133"
       },
@@ -1418,6 +1573,7 @@
         "h": 45,
         "cssW": 114,
         "cssH": 45,
+        "vis": true,
         "bytes": 12696,
         "hash": "c0a2892bd935aabb"
       },
@@ -1427,6 +1583,7 @@
         "h": 18,
         "cssW": 172,
         "cssH": 18,
+        "vis": true,
         "bytes": 9248,
         "hash": "528f2ab49153ff9d"
       },
@@ -1436,6 +1593,7 @@
         "h": 18,
         "cssW": 172,
         "cssH": 18,
+        "vis": true,
         "bytes": 5240,
         "hash": "60d79bc5281e7a2c"
       },
@@ -1445,6 +1603,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 7036,
         "hash": "b753e288f9724c64"
       },
@@ -1454,6 +1613,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 3948,
         "hash": "9eed9a6e3f8e2934"
       },
@@ -1463,6 +1623,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 5512,
         "hash": "0e320fe470162292"
       },
@@ -1472,6 +1633,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 7916,
         "hash": "6f11b2d73652b04f"
       },
@@ -1481,6 +1643,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 9440,
         "hash": "995e2d6493db3951"
       },
@@ -1490,6 +1653,7 @@
         "h": 534,
         "cssW": 374,
         "cssH": 534,
+        "vis": true,
         "bytes": 718368,
         "hash": "7259fabf1088fc6f"
       },
@@ -1499,6 +1663,7 @@
         "h": 280,
         "cssW": 360,
         "cssH": 280,
+        "vis": true,
         "bytes": 74152,
         "hash": "60bd515766130b36"
       },
@@ -1508,6 +1673,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19452,
         "hash": "8829a8c460edae1b"
       },
@@ -1517,6 +1683,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19048,
         "hash": "82889cab5565ba99"
       },
@@ -1526,6 +1693,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 18860,
         "hash": "eb67a8a57b26f8ab"
       },
@@ -1535,6 +1703,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19136,
         "hash": "c5f3b2b459acbd90"
       },
@@ -1544,6 +1713,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19260,
         "hash": "865a182d12026247"
       },
@@ -1553,6 +1723,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19312,
         "hash": "40160951f8926664"
       },
@@ -1562,6 +1733,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 18924,
         "hash": "97d133ab6404eab0"
       },
@@ -1571,6 +1743,7 @@
         "h": 150,
         "cssW": 0,
         "cssH": 0,
+        "vis": false,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       }
@@ -1582,6 +1755,7 @@
         "h": 148,
         "cssW": 0,
         "cssH": 0,
+        "vis": false,
         "bytes": 1440,
         "hash": "8afb8d7d0976ded5"
       },
@@ -1591,6 +1765,7 @@
         "h": 110,
         "cssW": 740,
         "cssH": 110,
+        "vis": true,
         "bytes": 169484,
         "hash": "70460d41b79e5702"
       },
@@ -1600,6 +1775,7 @@
         "h": 33,
         "cssW": 153,
         "cssH": 33,
+        "vis": true,
         "bytes": 20448,
         "hash": "85a1c12e13ee81da"
       },
@@ -1609,6 +1785,7 @@
         "h": 10,
         "cssW": 112,
         "cssH": 10,
+        "vis": true,
         "bytes": 2900,
         "hash": "1bd0d29c6380ada4"
       },
@@ -1618,6 +1795,7 @@
         "h": 26,
         "cssW": 59,
         "cssH": 26,
+        "vis": true,
         "bytes": 6728,
         "hash": "38397dbf53c5c2e6"
       },
@@ -1627,6 +1805,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5884,
         "hash": "9ca85ce8d70c2178"
       },
@@ -1636,6 +1815,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7408,
         "hash": "d0236def1c774600"
       },
@@ -1645,6 +1825,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5812,
         "hash": "92e9903adb4227b3"
       },
@@ -1654,6 +1835,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 7380,
         "hash": "742d38082419b4f1"
       },
@@ -1663,6 +1845,7 @@
         "h": 26,
         "cssW": 45,
         "cssH": 26,
+        "vis": true,
         "bytes": 5176,
         "hash": "5b4219bfd1548823"
       },
@@ -1672,6 +1855,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 5808,
         "hash": "ef9a608c4dc1223f"
       },
@@ -1681,6 +1865,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5484,
         "hash": "b7380e440685b510"
       },
@@ -1690,6 +1875,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5444,
         "hash": "881cb5770cd2f45d"
       },
@@ -1699,6 +1885,7 @@
         "h": 10,
         "cssW": 138,
         "cssH": 10,
+        "vis": true,
         "bytes": 3292,
         "hash": "ebdf65b08ea4dff5"
       },
@@ -1708,6 +1895,7 @@
         "h": 33,
         "cssW": 284,
         "cssH": 33,
+        "vis": true,
         "bytes": 37904,
         "hash": "9813ed3cd3ee0940"
       },
@@ -1717,6 +1905,7 @@
         "h": 120,
         "cssW": 430,
         "cssH": 120,
+        "vis": true,
         "bytes": 176712,
         "hash": "0d0fbd1c236c9e82"
       },
@@ -1726,6 +1915,7 @@
         "h": 33,
         "cssW": 91,
         "cssH": 33,
+        "vis": true,
         "bytes": 12296,
         "hash": "0e6bce4c782f24e1"
       },
@@ -1735,6 +1925,7 @@
         "h": 342,
         "cssW": 358,
         "cssH": 342,
+        "vis": true,
         "bytes": 61520,
         "hash": "bbc2769b78a98b33"
       },
@@ -1744,6 +1935,7 @@
         "h": 150,
         "cssW": 101,
         "cssH": 37,
+        "vis": true,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       },
@@ -1753,6 +1945,7 @@
         "h": 150,
         "cssW": 101,
         "cssH": 37,
+        "vis": true,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       },
@@ -1762,6 +1955,7 @@
         "h": 150,
         "cssW": 101,
         "cssH": 37,
+        "vis": true,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       },
@@ -1771,6 +1965,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 40616,
         "hash": "1d83174d129f402e"
       },
@@ -1780,6 +1975,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 4364,
         "hash": "4246c624ca93a97f"
       },
@@ -1789,6 +1985,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 7940,
         "hash": "a6426f46748f90d5"
       },
@@ -1798,6 +1995,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 10408,
         "hash": "1b14ec3328e7218e"
       },
@@ -1807,6 +2005,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6540,
         "hash": "84ccf3005b537547"
       },
@@ -1816,6 +2015,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 8504,
         "hash": "ddb56e8185ddc454"
       },
@@ -1825,6 +2025,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 7136,
         "hash": "ba15bbc5e113010b"
       },
@@ -1834,6 +2035,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 5048,
         "hash": "8be8d5a21fecb246"
       },
@@ -1843,6 +2045,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 8308,
         "hash": "dd003e34c90316d8"
       },
@@ -1852,6 +2055,7 @@
         "h": 26,
         "cssW": 72,
         "cssH": 26,
+        "vis": true,
         "bytes": 6100,
         "hash": "5a3e837c6039292f"
       },
@@ -1861,6 +2065,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6624,
         "hash": "4e10aec4fa7e0b03"
       },
@@ -1870,6 +2075,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 7044,
         "hash": "e221021f0e094ba6"
       },
@@ -1879,6 +2085,7 @@
         "h": 21,
         "cssW": 66,
         "cssH": 21,
+        "vis": true,
         "bytes": 4540,
         "hash": "ac354f667759a1bd"
       },
@@ -1888,6 +2095,7 @@
         "h": 21,
         "cssW": 66,
         "cssH": 21,
+        "vis": true,
         "bytes": 4408,
         "hash": "c362d34cd562f7cf"
       },
@@ -1897,6 +2105,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 3448,
         "hash": "84ae6eed9c52c99c"
       },
@@ -1906,6 +2115,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 3592,
         "hash": "a3c327c3633c2695"
       },
@@ -1915,6 +2125,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 7224,
         "hash": "ea939fec11648fce"
       },
@@ -1924,6 +2135,7 @@
         "h": 10,
         "cssW": 332,
         "cssH": 10,
+        "vis": true,
         "bytes": 9496,
         "hash": "d1019ecd7839d067"
       },
@@ -1933,6 +2145,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 3696,
         "hash": "a80f47a6fa6403fb"
       },
@@ -1942,6 +2155,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 3656,
         "hash": "b5db478dea70fbc5"
       },
@@ -1951,6 +2165,7 @@
         "h": 21,
         "cssW": 52,
         "cssH": 21,
+        "vis": true,
         "bytes": 3668,
         "hash": "1fd90eb763992076"
       },
@@ -1960,6 +2175,7 @@
         "h": 244,
         "cssW": 358,
         "cssH": 244,
+        "vis": true,
         "bytes": 47840,
         "hash": "81adfc7643277fd9"
       },
@@ -1969,6 +2185,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 40212,
         "hash": "63054547371a7dd4"
       },
@@ -1978,6 +2195,7 @@
         "h": 197,
         "cssW": 358,
         "cssH": 197,
+        "vis": true,
         "bytes": 40416,
         "hash": "7b8c63b4dbab0d98"
       },
@@ -1987,6 +2205,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 40680,
         "hash": "d18d03c9b1b0b167"
       },
@@ -1996,6 +2215,7 @@
         "h": 206,
         "cssW": 358,
         "cssH": 206,
+        "vis": true,
         "bytes": 41044,
         "hash": "5f225b0a906404e2"
       },
@@ -2005,6 +2225,7 @@
         "h": 33,
         "cssW": 304,
         "cssH": 33,
+        "vis": true,
         "bytes": 40292,
         "hash": "87f5cff9aab9b2d5"
       },
@@ -2014,6 +2235,7 @@
         "h": 33,
         "cssW": 175,
         "cssH": 33,
+        "vis": true,
         "bytes": 7456,
         "hash": "008eb120bf05e64f"
       },
@@ -2023,6 +2245,7 @@
         "h": 33,
         "cssW": 175,
         "cssH": 33,
+        "vis": true,
         "bytes": 23424,
         "hash": "343b9584c4fcec98"
       },
@@ -2032,6 +2255,7 @@
         "h": 33,
         "cssW": 175,
         "cssH": 33,
+        "vis": true,
         "bytes": 6996,
         "hash": "ed2daabcf90e114e"
       },
@@ -2041,6 +2265,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 740,
         "hash": "40eefe93c0f3dc84"
       },
@@ -2050,6 +2275,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 732,
         "hash": "dfceddf996cf3770"
       },
@@ -2059,6 +2285,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 728,
         "hash": "8c068de970547fc6"
       },
@@ -2068,6 +2295,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 744,
         "hash": "09b3d41c5c14d85a"
       },
@@ -2077,6 +2305,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 732,
         "hash": "7cf7a62bd601439c"
       },
@@ -2086,6 +2315,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5632,
         "hash": "264fb665b009c057"
       },
@@ -2095,6 +2325,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5604,
         "hash": "a467c1e00b350e16"
       },
@@ -2104,6 +2335,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5252,
         "hash": "77219ebc4f46c8e6"
       },
@@ -2113,6 +2345,7 @@
         "h": 280,
         "cssW": 674,
         "cssH": 280,
+        "vis": true,
         "bytes": 256168,
         "hash": "b53e83087c0746f4"
       },
@@ -2122,6 +2355,7 @@
         "h": 150,
         "cssW": 674,
         "cssH": 150,
+        "vis": true,
         "bytes": 97376,
         "hash": "b9446b505e30deeb"
       },
@@ -2131,6 +2365,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6240,
         "hash": "f90bdc66de186aa5"
       },
@@ -2140,6 +2375,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6708,
         "hash": "f37a0a844ff96ba9"
       },
@@ -2149,6 +2385,7 @@
         "h": 34,
         "cssW": 120,
         "cssH": 34,
+        "vis": true,
         "bytes": 6344,
         "hash": "e2b8835e971c1b7a"
       },
@@ -2158,6 +2395,7 @@
         "h": 220,
         "cssW": 674,
         "cssH": 220,
+        "vis": true,
         "bytes": 129892,
         "hash": "8558eae0f6e34a3c"
       },
@@ -2167,6 +2405,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 51472,
         "hash": "e7e8e708d0273796"
       },
@@ -2176,6 +2415,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 32096,
         "hash": "35e529f9518c7156"
       },
@@ -2185,6 +2425,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 25508,
         "hash": "72aea81af6d1f08d"
       },
@@ -2194,6 +2435,7 @@
         "h": 230,
         "cssW": 300,
         "cssH": 230,
+        "vis": true,
         "bytes": 19592,
         "hash": "ca10ed2d953bfcc0"
       },
@@ -2203,6 +2445,7 @@
         "h": 26,
         "cssW": 72,
         "cssH": 26,
+        "vis": true,
         "bytes": 5904,
         "hash": "dde9843bff5d237d"
       },
@@ -2212,6 +2455,7 @@
         "h": 26,
         "cssW": 72,
         "cssH": 26,
+        "vis": true,
         "bytes": 6072,
         "hash": "665d23efe7a5dca5"
       },
@@ -2221,6 +2465,7 @@
         "h": 26,
         "cssW": 79,
         "cssH": 26,
+        "vis": true,
         "bytes": 6916,
         "hash": "eff285d672561230"
       },
@@ -2230,6 +2475,7 @@
         "h": 26,
         "cssW": 86,
         "cssH": 26,
+        "vis": true,
         "bytes": 6632,
         "hash": "108009f80bbacc71"
       },
@@ -2239,6 +2485,7 @@
         "h": 240,
         "cssW": 340,
         "cssH": 240,
+        "vis": true,
         "bytes": 69324,
         "hash": "841adc70a7db1947"
       },
@@ -2248,6 +2495,7 @@
         "h": 33,
         "cssW": 75,
         "cssH": 33,
+        "vis": true,
         "bytes": 10308,
         "hash": "3f5c491f89e0679e"
       },
@@ -2257,6 +2505,7 @@
         "h": 33,
         "cssW": 91,
         "cssH": 33,
+        "vis": true,
         "bytes": 12400,
         "hash": "0c60b107c51366b3"
       },
@@ -2266,6 +2515,7 @@
         "h": 33,
         "cssW": 91,
         "cssH": 33,
+        "vis": true,
         "bytes": 3760,
         "hash": "ba926285dbd6375a"
       },
@@ -2275,6 +2525,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5804,
         "hash": "ea77728bc929000b"
       },
@@ -2284,6 +2535,7 @@
         "h": 26,
         "cssW": 66,
         "cssH": 26,
+        "vis": true,
         "bytes": 5480,
         "hash": "fa968a60f8637508"
       },
@@ -2293,6 +2545,7 @@
         "h": 26,
         "cssW": 52,
         "cssH": 26,
+        "vis": true,
         "bytes": 4328,
         "hash": "20797577ccc6bb83"
       },
@@ -2302,6 +2555,7 @@
         "h": 26,
         "cssW": 79,
         "cssH": 26,
+        "vis": true,
         "bytes": 6500,
         "hash": "447a57d46a5bee4e"
       },
@@ -2311,6 +2565,7 @@
         "h": 26,
         "cssW": 86,
         "cssH": 26,
+        "vis": true,
         "bytes": 7196,
         "hash": "0e977a930bda5286"
       },
@@ -2320,6 +2575,7 @@
         "h": 5,
         "cssW": 460,
         "cssH": 5,
+        "vis": true,
         "bytes": 1364,
         "hash": "03ea9a5b84f64e96"
       },
@@ -2329,6 +2585,7 @@
         "h": 35,
         "cssW": 86,
         "cssH": 35,
+        "vis": true,
         "bytes": 328,
         "hash": "f74d6cd3f1553100"
       },
@@ -2338,6 +2595,7 @@
         "h": 35,
         "cssW": 79,
         "cssH": 35,
+        "vis": true,
         "bytes": 11428,
         "hash": "11b974040fa07310"
       },
@@ -2347,6 +2605,7 @@
         "h": 35,
         "cssW": 57,
         "cssH": 35,
+        "vis": true,
         "bytes": 252,
         "hash": "dee181393ffc9b73"
       },
@@ -2356,6 +2615,7 @@
         "h": 35,
         "cssW": 86,
         "cssH": 35,
+        "vis": true,
         "bytes": 328,
         "hash": "f74d6cd3f1553100"
       },
@@ -2365,6 +2625,7 @@
         "h": 35,
         "cssW": 79,
         "cssH": 35,
+        "vis": true,
         "bytes": 11784,
         "hash": "0540db128c969695"
       },
@@ -2374,6 +2635,7 @@
         "h": 35,
         "cssW": 57,
         "cssH": 35,
+        "vis": true,
         "bytes": 252,
         "hash": "dee181393ffc9b73"
       },
@@ -2383,6 +2645,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 20860,
         "hash": "4268b20b338b1368"
       },
@@ -2392,6 +2655,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 400,
         "hash": "bfa5ec0df8a015de"
       },
@@ -2401,6 +2665,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 400,
         "hash": "bfa5ec0df8a015de"
       },
@@ -2410,6 +2675,7 @@
         "h": 33,
         "cssW": 150,
         "cssH": 33,
+        "vis": true,
         "bytes": 400,
         "hash": "bfa5ec0df8a015de"
       },
@@ -2419,6 +2685,7 @@
         "h": 10,
         "cssW": 272,
         "cssH": 10,
+        "vis": true,
         "bytes": 5292,
         "hash": "5d7fec236af9cff2"
       },
@@ -2428,6 +2695,7 @@
         "h": 33,
         "cssW": 122,
         "cssH": 33,
+        "vis": true,
         "bytes": 16240,
         "hash": "b9703c57c11512ec"
       },
@@ -2437,6 +2705,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 8896,
         "hash": "6d11124221eb482d"
       },
@@ -2446,6 +2715,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 8568,
         "hash": "3af4185c23c51ec6"
       },
@@ -2455,6 +2725,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 9116,
         "hash": "f5fec926cf08fa98"
       },
@@ -2464,6 +2735,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 9128,
         "hash": "37f28c8aac5a780f"
       },
@@ -2473,6 +2745,7 @@
         "h": 56,
         "cssW": 56,
         "cssH": 56,
+        "vis": true,
         "bytes": 9200,
         "hash": "e15c4dee5f5bd228"
       },
@@ -2482,8 +2755,9 @@
         "h": 14,
         "cssW": 236,
         "cssH": 14,
-        "bytes": 10608,
-        "hash": "a7d3deeedcc8d645"
+        "vis": true,
+        "bytes": 11464,
+        "hash": "efb1dfa9b26703a6"
       },
       "skeleton[1]": {
         "id": null,
@@ -2491,8 +2765,9 @@
         "h": 14,
         "cssW": 365,
         "cssH": 14,
-        "bytes": 17104,
-        "hash": "ecf6ec3998c6b21c"
+        "vis": true,
+        "bytes": 17488,
+        "hash": "908e8554de5abac0"
       },
       "skeleton[2]": {
         "id": null,
@@ -2500,8 +2775,9 @@
         "h": 14,
         "cssW": 319,
         "cssH": 14,
-        "bytes": 15056,
-        "hash": "126b30d7333e6c2c"
+        "vis": true,
+        "bytes": 14976,
+        "hash": "824caf709ffdd531"
       },
       "gradient[0]": {
         "id": "wash",
@@ -2509,8 +2785,9 @@
         "h": 170,
         "cssW": 738,
         "cssH": 170,
-        "bytes": 423316,
-        "hash": "a13bedcd29865b71"
+        "vis": true,
+        "bytes": 415964,
+        "hash": "03ef2ad31ff07131"
       },
       "image[0]": {
         "id": "simg-cv",
@@ -2518,6 +2795,7 @@
         "h": 240,
         "cssW": 190,
         "cssH": 240,
+        "vis": true,
         "bytes": 142420,
         "hash": "f3aea7999b3aae44"
       },
@@ -2527,6 +2805,7 @@
         "h": 22,
         "cssW": 44,
         "cssH": 22,
+        "vis": true,
         "bytes": 3420,
         "hash": "0e4feefd763f395f"
       },
@@ -2536,6 +2815,7 @@
         "h": 22,
         "cssW": 44,
         "cssH": 22,
+        "vis": true,
         "bytes": 468,
         "hash": "4250cc51e7cde546"
       },
@@ -2545,6 +2825,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1048,
         "hash": "11f715ebcbff79c6"
       },
@@ -2554,6 +2835,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1048,
         "hash": "08705a600c870c46"
       },
@@ -2563,6 +2845,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1056,
         "hash": "2aa5b425ccdd23d9"
       },
@@ -2572,6 +2855,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 252,
         "hash": "9e296cda88a87299"
       },
@@ -2581,6 +2865,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 828,
         "hash": "daec43783e7f3e8f"
       },
@@ -2590,6 +2875,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 152,
         "hash": "391c124cd494f1ba"
       },
@@ -2599,6 +2885,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 152,
         "hash": "391c124cd494f1ba"
       },
@@ -2608,6 +2895,7 @@
         "h": 26,
         "cssW": 250,
         "cssH": 26,
+        "vis": true,
         "bytes": 14804,
         "hash": "329fa9d6ebb9d6d3"
       },
@@ -2617,8 +2905,9 @@
         "h": 10,
         "cssW": 300,
         "cssH": 10,
-        "bytes": 8604,
-        "hash": "6ee8534e24557e66"
+        "vis": true,
+        "bytes": 9420,
+        "hash": "c9c066b90ae07bc2"
       },
       "spinner[0]": {
         "id": null,
@@ -2626,8 +2915,9 @@
         "h": 44,
         "cssW": 44,
         "cssH": 44,
-        "bytes": 3144,
-        "hash": "d6fcd426a8204e12"
+        "vis": true,
+        "bytes": 3220,
+        "hash": "0c5aa8bb68380d34"
       },
       "spinner[1]": {
         "id": null,
@@ -2635,8 +2925,9 @@
         "h": 44,
         "cssW": 44,
         "cssH": 44,
-        "bytes": 3208,
-        "hash": "c4e718b7d8c18edb"
+        "vis": true,
+        "bytes": 3168,
+        "hash": "454c83b38fec3381"
       },
       "fieldset[0]": {
         "id": null,
@@ -2644,6 +2935,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 1052,
         "hash": "06e4200af81fc523"
       },
@@ -2653,6 +2945,7 @@
         "h": 16,
         "cssW": 16,
         "cssH": 16,
+        "vis": true,
         "bytes": 352,
         "hash": "fe979a028b0cbfd4"
       },
@@ -2662,6 +2955,7 @@
         "h": 33,
         "cssW": 298,
         "cssH": 33,
+        "vis": true,
         "bytes": 39748,
         "hash": "1ec63074a74fb4f2"
       },
@@ -2671,6 +2965,7 @@
         "h": 12,
         "cssW": 300,
         "cssH": 12,
+        "vis": true,
         "bytes": 7776,
         "hash": "cb2cfa11bddd9a99"
       },
@@ -2680,26 +2975,29 @@
         "h": 33,
         "cssW": 130,
         "cssH": 33,
+        "vis": true,
         "bytes": 17328,
         "hash": "4637f4bc875dddcf"
       },
       "dialog[1]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 3920,
+        "hash": "d71e96d405a129cb"
       },
       "dialog[2]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 91,
+        "h": 33,
+        "cssW": 91,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 12268,
+        "hash": "02696573b948e301"
       },
       "alert-dialog[0]": {
         "id": null,
@@ -2707,26 +3005,29 @@
         "h": 33,
         "cssW": 153,
         "cssH": 33,
+        "vis": true,
         "bytes": 20460,
         "hash": "d4cc0e5b073d1a93"
       },
       "alert-dialog[1]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 98,
+        "h": 33,
+        "cssW": 98,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 3952,
+        "hash": "6427de8c1e5d3070"
       },
       "alert-dialog[2]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 153,
+        "h": 33,
+        "cssW": 153,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 20488,
+        "hash": "e4261d00879e1419"
       },
       "drawer[0]": {
         "id": null,
@@ -2734,17 +3035,19 @@
         "h": 33,
         "cssW": 130,
         "cssH": 33,
+        "vis": true,
         "bytes": 17496,
         "hash": "c8235cd09f435a72"
       },
       "drawer[1]": {
         "id": null,
-        "w": 300,
-        "h": 150,
-        "cssW": 0,
-        "cssH": 0,
-        "bytes": 2096,
-        "hash": "222b690cf21b5729"
+        "w": 75,
+        "h": 33,
+        "cssW": 75,
+        "cssH": 33,
+        "vis": true,
+        "bytes": 10116,
+        "hash": "b037f030dca08e3d"
       },
       "preview-card[0]": {
         "id": null,
@@ -2752,6 +3055,7 @@
         "h": 21,
         "cssW": 66,
         "cssH": 21,
+        "vis": true,
         "bytes": 4416,
         "hash": "f9226e0435ef56e1"
       },
@@ -2761,6 +3065,7 @@
         "h": 26,
         "cssW": 38,
         "cssH": 26,
+        "vis": true,
         "bytes": 3260,
         "hash": "d4f5fa0ffce2d952"
       },
@@ -2770,6 +3075,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1984,
         "hash": "b60706cfa7779466"
       },
@@ -2779,6 +3085,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1984,
         "hash": "b60706cfa7779466"
       },
@@ -2788,6 +3095,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1984,
         "hash": "b60706cfa7779466"
       },
@@ -2797,6 +3105,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1112,
         "hash": "b17c6f10e28e3665"
       },
@@ -2806,6 +3115,7 @@
         "h": 30,
         "cssW": 30,
         "cssH": 30,
+        "vis": true,
         "bytes": 1216,
         "hash": "23b9aa83c403d398"
       },
@@ -2815,6 +3125,7 @@
         "h": 33,
         "cssW": 75,
         "cssH": 33,
+        "vis": true,
         "bytes": 3144,
         "hash": "38536ae106422881"
       },
@@ -2824,6 +3135,7 @@
         "h": 33,
         "cssW": 106,
         "cssH": 33,
+        "vis": true,
         "bytes": 14316,
         "hash": "857f6c8cfb3a9c3c"
       },
@@ -2833,6 +3145,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 740,
         "hash": "40eefe93c0f3dc84"
       },
@@ -2842,6 +3155,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 732,
         "hash": "dfceddf996cf3770"
       },
@@ -2851,6 +3165,7 @@
         "h": 14,
         "cssW": 14,
         "cssH": 14,
+        "vis": true,
         "bytes": 732,
         "hash": "76d67239c2326244"
       },
@@ -2860,6 +3175,7 @@
         "h": 260,
         "cssW": 738,
         "cssH": 260,
+        "vis": true,
         "bytes": 645448,
         "hash": "525e5cb40c678f29"
       },
@@ -2869,6 +3185,7 @@
         "h": 290,
         "cssW": 358,
         "cssH": 290,
+        "vis": true,
         "bytes": 275296,
         "hash": "251094a9b476b587"
       },
@@ -2878,6 +3195,7 @@
         "h": 45,
         "cssW": 304,
         "cssH": 45,
+        "vis": true,
         "bytes": 36096,
         "hash": "c32ace9bc14baffb"
       },
@@ -2887,6 +3205,7 @@
         "h": 210,
         "cssW": 738,
         "cssH": 210,
+        "vis": true,
         "bytes": 279152,
         "hash": "cfd717770779a1f3"
       },
@@ -2896,6 +3215,7 @@
         "h": 200,
         "cssW": 738,
         "cssH": 200,
+        "vis": true,
         "bytes": 218952,
         "hash": "cbacfc276d58587f"
       },
@@ -2905,6 +3225,7 @@
         "h": 190,
         "cssW": 738,
         "cssH": 190,
+        "vis": true,
         "bytes": 186004,
         "hash": "d1fc35c1501fe944"
       },
@@ -2914,6 +3235,7 @@
         "h": 210,
         "cssW": 738,
         "cssH": 210,
+        "vis": true,
         "bytes": 66100,
         "hash": "f021d8736723f852"
       },
@@ -2923,6 +3245,7 @@
         "h": 150,
         "cssW": 738,
         "cssH": 150,
+        "vis": true,
         "bytes": 199400,
         "hash": "c5c25fd4ee08d7ab"
       },
@@ -2932,6 +3255,7 @@
         "h": 45,
         "cssW": 83,
         "cssH": 45,
+        "vis": true,
         "bytes": 8028,
         "hash": "410fd5b6343d27ef"
       },
@@ -2941,6 +3265,7 @@
         "h": 45,
         "cssW": 99,
         "cssH": 45,
+        "vis": true,
         "bytes": 10796,
         "hash": "26add7436d2e81c5"
       },
@@ -2950,6 +3275,7 @@
         "h": 45,
         "cssW": 114,
         "cssH": 45,
+        "vis": true,
         "bytes": 14008,
         "hash": "3007377f52c5b4a9"
       },
@@ -2959,6 +3285,7 @@
         "h": 45,
         "cssW": 107,
         "cssH": 45,
+        "vis": true,
         "bytes": 10616,
         "hash": "e7bf9d0526c42133"
       },
@@ -2968,6 +3295,7 @@
         "h": 45,
         "cssW": 114,
         "cssH": 45,
+        "vis": true,
         "bytes": 12696,
         "hash": "c0a2892bd935aabb"
       },
@@ -2977,6 +3305,7 @@
         "h": 18,
         "cssW": 172,
         "cssH": 18,
+        "vis": true,
         "bytes": 9248,
         "hash": "528f2ab49153ff9d"
       },
@@ -2986,6 +3315,7 @@
         "h": 18,
         "cssW": 172,
         "cssH": 18,
+        "vis": true,
         "bytes": 5240,
         "hash": "60d79bc5281e7a2c"
       },
@@ -2995,6 +3325,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 7036,
         "hash": "b753e288f9724c64"
       },
@@ -3004,6 +3335,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 3948,
         "hash": "9eed9a6e3f8e2934"
       },
@@ -3013,6 +3345,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 5512,
         "hash": "0e320fe470162292"
       },
@@ -3022,6 +3355,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 7916,
         "hash": "6f11b2d73652b04f"
       },
@@ -3031,6 +3365,7 @@
         "h": 58,
         "cssW": 58,
         "cssH": 58,
+        "vis": true,
         "bytes": 9440,
         "hash": "995e2d6493db3951"
       },
@@ -3040,6 +3375,7 @@
         "h": 534,
         "cssW": 374,
         "cssH": 534,
+        "vis": true,
         "bytes": 718368,
         "hash": "7259fabf1088fc6f"
       },
@@ -3049,6 +3385,7 @@
         "h": 280,
         "cssW": 360,
         "cssH": 280,
+        "vis": true,
         "bytes": 74152,
         "hash": "60bd515766130b36"
       },
@@ -3058,6 +3395,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19536,
         "hash": "5567c3bb486a939c"
       },
@@ -3067,6 +3405,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19396,
         "hash": "49d3e0c47b27ef37"
       },
@@ -3076,6 +3415,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19240,
         "hash": "b0483bb067f2a20d"
       },
@@ -3085,6 +3425,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19124,
         "hash": "89ce731f17cc6076"
       },
@@ -3094,6 +3435,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19100,
         "hash": "803a3315d53b7ded"
       },
@@ -3103,6 +3445,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19352,
         "hash": "0b76f1a3e7b0ad3f"
       },
@@ -3112,6 +3455,7 @@
         "h": 54,
         "cssW": 94,
         "cssH": 54,
+        "vis": true,
         "bytes": 19028,
         "hash": "de7797c53cbbd66f"
       },
@@ -3121,6 +3465,7 @@
         "h": 150,
         "cssW": 0,
         "cssH": 0,
+        "vis": false,
         "bytes": 2096,
         "hash": "222b690cf21b5729"
       }
@@ -3128,7 +3473,7 @@
   },
   "problems": [],
   "notes": [
-    "[dark] 145 observed · 6 blank-by-design (closed dialog/drawer)",
-    "[light] 145 observed · 6 blank-by-design (closed dialog/drawer)"
+    "[dark] 172 canvases · 170 rendered · 7 loopers frozen · 2 hidden (hash is unrendered): ~doc[0], ~doc[2]",
+    "[light] 172 canvases · 170 rendered · 7 loopers frozen · 2 hidden (hash is unrendered): ~doc[0], ~doc[2]"
   ]
 }

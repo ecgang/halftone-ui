@@ -62,6 +62,7 @@ const CONFIG = {
   scrollStep: 700, // must be < viewport height so no canvas is skipped by grainIO
   scrollTickMs: 60, // let each intersection's press-in start
   settleMs: 4000, // >> the 1500ms masthead press; drives every run to pr === 1
+  dialogPressMs: 1600, // per opened dialog/drawer: > its inner buttons' 700ms press-in
   modes: ['dark', 'light'], // both: lazy colour resolution is what extraction is likeliest to flatten
   seed: 1859, // source constant, not persisted -- listed so a change to it shows up here
   storage: 'cleared; then stipple-mode=<mode>. hue/grain/lang left at source defaults.',
@@ -114,13 +115,19 @@ function readAllCanvases() {
     const n = seen.get(base) || 0
     seen.set(base, n + 1)
     const r = cv.getBoundingClientRect()
+    // checkVisibility() is NOT a readback (no pixel access), so it does not poison the hash.
+    // A hidden canvas is still hashed (its blank backing store) but flagged so --write can
+    // disclose it: a rendering regression INSIDE a canvas that is hidden on both sides would
+    // otherwise stay masked. Dialogs/drawers are opened before this runs; what stays hidden
+    // here is the genuinely-never-shown remainder (orphan templates).
+    const vis = cv.checkVisibility ? cv.checkVisibility() : r.width > 0
     let url
     try {
       url = cv.toDataURL() // THE ONE readback. Do not add another.
     } catch (e) {
       url = 'ERR:' + e.message
     }
-    out.push({ key: `${base}[${n}]`, id: cv.id || null, w: cv.width, h: cv.height, cssW: Math.round(r.width), cssH: Math.round(r.height), url })
+    out.push({ key: `${base}[${n}]`, id: cv.id || null, w: cv.width, h: cv.height, cssW: Math.round(r.width), cssH: Math.round(r.height), vis, url })
   }
   return out
 }
@@ -165,6 +172,18 @@ async function capture() {
       await page.evaluate(() => scrollTo(0, 0))
       await page.clock.runFor(CONFIG.settleMs)
 
+      // Open every dialog/drawer so its inner canvases render into a hashable state. A closed
+      // dialog's canvases are blank on BOTH sides (golden and check), so a rendering regression
+      // inside one would be masked -- the exact false-PASS Codex flagged. The open handler
+      // (docs/index.html:4392) synchronously rebuilds+draws the canvases it contains; grainIO
+      // then presses them in, and the clock winds that to pr === 1. Order is document order,
+      // deterministic. Left open through readback -- closing would blank them again.
+      const dlgIds = await page.evaluate(() => [...document.querySelectorAll('[data-dlg]')].map((b) => b.dataset.dlg))
+      for (const id of dlgIds) {
+        await page.evaluate((i) => document.querySelector(`[data-dlg="${i}"]`)?.click(), id)
+        await page.clock.runFor(CONFIG.dialogPressMs)
+      }
+
       // Assert the environment took, rather than trusting the flags: a silently un-frozen clock
       // or an unfired observer would mean hashing a moving target and calling it a golden.
       const env = await page.evaluate(() => {
@@ -177,20 +196,36 @@ async function capture() {
         return {
           mode: document.documentElement.dataset.mode,
           observed: all.filter((c) => c._grainS).length,
+          // A VISIBLE canvas short of pr === 1 means the clock didn't wind far enough -- fatal.
           unsettled: all.filter((c) => c._grainS && c._grainS.x.pr !== 1 && vis(c)).length,
-          neverShown: all.filter((c) => c._grainS && c._grainS.x.pr === 0 && !vis(c)).length,
         }
       })
       if (env.mode !== mode) problems.push(`[${mode}] data-mode is "${env.mode}", expected "${mode}"`)
-      if (env.unsettled) problems.push(`[${mode}] ${env.unsettled} VISIBLE canvas(es) still mid-press (pr !== 1) -- settleMs too low`)
+      if (env.unsettled) problems.push(`[${mode}] ${env.unsettled} VISIBLE canvas(es) still mid-press (pr !== 1) -- settle/dialog clock too low`)
       if (!env.observed) problems.push(`[${mode}] no canvas carries _grainS -- grainIO never ran; frames are not trustworthy`)
-      notes.push(`[${mode}] ${env.observed} observed · ${env.neverShown} blank-by-design (closed dialog/drawer)`)
+
+      // Freeze the perpetual-drift surfaces (loop:true — #wash gradient :3240, the pulse/progress/
+      // spinner) to a deterministic frame. They NEVER settle: s.x.t += 0.0045 per rAF forever, so
+      // their hash is an arbitrary drift frame whose value depends on the exact fake-clock tick
+      // count — reproducible only by luck. A live rAF handle (s.raf) is exactly what marks a
+      // looper; non-loopers never set it. Pin t to 2.5 (the same value s.start() gives every
+      // non-looping surface) and redraw once, so a golden pins a fixed frame instead of a moving one.
+      const froze = await page.evaluate(() => {
+        let n = 0
+        for (const cv of document.querySelectorAll('canvas')) {
+          const s = cv._grainS
+          if (s && s.raf) { cancelAnimationFrame(s.raf); s.raf = 0; s.x.t = 2.5; s.draw(); n++ }
+        }
+        return n
+      })
 
       const shots = await page.evaluate(readAllCanvases)
       frames[mode] = {}
+      const hidden = []
       for (const s of shots) {
         if (frames[mode][s.key]) problems.push(`[${mode}] duplicate key ${s.key} -- keying scheme is broken`)
         if (s.url.startsWith('ERR:')) problems.push(`[${mode}] ${s.key}: ${s.url}`)
+        if (!s.vis) hidden.push(s.key)
         const payload = s.url.slice(s.url.indexOf(',') + 1)
         frames[mode][s.key] = {
           id: s.id,
@@ -198,10 +233,16 @@ async function capture() {
           h: s.h,
           cssW: s.cssW,
           cssH: s.cssH,
+          vis: s.vis,
           bytes: payload.length,
           hash: createHash('sha256').update(s.url).digest('hex').slice(0, 16),
         }
       }
+      // Honest disclosure, not silent coverage: these were hidden at capture, so their hash is
+      // an unrendered backing store. A regression that only shows inside them is NOT caught.
+      // After dialogs are opened this is just orphan templates; recorded so the gap is visible
+      // and so a canvas entering/leaving the hidden set between golden and check is diffable.
+      notes.push(`[${mode}] ${shots.length} canvases · ${shots.length - hidden.length} rendered · ${froze} loopers frozen · ${hidden.length} hidden (hash is unrendered): ${hidden.join(', ') || 'none'}`)
       await ctx.close()
     }
     return {
@@ -236,6 +277,16 @@ function summarise(run) {
     const same = keys.filter((k) => d[k].hash === l[k].hash).length
     console.log(`  themes: ${keys.length - same}/${keys.length} canvases differ between dark and light`)
   }
+  ;(run.notes || []).forEach((n) => console.log(`  · ${n}`))
+}
+
+// Any recorded problem makes a run non-authoritative: matching hashes on a half-rendered or
+// mid-press page is a FALSE pass. Print and report whether the run may be trusted at all.
+function trustworthy(run, label) {
+  if (!run.problems.length) return true
+  console.log(`\n${label} has ${run.problems.length} problem(s) — verdict is NOT trustworthy:`)
+  run.problems.forEach((p) => console.log(`  ! ${p}`))
+  return false
 }
 
 function diff(a, b) {
@@ -263,10 +314,13 @@ if (mode === 'write') {
   const run = await capture()
   console.log('captured:')
   summarise(run)
-  run.problems.forEach((p) => console.log(`  ! ${p}`))
+  // Never persist a golden from a run with problems -- it would poison every later --check.
+  if (!trustworthy(run, 'this capture')) {
+    console.log('\nREFUSED — not writing a golden from an untrustworthy capture. Fix the problems and re-run.')
+    process.exit(1)
+  }
   await writeFile(GOLDEN, JSON.stringify(run, null, 2) + '\n')
   console.log(`\nwrote ${path.relative(ROOT, GOLDEN)} (${run.meta.browser}, ${run.meta.platform})`)
-  if (run.problems.length) process.exit(1)
 } else if (mode === 'selftest') {
   // The P0 acceptance test: an oracle that cannot reproduce ITSELF cannot judge anything else.
   console.log('run 1:')
@@ -275,8 +329,14 @@ if (mode === 'write') {
   console.log('run 2:')
   const b = await capture()
   summarise(b)
+  // Two identically-broken captures agree on every hash -- that is a false STABLE. Problems
+  // in either run disqualify the verdict before the diff is even consulted.
+  const ok = [trustworthy(a, 'run 1'), trustworthy(b, 'run 2')].every(Boolean)
   const d = diff(a, b)
-  a.problems.concat(b.problems).forEach((p) => console.log(`  ! ${p}`))
+  if (!ok) {
+    console.log('\nINCONCLUSIVE — a capture had problems; stability is not meaningful until they are fixed.')
+    process.exit(1)
+  }
   if (d.length) {
     console.log(`\nUNSTABLE — ${d.length} canvas(es) differ between two identical runs:`)
     d.slice(0, 20).forEach((l) => console.log('  ' + l))
@@ -294,17 +354,27 @@ if (mode === 'write') {
   const run = await capture()
   console.log('captured:')
   summarise(run)
+  // Fail closed on anything that makes the comparison unsound, BEFORE trusting a hash match.
+  // A poisoned golden, an untrustworthy fresh capture, or non-portable rasterisation (a
+  // different browser/platform) can all produce a byte-match that means nothing.
+  if (golden.problems && golden.problems.length) {
+    console.log(`\nFAIL — the golden itself was captured with ${golden.problems.length} problem(s); it is not a valid baseline. Re-run --write on a clean build.`)
+    process.exit(1)
+  }
+  if (!trustworthy(run, 'this capture')) {
+    console.log('\nFAIL — capture is untrustworthy; a hash match would be a false PASS.')
+    process.exit(1)
+  }
   if (golden.meta.browser !== run.meta.browser || golden.meta.platform !== run.meta.platform) {
-    console.log(`\n! BROWSER/PLATFORM DRIFT — golden: ${golden.meta.browser} on ${golden.meta.platform}`)
-    console.log(`!                          now:    ${run.meta.browser} on ${run.meta.platform}`)
-    console.log('! Rasterisation is not portable across builds. Differences below may be the browser, not the code.')
+    console.log(`\nFAIL — BROWSER/PLATFORM DRIFT. golden: ${golden.meta.browser} on ${golden.meta.platform}; now: ${run.meta.browser} on ${run.meta.platform}.`)
+    console.log('Rasterisation is not portable across builds, so a match here is unsupported. Re-capture the golden on this machine (--write) to compare.')
+    process.exit(1)
   }
   if (JSON.stringify(golden.config) !== JSON.stringify(run.config)) {
-    console.log('\n! CONFIG DRIFT — the golden was captured under different settings; hashes are not comparable.')
+    console.log('\nFAIL — CONFIG DRIFT — the golden was captured under different settings; hashes are not comparable.')
     process.exit(1)
   }
   const d = diff(golden, run)
-  run.problems.forEach((p) => console.log(`  ! ${p}`))
   if (d.length) {
     console.log(`\nFAIL — ${d.length} canvas(es) drifted from the golden:`)
     d.forEach((l) => console.log('  ' + l))
