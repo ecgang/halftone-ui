@@ -27,9 +27,9 @@ const entry = `
   import { createRoot } from 'react-dom/client';
   import { act } from 'react-dom/test-utils';
   import { renderToStaticMarkup } from 'react-dom/server';
-  import { HalftoneProvider, Surface, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
+  import { HalftoneProvider, Surface, Text, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
   import { createPressContext } from ${JSON.stringify(coreIndex)};
-  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, usePress, useHalftoneContext, createPressContext };
+  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, usePress, useHalftoneContext, createPressContext };
 `;
 const built = await esbuild.build({
   absWorkingDir: ROOT,
@@ -78,7 +78,7 @@ globalThis.devicePixelRatio = 1;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const m = await import(pathToFileURL(tmp).href);
-const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, createPressContext } = m;
+const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, createPressContext } = m;
 const act = React.act || actLegacy;   // React.act (18.3+) is the non-deprecated path
 const h = React.createElement;
 const clearsOf = (canvas) => (drawnPerCanvas.get(canvas) || []).filter((c) => c === 'clearRect').length;
@@ -111,6 +111,23 @@ ok('set: a scalar-dial change (screen) re-presses via handle.set()', clearsOf(ca
 
 await act(async () => { root.unmount(); });
 ok('destroy: unmount drops the surface from the registry (size back to baseline — leak retired)', ctx.size === baseSize, `size=${ctx.size}`);
+
+// ---- 4b. <Text>: rasterise the wordmark, push its height, press, clean up ------------------------
+const tctx = createPressContext({});
+const tcontainer = window.document.createElement('div');
+window.document.body.appendChild(tcontainer);
+const troot = createRoot(tcontainer);
+const tBase = tctx.size;
+let threw = null;
+try {
+  await act(async () => { troot.render(h(HalftoneProvider, { context: tctx }, h(Text, { text: 'HALFTONE UI' }))); });
+} catch (e) { threw = e; }
+const tcanvas = tcontainer.querySelector('canvas');
+ok('Text: mounts + rasterises without throwing (textField over stubbed 2D ctx)', threw === null, threw?.message);
+ok('Text: registered and drew on the shared context', tcanvas && tctx.size === tBase + 1 && clearsOf(tcanvas) >= 1, `size=${tctx.size} clears=${tcanvas ? clearsOf(tcanvas) : 'n/a'}`);
+ok('Text: pushed the wordmark height through the press (canvas got a CSS height)', !!tcanvas && /\d/.test(tcanvas.style.height || ''), `height=${tcanvas?.style.height || '(none)'}`);
+await act(async () => { troot.unmount(); });
+ok('Text: unmount cleans up (registry back to baseline)', tctx.size === tBase, `size=${tctx.size}`);
 
 // ---- 5. Two providers hold independent state (blocker 2) -----------------------------------------
 const a = createPressContext({ mode: 'dark' });
