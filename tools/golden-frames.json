@@ -1,12 +1,12 @@
 {
   "meta": {
-    "capturedAt": "2026-07-17T16:45:53.091Z",
+    "capturedAt": "2026-07-17T20:35:59.184Z",
     "browser": "chromium 149.0.7827.55",
     "platform": "darwin arm64",
     "node": "v20.19.6"
   },
   "config": {
-    "page": "/docs/index.html",
+    "page": "/dist/index.html",
     "viewport": {
       "width": 1440,
       "height": 900

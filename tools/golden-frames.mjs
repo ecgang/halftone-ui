@@ -54,7 +54,11 @@ const GOLDEN = path.join(HERE, 'golden-frames.json')
 
 // Everything that can move a pixel. Recorded into the golden verbatim; --check compares it.
 const CONFIG = {
-  page: '/docs/index.html',
+  // The SHIPPED artifact — the self-contained bundle users download and the deploy serves. It is
+  // built from the modular docs/index.html by tools/build-standalone.mjs; hashing what ships (not
+  // the source) guarantees the download works. build-standalone.mjs --check proves dist == build(src),
+  // so the modular source is verified transitively.
+  page: '/dist/index.html',
   viewport: { width: 1440, height: 900 },
   deviceScaleFactor: 1, // engine clamps: Math.min(devicePixelRatio || 1, 2)
   reducedMotion: 'no-preference', // deliberate: see header. The real path, not the side door.

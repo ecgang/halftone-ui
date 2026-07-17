@@ -73,17 +73,17 @@ No install. It's one HTML file.
 
 ```bash
 git clone https://github.com/ecgang/halftone-ui.git
-open halftone-ui/docs/index.html
+open halftone-ui/dist/index.html
 ```
 
-Or just [download `docs/index.html`](https://raw.githubusercontent.com/ecgang/halftone-ui/main/docs/index.html) and double-click it. Everything — engine, docs, demos, themes — is inside.
+Or just [download `dist/index.html`](https://raw.githubusercontent.com/ecgang/halftone-ui/main/dist/index.html) and double-click it. Everything — engine, docs, demos, themes — is inside, in one self-contained file.
 
 > [!TIP]
 > Try the topbar: `☀` toggles the designed light mode, `◐` opens the OKLCH wheel (drag the ring — the whole site rethemes), `▦` opens the global grain dials, and `reroll` reprints every surface from a new seed.
 
 ## Vue / React
 
-The docs show every component with Vue and React snippets. The single-file demo *is* the source of truth for the engine today; packaged builds are on the roadmap.
+The docs show every component with Vue and React snippets. The engine's source of truth is the framework-free core in [`halftone-kit/core/`](halftone-kit/core/) — `dist/index.html` is that core inlined into one self-contained file by [`tools/build-standalone.mjs`](tools/build-standalone.mjs) (the docs are dogfooded on the real library). Packaged/adapter builds are on the roadmap.
 
 ```vue
 <HButton color="purple">Press me</HButton>
