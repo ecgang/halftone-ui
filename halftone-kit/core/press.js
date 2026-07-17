@@ -31,7 +31,12 @@ export function resolvePress(opts = {}, ctx = null) {
     r: opts.r ?? 2.5,                     // base pitch factor; grid pitch = r * 0.8 * scale (docs :3137)
     h: opts.h ?? null,                    // CSS height override; null = measure clientHeight
     seed: opts.seed ?? (ctx ? ctx.seed : 1859), // ENTRANCE transient seed (see roll for resting)
-    roll: opts.roll ?? 0,                 // resting-geometry entropy; 0 = canonical (byte-identical)
+    // Per-press resting-geometry entropy. `null` (the default) means INHERIT the context's roll —
+    // so a provider-level ctx.setRoll() re-presses every surface that didn't pin its own roll,
+    // matching the "provider default all its surfaces share" contract (context.js). An explicit
+    // number (incl. 0) OVERRIDES the context roll for that one surface. Resolved live in rebuild(),
+    // not frozen here, so ctx.setRoll() after mount takes effect on the next rebuild()/repaint().
+    roll: opts.roll ?? null,
     inks: opts.inks || null,              // ink SELECTION (names) frozen here; VALUES stay lazy (V-11)
     plates: opts.plates || null,          // explicit multi-plate stack (masthead/charts) — P2
     animate: opts.animate ?? false,       // press-in when the caller triggers it
@@ -63,13 +68,16 @@ export function mount(el, spec, ctx) {
   }
 
   // rebuild: recompute the point grid + noise field. Resting geometry derives from the context
-  // base + decorrelation offset + roll (NOT the entrance seed) so the resting frame is
-  // seed-invariant; roll 0 reproduces docs `mulberry32(state.seed + off)` byte-for-byte (§7, V-4).
+  // base + decorrelation offset + the EFFECTIVE roll (NOT the entrance seed) so the resting frame is
+  // seed-invariant. Effective roll = the per-press roll if pinned, else the live context roll
+  // (`spec.roll ?? ctx.roll`) — read here, not frozen at resolve, so ctx.setRoll() + rebuild()
+  // re-presses this surface. With both at 0 it reproduces docs `mulberry32(base + off)` byte-for-byte
+  // (§7, V-4); ctx.base + off + ctx.roll is exactly ctx.seedValue + off.
   s.rebuild = () => {
     const f = fit();
     if (!f) { s.stale = true; return; }
     s.stale = false; s.g = f.g; s.W = f.w; s.H = f.h;
-    const restSeed = ctx.base + off + spec.roll;
+    const restSeed = ctx.base + off + (spec.roll ?? ctx.roll);
     s.pts = grainPts(f.w, f.h, spec.r * 0.8 * spec.scale, mulberry32(restSeed), spec.screen);
     s.noise = makeNoise(restSeed);
   };
