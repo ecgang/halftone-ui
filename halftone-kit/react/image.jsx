@@ -41,13 +41,14 @@ export function Image({
   // Load + rasterise luminance (browser only). Cover-fit into a grid sized to `resolution` on the
   // long side at the image's own aspect, so grid aspect == display aspect == no distortion.
   useEffect(() => {
-    if (typeof document === 'undefined' || !src || typeof window.Image !== 'function') return undefined;
-    let cancelled = false;
-    // A NEW source must never keep showing the OLD image. Drop the prior luminance up front and
-    // rebuild to a blank field; if the new src is slow, errors, or is CORS-tainted, the surface
-    // stays blank rather than displaying stale (possibly sensitive) prior content.
+    // A source change must NEVER keep showing the old image. Drop the prior luminance and rebuild to
+    // a blank field FIRST, before any early return — so removing the src (falsy), an SSR/no-Image
+    // environment, or a slow/errored/CORS-tainted new load all leave the surface blank rather than
+    // displaying stale (possibly sensitive) prior content.
     lum.current = null;
     press.rebuild();
+    if (typeof document === 'undefined' || !src || typeof window.Image !== 'function') return undefined;
+    let cancelled = false;
     const img = new window.Image();
     img.crossOrigin = 'anonymous';   // allow getImageData when the host sends CORS headers
     const fail = () => { if (cancelled) return; lum.current = null; press.rebuild(); };
