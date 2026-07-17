@@ -3377,9 +3377,9 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
             if (p.x < M.l || p.x > W - M.r || p.y > yBase) continue;
             const yc = curveY(vals, p.x);
             if (p.y < yc) continue;
-            const tone = Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
+            const tone = Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9 * GRAIN.ink;
             if (tone <= p.th) continue;
-            ctx.beginPath(); ctx.arc(p.x, p.y, 0.45 + 0.9 * tone, 0, 6.283); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, 0.45 + 0.9 * Math.min(1.15, tone), 0, 6.283); ctx.fill();
           }
           for (const e of edge[si]) {
             if (e.th > 0.85) continue;
@@ -3492,7 +3492,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
             const b = bar(i);
             if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
             const boost = hover === i ? 1.3 : 1;
-            const tone = Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost;
+            const tone = Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost * GRAIN.ink;
             if (tone > p.th) { ctx.beginPath(); ctx.arc(p.x, p.y, 0.5 + 1.05 * Math.min(1.1, tone), 0, 6.283); ctx.fill(); }
             break;
           }
