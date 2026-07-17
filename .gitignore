@@ -1,8 +1,10 @@
 # Vercel's local link/build artifacts
 .vercel
 
-# Secrets, including whatever `vercel env pull` drops here. Templates stay
-# trackable on purpose — they carry no secrets and onboarding needs them.
+# Secrets, including whatever `vercel env pull` drops here. Ignore every .env
+# variant and name the exceptions: .env.production and .env.development carry
+# real values as often as .env.local does, so an allow-list is the safe shape.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.template
