@@ -27,9 +27,9 @@ const entry = `
   import { createRoot } from 'react-dom/client';
   import { act } from 'react-dom/test-utils';
   import { renderToStaticMarkup } from 'react-dom/server';
-  import { HalftoneProvider, Surface, Text, Image, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
+  import { HalftoneProvider, Surface, Text, Image, Button, Meter, Card, usePress, useHalftoneContext } from ${JSON.stringify(reactIndex)};
   import { createPressContext } from ${JSON.stringify(coreIndex)};
-  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, usePress, useHalftoneContext, createPressContext };
+  export { React, createRoot, act, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, Button, Meter, Card, usePress, useHalftoneContext, createPressContext };
 `;
 const built = await esbuild.build({
   absWorkingDir: ROOT,
@@ -82,7 +82,7 @@ globalThis.devicePixelRatio = 1;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const m = await import(pathToFileURL(tmp).href);
-const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, createPressContext } = m;
+const { React, createRoot, act: actLegacy, renderToStaticMarkup, HalftoneProvider, Surface, Text, Image, Button, Meter, Card, createPressContext } = m;
 const act = React.act || actLegacy;   // React.act (18.3+) is the non-deprecated path
 const h = React.createElement;
 const clearsOf = (canvas) => (drawnPerCanvas.get(canvas) || []).filter((c) => c === 'clearRect').length;
@@ -153,6 +153,66 @@ ok('Image: luminance load re-presses the surface (draws again post-load)', clear
 ok('Image: took the image aspect ratio (no distortion by default)', !!icanvas && (icanvas.style.aspectRatio || '') !== '', `aspectRatio=${icanvas?.style.aspectRatio || '(none)'}`);
 await act(async () => { iroot.unmount(); });
 ok('Image: unmount cleans up (registry back to baseline)', ictx.size === iBase, `size=${ictx.size}`);
+
+// ---- 4d. <Button>: real <button> + decorative press; a11y and clicks come from the DOM (V-10) -----
+const bctx = createPressContext({});
+const bcontainer = window.document.createElement('div');
+window.document.body.appendChild(bcontainer);
+const broot = createRoot(bcontainer);
+const bBase = bctx.size;
+let bClicks = 0;
+await act(async () => { broot.render(h(HalftoneProvider, { context: bctx }, h(Button, { onClick: () => { bClicks++; } }, 'Publish'))); });
+const button = bcontainer.querySelector('button');
+const bcanvas = bcontainer.querySelector('canvas');
+ok('Button: renders a real <button> whose accessible name is DOM text, not the canvas',
+  !!button && /Publish/.test(button.textContent || '') && !!bcanvas && bcanvas.getAttribute('aria-hidden') === 'true',
+  `text=${button?.textContent} aria-hidden=${bcanvas?.getAttribute('aria-hidden')}`);
+ok('Button: registered + drew the decorative fill on the shared context', bctx.size === bBase + 1 && clearsOf(bcanvas) >= 1, `size=${bctx.size}`);
+await act(async () => { button.dispatchEvent(new window.MouseEvent('click', { bubbles: true })); });
+ok('Button: click reaches the native element (onClick fired once)', bClicks === 1, `clicks=${bClicks}`);
+const bClears = clearsOf(bcanvas);
+await act(async () => { button.dispatchEvent(new window.Event('pointerdown', { bubbles: true })); await new Promise((r) => setTimeout(r, 5)); });
+ok('Button: a pointer-press ramps the ink in (canvas redrew via pressIn)', clearsOf(bcanvas) > bClears, `clears ${bClears} -> ${clearsOf(bcanvas)}`);
+await act(async () => { broot.render(h(HalftoneProvider, { context: bctx }, h(Button, { disabled: true }, 'X'))); });
+ok('Button: native attributes forward (disabled reaches the <button>)', bcontainer.querySelector('button').disabled === true);
+await act(async () => { broot.unmount(); });
+ok('Button: unmount cleans up (registry back to baseline)', bctx.size === bBase, `size=${bctx.size}`);
+
+// ---- 4e. <Meter>: real <progress> holds value/max; the halftone bar mirrors value/max (V-10) ------
+const mctx = createPressContext({});
+const mcontainer = window.document.createElement('div');
+window.document.body.appendChild(mcontainer);
+const mroot = createRoot(mcontainer);
+const mBase = mctx.size;
+await act(async () => { mroot.render(h(HalftoneProvider, { context: mctx }, h(Meter, { value: 0.4 }))); });
+const progress = mcontainer.querySelector('progress');
+const mcanvas = mcontainer.querySelector('canvas');
+ok('Meter: renders a real <progress> carrying value/max (semantics in the a11y tree, not the canvas)',
+  !!progress && Number(progress.value) === 0.4 && Number(progress.max) === 1 && !!mcanvas && mcanvas.getAttribute('aria-hidden') === 'true',
+  `value=${progress?.value} max=${progress?.max}`);
+const mClears = clearsOf(mcanvas);
+await act(async () => { mroot.render(h(HalftoneProvider, { context: mctx }, h(Meter, { value: 0.9 }))); });
+ok('Meter: a value change re-presses the fill (canvas redrew)', clearsOf(mcanvas) > mClears, `clears ${mClears} -> ${clearsOf(mcanvas)}`);
+ok('Meter: the new value is reflected on the native <progress>', Number(mcontainer.querySelector('progress').value) === 0.9, `value=${mcontainer.querySelector('progress').value}`);
+await act(async () => { mroot.unmount(); });
+ok('Meter: unmount cleans up (registry back to baseline)', mctx.size === mBase, `size=${mctx.size}`);
+
+// ---- 4f. <Card>: real children + decorative backdrop; meaning lives in the DOM (V-10) -------------
+const cctx = createPressContext({});
+const ccontainer = window.document.createElement('div');
+window.document.body.appendChild(ccontainer);
+const croot = createRoot(ccontainer);
+const cBase = cctx.size;
+await act(async () => { croot.render(h(HalftoneProvider, { context: cctx }, h(Card, null, h('h3', null, 'Plate registration')))); });
+const heading = ccontainer.querySelector('h3');
+const ccanvas = ccontainer.querySelector('canvas');
+ok('Card: children are real DOM (heading present); the backdrop is a decorative aria-hidden canvas',
+  !!heading && /Plate registration/.test(heading.textContent || '') && !!ccanvas && ccanvas.getAttribute('aria-hidden') === 'true');
+ok('Card: registered + drew the backdrop on the shared context', cctx.size === cBase + 1 && clearsOf(ccanvas) >= 1, `size=${cctx.size}`);
+await act(async () => { croot.render(h(HalftoneProvider, { context: cctx }, h(Card, { as: 'article' }, 'x'))); });
+ok('Card: `as` renders the chosen semantic element (<article>)', !!ccontainer.querySelector('article'));
+await act(async () => { croot.unmount(); });
+ok('Card: unmount cleans up (registry back to baseline)', cctx.size === cBase, `size=${cctx.size}`);
 
 // ---- 5. Two providers hold independent state (blocker 2) -----------------------------------------
 const a = createPressContext({ mode: 'dark' });

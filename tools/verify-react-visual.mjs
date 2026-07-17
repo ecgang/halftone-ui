@@ -22,7 +22,7 @@ const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' 
 const app = `
   import React from 'react';
   import { createRoot } from 'react-dom/client';
-  import { HalftoneProvider, Surface, Text, Image } from ${JSON.stringify(reactIndex)};
+  import { HalftoneProvider, Surface, Text, Image, Button, Meter, Card } from ${JSON.stringify(reactIndex)};
 
   const gradient = (u, v) => Math.max(0, Math.min(1, 1 - (u * 0.5 + v * 0.5) + 0.15 * Math.sin(u * 18)));
   const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='220' height='130'>"
@@ -41,6 +41,16 @@ const app = `
           React.createElement(Text, { text: 'HALFTONE UI', screen: 'stipple' })),
         React.createElement('div', { 'data-box': 'image' },
           React.createElement(Image, { src: imgSrc, screen: 'stipple' })),
+        React.createElement('div', { 'data-box': 'button' },
+          React.createElement(Button, { color: 'blue', screen: 'stipple',
+            style: { border: 0, padding: '12px 20px', color: '#0B0C10', font: '600 15px system-ui', cursor: 'pointer' } },
+            'Publish')),
+        React.createElement('div', { 'data-box': 'meter' },
+          React.createElement(Meter, { value: 0.66, color: 'blue', screen: 'stipple', h: 16 })),
+        React.createElement('div', { 'data-box': 'card', style: { minHeight: 64 } },
+          React.createElement(Card, { color: 'blue', screen: 'stipple',
+            style: { padding: 16, color: '#F2EFE6', font: '15px system-ui' } },
+            React.createElement('h3', { style: { margin: 0 } }, 'Plate registration'))),
       ),
     );
   }
@@ -74,7 +84,7 @@ let inks = [];
 try {
   await page.waitForFunction(() => {
     const cs = [...document.querySelectorAll('canvas')];
-    if (cs.length < 3) return false;
+    if (cs.length < 6) return false;
     return cs.every((cv) => {
       if (!cv.width) return false;
       const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -95,8 +105,8 @@ const pngPath = path.join(HERE, '.verify-react-visual.png');
 await page.screenshot({ path: pngPath, fullPage: true });
 await browser.close();
 
-const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)'];
-ok('three canvases mounted', inks.length === 3, `count=${inks.length}`);
+const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)'];
+ok('six canvases mounted', inks.length === 6, `count=${inks.length}`);
 inks.forEach((c, i) => ok(`${label[i] || 'canvas ' + i}: real ink drawn`, c.ink > 0, `${c.w}x${c.h}, inkPx=${c.ink}`));
 ok('no console/page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(`\nscreenshot: ${pngPath}`);

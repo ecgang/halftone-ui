@@ -8,7 +8,7 @@
 // pass `h`). By default it re-presses only when a scalar dial changes; a data-driven surface whose
 // `field` closes over changing values should pass an explicit `deps` (e.g. deps={[value]}).
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { usePress } from './use-press.js';
 
 export function Surface({
@@ -16,6 +16,7 @@ export function Surface({
   screen, scale, r, ink, wash, roll, h, seed, color,
   animate, pressMs,
   deps,
+  pressRef,
   className, style,
   ...rest
 }) {
@@ -23,7 +24,15 @@ export function Surface({
   const opts = { field, screen, scale, r, ink, wash, roll, h, seed, color, animate, pressMs };
   // Default dep list = the scalar dials. `field` identity is intentionally excluded (it is usually a
   // fresh closure every render); to redraw on data change, drive it through `deps`.
-  usePress(ref, opts, deps ?? [screen, scale, r, ink, wash, roll, h, seed, color]);
+  const press = usePress(ref, opts, deps ?? [screen, scale, r, ink, wash, roll, h, seed, color]);
+
+  // Optional escape hatch: hand the stable press facade back to a caller-owned ref so a wrapper (e.g.
+  // <Button>) can drive pressIn() on interaction without Surface losing ownership of the canvas.
+  useEffect(() => {
+    if (!pressRef) return undefined;
+    pressRef.current = press;
+    return () => { pressRef.current = null; };
+  }, [pressRef, press]);
 
   return (
     <canvas
