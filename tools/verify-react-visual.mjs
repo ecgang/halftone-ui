@@ -31,6 +31,10 @@ const app = `
     + "<rect width='220' height='130' fill='url(#g)'/>"
     + "<circle cx='150' cy='55' r='34' fill='black'/></svg>";
   const imgSrc = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  // A TRANSPARENT-background image (no rect fill) with one opaque black shape — the alpha regression.
+  const svgAlpha = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'>"
+    + "<circle cx='100' cy='60' r='42' fill='black'/></svg>";
+  const imgAlphaSrc = 'data:image/svg+xml,' + encodeURIComponent(svgAlpha);
 
   function App() {
     return React.createElement(HalftoneProvider, { mode: 'dark' },
@@ -55,6 +59,8 @@ const app = `
           React.createElement(BarChart, { data: [4, 9, 6, 11, 7], caption: 'Impressions by week', color: 'blue', screen: 'stipple', h: 120 })),
         React.createElement('div', { 'data-box': 'line' },
           React.createElement(LineChart, { data: [3, 6, 4, 9, 7, 12], area: true, caption: 'Ink-up over time', color: 'blue', screen: 'stipple', h: 120 })),
+        React.createElement('div', { 'data-box': 'imgalpha' },
+          React.createElement(Image, { src: imgAlphaSrc, screen: 'stipple', color: 'blue', h: 120 })),
       ),
     );
   }
@@ -76,7 +82,7 @@ const htmlPath = path.join(HERE, '.verify-react-visual.html');
 fs.writeFileSync(htmlPath, html);
 
 // ---- drive it in real Chromium ------------------------------------------------------------------
-const browser = await chromium.launch();
+const browser = await chromium.launch({ args: ['--disable-gpu'] });
 const page = await browser.newPage({ viewport: { width: 420, height: 640 }, deviceScaleFactor: 1 });
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
@@ -88,7 +94,7 @@ let inks = [];
 try {
   await page.waitForFunction(() => {
     const cs = [...document.querySelectorAll('canvas')];
-    if (cs.length < 8) return false;
+    if (cs.length < 9) return false;
     return cs.every((cv) => {
       if (!cv.width) return false;
       const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -105,13 +111,32 @@ inks = await page.evaluate(() => [...document.querySelectorAll('canvas')].map((c
   return { w: cv.width, h: cv.height, ink };
 }));
 
+// Alpha regression: a transparent-background image must ink ONLY its opaque shape. A blank corner
+// (transparent) + an inked center (the black circle) proves transparent pixels aren't read as black.
+const alpha = await page.evaluate(() => {
+  const cv = document.querySelector('[data-box="imgalpha"] canvas');
+  if (!cv || !cv.width) return null;
+  const g = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const inkIn = (x0, y0, x1, y1) => {
+    const d = g.getImageData(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0)).data;
+    let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 10) n++; return n;
+  };
+  return {
+    corner: inkIn(0, 0, Math.floor(W * 0.18), Math.floor(H * 0.18)),
+    center: inkIn(Math.floor(W * 0.4), Math.floor(H * 0.38), Math.floor(W * 0.6), Math.floor(H * 0.62)),
+  };
+});
+
 const pngPath = path.join(HERE, '.verify-react-visual.png');
 await page.screenshot({ path: pngPath, fullPage: true });
 await browser.close();
 
-const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)'];
-ok('eight canvases mounted', inks.length === 8, `count=${inks.length}`);
+const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)', 'Image (transparent bg)'];
+ok('nine canvases mounted', inks.length === 9, `count=${inks.length}`);
 inks.forEach((c, i) => ok(`${label[i] || 'canvas ' + i}: real ink drawn`, c.ink > 0, `${c.w}x${c.h}, inkPx=${c.ink}`));
+ok('alpha regression: a transparent background inks nothing (blank corner)', alpha && alpha.corner === 0, `corner=${alpha?.corner}`);
+ok('alpha regression: the opaque shape still inks (center has ink)', alpha && alpha.center > 0, `center=${alpha?.center}`);
 ok('no console/page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(`\nscreenshot: ${pngPath}`);
 

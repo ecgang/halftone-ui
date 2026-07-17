@@ -58,7 +58,14 @@ export function Image({
       try { d = g.getImageData(0, 0, gw, gh).data; } catch (e) { return; } // CORS-tainted → stay blank
       const data = new Float32Array(gw * gh);
       for (let i = 0; i < gw * gh; i++) {
-        data[i] = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255;
+        const j = i * 4;
+        // Composite over paper (luminance 1) by alpha, THEN take luminance. Canvas returns (0,0,0,0)
+        // for transparent pixels, so without this a transparent region reads as luminance 0 -> max
+        // tone -> a solid black halo. Compositing makes transparent -> luminance 1 -> tone 0 -> no
+        // ink (the page shows through); opaque pixels (a=1) are unchanged, so photos are unaffected.
+        const a = d[j + 3] / 255;
+        const rgb = (0.299 * d[j] + 0.587 * d[j + 1] + 0.114 * d[j + 2]) / 255;
+        data[i] = rgb * a + (1 - a);
       }
       lum.current = { data, gw, gh };
       const el = ref.current;
