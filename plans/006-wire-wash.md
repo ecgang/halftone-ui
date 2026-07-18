@@ -9,7 +9,11 @@
 >
 > **Drift check (run first)**: `git diff --stat 8072748..HEAD -- halftone-kit/core/draw.js halftone-kit/core/press.js docs/index.html dist/index.html`
 > On drift in draw.js or press.js, re-verify the excerpts below; the FP-identity
-> argument in "Why this is golden-safe" must still hold.
+> argument in "Why this is golden-safe" must still hold. NOTE (reviewer,
+> 2026-07-17): dist/index.html WILL show drift — it was rebuilt during the
+> security-hardening rounds (screens.js work budgets). draw.js and press.js are
+> untouched since the plan was written; only drift in THOSE two files is a
+> reason to re-verify.
 
 ## Status
 
@@ -77,7 +81,7 @@ something else changed and you must STOP.
 |---|---|---|
 | Rebuild dist | `node tools/build-standalone.mjs` | `wrote dist/index.html (...)` |
 | Golden | `npm run golden:check --prefix tools` | **PASS — byte-identical** (mandatory) |
-| Core suite | `node tools/verify-core.mjs` | `24 passed, 0 failed` (+ any you add) |
+| Core suite | `node tools/verify-core.mjs` | `33 passed, 0 failed` (+ any you add) |
 | Adapter suites | `node tools/verify-react.mjs` / `verify-vue.mjs` | 40 / 46 baseline + new |
 | Pixels | `node tools/verify-react-visual.mjs` | 19 baseline + new |
 
@@ -116,7 +120,7 @@ every existing caller bit-identical.
 In `press.js` `s.draw`: `grain: { ink: spec.ink }` →
 `grain: { ink: spec.ink, wash: spec.wash }`.
 
-**Verify**: `node tools/verify-core.mjs` → 24 passed (nothing asserted wash yet).
+**Verify**: `node tools/verify-core.mjs` → 33 passed (nothing asserted wash yet).
 
 ### Step 2: The golden gate
 
@@ -136,7 +140,7 @@ canvas differs → STOP (see conditions).
   identical `wash: 1` surface (same field/seed/size); assert inked-pixel count
   is strictly lower on the washed one (and > 0).
 
-**Verify**: `node tools/verify-core.mjs` → 25+; `node tools/verify-react-visual.mjs`
+**Verify**: `node tools/verify-core.mjs` → 34+; `node tools/verify-react-visual.mjs`
 → 20+; `node tools/verify-vue.mjs` and `verify-react.mjs` still green.
 
 ### Step 4: Documentation
@@ -159,7 +163,7 @@ assertion under the stubbed 2D context, and a real-pixel monotonicity check
 ## Done criteria
 
 - [ ] Golden: `PASS — byte-identical` on the rebuilt dist (no re-baseline)
-- [ ] `verify-core` ≥ 25, `verify-react-visual` ≥ 20, all other suites at
+- [ ] `verify-core` ≥ 34, `verify-react-visual` ≥ 20, all other suites at
       baseline — 0 failed everywhere
 - [ ] `grep -n "wash" halftone-kit/core/draw.js` shows the multiplier
 - [ ] dist committed in the same commit as core
