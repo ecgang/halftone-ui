@@ -22,7 +22,12 @@
   re-baselined (Step 5), not blindly overwritten.
 - **Depends on**: none
 - **Category**: docs
-- **Planned at**: commit `8072748`, 2026-07-17
+- **Planned at**: commit `8072748`, 2026-07-17; REFINED after a correct executor
+  STOP (2026-07-17): the inventory found **83 sample pairs** (166 `data-lang=` blocks),
+  tripping the old ~40-pair gate — which contradicted this plan's own ~90-mention estimate.
+  The refined Step 1 classifies by BROKEN-PATTERN greps instead of raw pair count: measured
+  at `bd04798` — `npm i @halftone` x2, H-prefixed names x50, `toast` import pair at
+  :1548-1553, prose at :758-759. Pairs matching none of the broken patterns need NO edit.
 
 ## Why this matters
 
@@ -103,15 +108,19 @@ docs are worse than missing docs.
 
 ## Steps
 
-### Step 1: Inventory every sample
+### Step 1: Inventory the BROKEN sites (not every sample)
 
-`grep -n "data-lang=" docs/index.html` → list of paired samples. For each pair,
-identify the component it demonstrates and whether the kit exports it
-(the 8: Surface, Text, Image, Button, Meter, Card, BarChart, LineChart —
-plus Provider/usePress).
+83 pairs exist; most need nothing. Classify by broken-pattern greps:
+`grep -n "@halftone-ui/\|HButton\|HMeter\|HCard\|HTabs\|HSurface\|HText\|HImage\|HBarChart\|HLineChart\|npm i @halftone" docs/index.html`
+→ every hit line belongs to a `<pre>` block that needs editing. Add the `toast`
+pair (:1548-1553). For each hit block, classify `kit-export` (real component
+exists — mechanical rename/install/import fix) or `no-kit-equivalent` (like
+toast — core escape hatch per Step 3). Blocks with no hits are NOT in scope.
 
-**Verify**: a written list (in your working notes) of every sample line range,
-each classified `kit-export` or `no-kit-equivalent`.
+**Verify**: a written list (working notes) of hit blocks with classification.
+If the hit-block count exceeds ~60 or a class of brokenness appears that Steps
+2-3 don't cover, report the breakdown before editing (expected: dominated by
+the mechanical rename class).
 
 ### Step 2: Rewrite `kit-export` samples
 
@@ -187,8 +196,9 @@ into scratch files and confirm every imported name exists:
 - Golden diffs appear on component-demo canvases (not just layout washes).
 - You cannot find a real-API equivalent for a sample and the core fallback
   (Step 3) doesn't fit either — report the section, don't invent API.
-- More than ~40 sample pairs exist (inventory much larger than audited) —
-  report the count first.
+- A class of brokenness appears that Steps 2-3 don't cover (the raw pair count
+  is NOT a stop signal — 83 pairs is known and expected; only broken-pattern
+  blocks are in scope).
 
 ## Maintenance notes
 
