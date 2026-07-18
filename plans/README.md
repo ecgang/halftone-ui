@@ -15,7 +15,7 @@ row when done.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | One `verify` command + CI on every push | P1 | M | — | TODO |
+| 001 | One `verify` command + CI on every push | P1 | M | — | DONE (387ffc2, reviewed + integrated 2026-07-17) |
 | 002 | Repo-level CLAUDE.md (operational knowledge) | P1 | S | — (001 refines it) | TODO |
 | 003 | Docs-site samples teach the real API | P1 | M | — | TODO |
 | 004 | Unit vectors: core math + Studio reducer | P2 | S | — (001 registers it) | TODO |
