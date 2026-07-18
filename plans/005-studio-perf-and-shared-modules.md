@@ -90,9 +90,13 @@ despite `vue/chart.js` already demonstrating the shared-object pattern.
 | Vue jsdom | `node tools/verify-vue.mjs` | `46 passed, 0 failed` |
 | React pixels | `node tools/verify-react-visual.mjs` | `19 passed, 0 failed` |
 | Vue pixels | `node tools/verify-vue-visual.mjs` | `19 passed, 0 failed` |
-| Studio e2e | `node tools/verify-studio.mjs` | `38 passed, 0 failed` |
+| Studio e2e | `node tools/verify-studio.mjs` | `50 passed, 0 failed` |
 
-(Counts are the baseline at planning time; if a step adds checks, expect more.)
+(Counts reconciled at `d5a9c4e`; if a step adds checks, expect more. The drift check WILL show
+`studio/src/store.js`, `studio/src/presets.js`, `studio/src/app.jsx`, `studio/src/inspector.jsx`
+and `tools/verify-studio.mjs` changed since `8072748` — that is the security-hardening work, all
+OUT of this plan's scope; none of it touched `frames.jsx`, `stage.jsx`, or the adapter files this
+plan edits. Re-verify excerpts for the files you touch and proceed.)
 
 ## Scope
 
