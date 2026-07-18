@@ -755,8 +755,8 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 <section class="doc" id="quick-start">
   <h2>Quick start</h2>
   <p class="desc">A halftone UI toolkit — charts, primitives and app components on one seed-generative
-  point-cloud engine. The engine is plain TypeScript with no framework in it; <code>@halftone-ui/vue</code>
-  and <code>@halftone-ui/react</code> are thin adapters over the same core.</p>
+  point-cloud engine. The engine is plain JavaScript with no framework in it; <code>react/</code>
+  and <code>vue/</code> in <code>halftone-kit/</code> are thin copy-in adapters over the same core (degit, not npm).</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage tall">
@@ -767,25 +767,25 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue"><span class="c"># npm i @halftone-ui/vue</span>
+      <pre data-lang="vue"><span class="c"># npx degit ecgang/halftone-ui/halftone-kit/vue src/halftone/vue</span>
 
 <span class="k">&lt;script setup&gt;</span>
-<span class="k">import</span> { HButton, HMeter } <span class="k">from</span> <span class="s">"@halftone-ui/vue"</span>
+<span class="k">import</span> { Button, Meter } <span class="k">from</span> <span class="s">"./halftone/vue/index.js"</span>
 <span class="k">&lt;/script&gt;</span>
 
 <span class="k">&lt;template&gt;</span>
-  &lt;HButton color=<span class="s">"purple"</span>&gt;Create account&lt;/HButton&gt;
-  &lt;HMeter label=<span class="s">"Memory"</span> :value=<span class="s">"68"</span> /&gt;
+  &lt;Button color=<span class="s">"purple"</span>&gt;Create account&lt;/Button&gt;
+  &lt;label&gt;Memory &lt;Meter :value=<span class="s">"0.68"</span> /&gt;&lt;/label&gt;
 <span class="k">&lt;/template&gt;</span></pre>
-      <pre data-lang="react" hidden><span class="c"># npm i @halftone-ui/react</span>
+      <pre data-lang="react" hidden><span class="c"># npx degit ecgang/halftone-ui/halftone-kit/react src/halftone/react</span>
 
-<span class="k">import</span> { Button, Meter } <span class="k">from</span> <span class="s">"@halftone-ui/react"</span>
+<span class="k">import</span> { Button, Meter } <span class="k">from</span> <span class="s">"./halftone/react/index.js"</span>
 
 <span class="k">export function</span> Panel() {
   <span class="k">return</span> (
     &lt;&gt;
       &lt;Button color=<span class="s">"purple"</span>&gt;Create account&lt;/Button&gt;
-      &lt;Meter label=<span class="s">"Memory"</span> value={68} /&gt;
+      &lt;label&gt;Memory &lt;Meter value={0.68} /&gt;&lt;/label&gt;
     &lt;/&gt;
   )
 }</pre>
@@ -837,14 +837,14 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HCard&gt;
+      <pre data-lang="vue">&lt;Card&gt;
   &lt;HBadge color=<span class="s">"green"</span>&gt;stable&lt;/HBadge&gt;
-  &lt;HMeter label=<span class="s">"Usage"</span> :value=<span class="s">"64"</span> /&gt;
-  &lt;HButton color=<span class="s">"purple"</span> block&gt;Deploy&lt;/HButton&gt;
-&lt;/HCard&gt;</pre>
+  &lt;label&gt;Usage &lt;Meter :value=<span class="s">"0.64"</span> /&gt;&lt;/label&gt;
+  &lt;Button color=<span class="s">"purple"</span> block&gt;Deploy&lt;/Button&gt;
+&lt;/Card&gt;</pre>
       <pre data-lang="react" hidden>&lt;Card&gt;
   &lt;Badge color=<span class="s">"green"</span>&gt;stable&lt;/Badge&gt;
-  &lt;Meter label=<span class="s">"Usage"</span> value={64} /&gt;
+  &lt;label&gt;Usage &lt;Meter value={0.64} /&gt;&lt;/label&gt;
   &lt;Button color=<span class="s">"purple"</span> block&gt;Deploy&lt;/Button&gt;
 &lt;/Card&gt;</pre>
     </div>
@@ -865,7 +865,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
       <pre data-lang="vue">&lt;HWash color=<span class="s">"pink"</span> :reveal=<span class="s">"revealed"</span> /&gt;
-&lt;HButton color=<span class="s">"pink"</span> @click=<span class="s">"replay"</span>&gt;Replay&lt;/HButton&gt;</pre>
+&lt;Button color=<span class="s">"pink"</span> @click=<span class="s">"replay"</span>&gt;Replay&lt;/Button&gt;</pre>
       <pre data-lang="react" hidden>&lt;Wash color=<span class="s">"pink"</span> reveal={revealed} /&gt;
 &lt;Button color=<span class="s">"pink"</span> onClick={replay}&gt;Replay&lt;/Button&gt;</pre>
     </div>
@@ -905,11 +905,11 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HCard wash=<span class="s">"purple"</span>&gt;
+      <pre data-lang="vue">&lt;Card wash=<span class="s">"purple"</span>&gt;
   &lt;HInput v-model=<span class="s">"name"</span> placeholder=<span class="s">"Ada Byte"</span> /&gt;
   &lt;HSegmented v-model=<span class="s">"plan"</span> :options=<span class="s">"['Free','Pro','Scale']"</span> /&gt;
-  &lt;HButton color=<span class="s">"purple"</span> block&gt;Create account&lt;/HButton&gt;
-&lt;/HCard&gt;</pre>
+  &lt;Button color=<span class="s">"purple"</span> block&gt;Create account&lt;/Button&gt;
+&lt;/Card&gt;</pre>
       <pre data-lang="react" hidden>&lt;Card wash=<span class="s">"purple"</span>&gt;
   &lt;Input value={name} onChange={setName} placeholder=<span class="s">"Ada Byte"</span> /&gt;
   &lt;Segmented value={plan} onChange={setPlan} options={[<span class="s">"Free"</span>, <span class="s">"Pro"</span>, <span class="s">"Scale"</span>]} /&gt;
@@ -934,12 +934,12 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HMeter label=<span class="s">"Disk"</span>   :value=<span class="s">"35"</span> /&gt;
-&lt;HMeter label=<span class="s">"Memory"</span> :value=<span class="s">"68"</span> /&gt;
-&lt;HMeter label=<span class="s">"CPU"</span>    :value=<span class="s">"92"</span> /&gt;</pre>
-      <pre data-lang="react" hidden>&lt;Meter label=<span class="s">"Disk"</span>   value={35} /&gt;
-&lt;Meter label=<span class="s">"Memory"</span> value={68} /&gt;
-&lt;Meter label=<span class="s">"CPU"</span>    value={92} /&gt;</pre>
+      <pre data-lang="vue">&lt;label&gt;Disk   &lt;Meter :value=<span class="s">"0.35"</span> /&gt;&lt;/label&gt;
+&lt;label&gt;Memory &lt;Meter :value=<span class="s">"0.68"</span> /&gt;&lt;/label&gt;
+&lt;label&gt;CPU    &lt;Meter :value=<span class="s">"0.92"</span> /&gt;&lt;/label&gt;</pre>
+      <pre data-lang="react" hidden>&lt;label&gt;Disk   &lt;Meter value={0.35} /&gt;&lt;/label&gt;
+&lt;label&gt;Memory &lt;Meter value={0.68} /&gt;&lt;/label&gt;
+&lt;label&gt;CPU    &lt;Meter value={0.92} /&gt;&lt;/label&gt;</pre>
     </div>
   </div>
 </section>
@@ -969,10 +969,10 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
       <div class="langs" role="tablist"></div>
       <pre data-lang="vue">&lt;HStat label=<span class="s">"requests/min"</span> value=<span class="s">"4,812"</span> :trend=<span class="s">"reqs"</span> /&gt;
 &lt;HStat label=<span class="s">"uptime, 30d"</span> value=<span class="s">"99.98%"</span> :trend=<span class="s">"uptime"</span> /&gt;
-&lt;HMeter label=<span class="s">"Disk"</span> :value=<span class="s">"41"</span> /&gt;</pre>
+&lt;label&gt;Disk &lt;Meter :value=<span class="s">"0.41"</span> /&gt;&lt;/label&gt;</pre>
       <pre data-lang="react" hidden>&lt;Stat label=<span class="s">"requests/min"</span> value=<span class="s">"4,812"</span> trend={reqs} /&gt;
 &lt;Stat label=<span class="s">"uptime, 30d"</span> value=<span class="s">"99.98%"</span> trend={uptime} /&gt;
-&lt;Meter label=<span class="s">"Disk"</span> value={41} /&gt;</pre>
+&lt;label&gt;Disk &lt;Meter value={0.41} /&gt;&lt;/label&gt;</pre>
     </div>
   </div>
 </section>
@@ -1065,9 +1065,9 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HMeter label=<span class="s">"API calls"</span> :value=<span class="s">"62"</span> caption=<span class="s">"6.2M / 10M"</span> /&gt;
+      <pre data-lang="vue">&lt;label&gt;API calls &lt;Meter :value=<span class="s">"0.62"</span> caption=<span class="s">"6.2M / 10M"</span> /&gt;&lt;/label&gt;
 &lt;HTable :rows=<span class="s">"invoices"</span> /&gt;</pre>
-      <pre data-lang="react" hidden>&lt;Meter label=<span class="s">"API calls"</span> value={62} caption=<span class="s">"6.2M / 10M"</span> /&gt;
+      <pre data-lang="react" hidden>&lt;label&gt;API calls &lt;Meter value={0.62} caption=<span class="s">"6.2M / 10M"</span> /&gt;&lt;/label&gt;
 &lt;Table rows={invoices} /&gt;</pre>
     </div>
   </div>
@@ -1092,11 +1092,11 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HCard wash=<span class="s">"blue"</span>&gt;
+      <pre data-lang="vue">&lt;Card wash=<span class="s">"blue"</span>&gt;
   &lt;HInput v-model=<span class="s">"email"</span> type=<span class="s">"email"</span> /&gt;
   &lt;HInput v-model=<span class="s">"password"</span> type=<span class="s">"password"</span> /&gt;
-  &lt;HButton color=<span class="s">"blue"</span> block&gt;Sign in&lt;/HButton&gt;
-&lt;/HCard&gt;</pre>
+  &lt;Button color=<span class="s">"blue"</span> block&gt;Sign in&lt;/Button&gt;
+&lt;/Card&gt;</pre>
       <pre data-lang="react" hidden>&lt;Card wash=<span class="s">"blue"</span>&gt;
   &lt;Input value={email} onChange={setEmail} type=<span class="s">"email"</span> /&gt;
   &lt;Input value={password} onChange={setPassword} type=<span class="s">"password"</span> /&gt;
@@ -1124,10 +1124,10 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HCard wash=<span class="s">"green"</span>&gt;
+      <pre data-lang="vue">&lt;Card wash=<span class="s">"green"</span>&gt;
   &lt;HInput v-model=<span class="s">"email"</span> type=<span class="s">"email"</span> /&gt;
-  &lt;HButton color=<span class="s">"green"</span> block&gt;Email me a link&lt;/HButton&gt;
-&lt;/HCard&gt;</pre>
+  &lt;Button color=<span class="s">"green"</span> block&gt;Email me a link&lt;/Button&gt;
+&lt;/Card&gt;</pre>
       <pre data-lang="react" hidden>&lt;Card wash=<span class="s">"green"</span>&gt;
   &lt;Input value={email} onChange={setEmail} type=<span class="s">"email"</span> /&gt;
   &lt;Button color=<span class="s">"green"</span> block&gt;Email me a link&lt;/Button&gt;
@@ -1156,10 +1156,10 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HCard wash=<span class="s">"orange"</span>&gt;
+      <pre data-lang="vue">&lt;Card wash=<span class="s">"orange"</span>&gt;
   &lt;HOtpField v-model=<span class="s">"code"</span> :length=<span class="s">"6"</span> /&gt;
-  &lt;HButton color=<span class="s">"orange"</span> block&gt;Verify&lt;/HButton&gt;
-&lt;/HCard&gt;</pre>
+  &lt;Button color=<span class="s">"orange"</span> block&gt;Verify&lt;/Button&gt;
+&lt;/Card&gt;</pre>
       <pre data-lang="react" hidden>&lt;Card wash=<span class="s">"orange"</span>&gt;
   &lt;OtpField value={code} onChange={setCode} length={6} /&gt;
   &lt;Button color=<span class="s">"orange"</span> block&gt;Verify&lt;/Button&gt;
@@ -1345,7 +1345,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HLineChart :data=<span class="s">"requests"</span> color=<span class="s">"blue"</span> /&gt;</pre>
+      <pre data-lang="vue">&lt;LineChart :data=<span class="s">"requests"</span> color=<span class="s">"blue"</span> /&gt;</pre>
       <pre data-lang="react" hidden>&lt;LineChart :data=<span class="s">"requests"</span> color=<span class="s">"blue"</span> /&gt;</pre>
     </div>
   </div>
@@ -1419,9 +1419,9 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HButton color=<span class="s">"green"</span>&gt;Save&lt;/HButton&gt;
-&lt;HButton color=<span class="s">"red"</span>&gt;Export&lt;/HButton&gt;
-&lt;HButton color=<span class="s">"grey"</span> variant=<span class="s">"outline"</span>&gt;Cancel&lt;/HButton&gt;</pre>
+      <pre data-lang="vue">&lt;Button color=<span class="s">"green"</span>&gt;Save&lt;/Button&gt;
+&lt;Button color=<span class="s">"red"</span>&gt;Export&lt;/Button&gt;
+&lt;Button color=<span class="s">"grey"</span> variant=<span class="s">"outline"</span>&gt;Cancel&lt;/Button&gt;</pre>
       <pre data-lang="react" hidden>&lt;Button color=<span class="s">"green"</span>&gt;Save&lt;/Button&gt;
 &lt;Button color=<span class="s">"red"</span>&gt;Export&lt;/Button&gt;
 &lt;Button color=<span class="s">"grey"</span> variant=<span class="s">"outline"</span>&gt;Cancel&lt;/Button&gt;</pre>
@@ -1472,8 +1472,26 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HTabs v-model=<span class="s">"tab"</span> :tabs=<span class="s">"['Overview','Metrics','Logs']"</span> /&gt;</pre>
-      <pre data-lang="react" hidden>&lt;Tabs value={tab} onChange={setTab} tabs={[<span class="s">"Overview"</span>, <span class="s">"Metrics"</span>, <span class="s">"Logs"</span>]} /&gt;</pre>
+      <pre data-lang="vue"><span class="c"># Tabs/Textarea are not yet halftone-kit components — this demo is pressed by the docs engine; build your own markup and ink it with the core</span>
+
+&lt;div role=<span class="s">"tablist"</span> aria-label=<span class="s">"Service"</span>&gt;
+  &lt;button role=<span class="s">"tab"</span> aria-selected=<span class="s">"true"</span>&gt;Overview&lt;/button&gt;
+  &lt;button role=<span class="s">"tab"</span>&gt;Metrics&lt;/button&gt;
+&lt;/div&gt;
+&lt;canvas class=<span class="s">"ink"</span> aria-hidden=<span class="s">"true"</span>&gt;&lt;/canvas&gt;
+
+<span class="k">import</span> { press } <span class="k">from</span> <span class="s">"./halftone/core/index.js"</span>
+press(el.querySelector(<span class="s">'.ink'</span>), { field: (u) =&gt; (u &lt; 0.33 ? 1 : 0) })</pre>
+      <pre data-lang="react" hidden><span class="c"># Tabs/Textarea are not yet halftone-kit components — this demo is pressed by the docs engine; build your own markup and ink it with the core</span>
+
+&lt;div role=<span class="s">"tablist"</span> aria-label=<span class="s">"Service"</span>&gt;
+  &lt;button role=<span class="s">"tab"</span> aria-selected=<span class="s">"true"</span>&gt;Overview&lt;/button&gt;
+  &lt;button role=<span class="s">"tab"</span>&gt;Metrics&lt;/button&gt;
+&lt;/div&gt;
+&lt;canvas class=<span class="s">"ink"</span> aria-hidden=<span class="s">"true"</span>&gt;&lt;/canvas&gt;
+
+<span class="k">import</span> { press } <span class="k">from</span> <span class="s">"./halftone/core/index.js"</span>
+press(el.querySelector(<span class="s">'.ink'</span>), { field: (u) =&gt; (u &lt; 0.33 ? 1 : 0) })</pre>
     </div>
   </div>
 
@@ -1522,8 +1540,8 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HMeter label=<span class="s">"Build cache"</span> :value=<span class="s">"54"</span> :low=<span class="s">"40"</span> :high=<span class="s">"80"</span> /&gt;</pre>
-      <pre data-lang="react" hidden>&lt;Meter label=<span class="s">"Build cache"</span> value={54} low={40} high={80} /&gt;</pre>
+      <pre data-lang="vue">&lt;label&gt;Build cache &lt;Meter :value=<span class="s">"0.54"</span> :low=<span class="s">"40"</span> :high=<span class="s">"80"</span> /&gt;&lt;/label&gt;</pre>
+      <pre data-lang="react" hidden>&lt;label&gt;Build cache &lt;Meter value={0.54} low={40} high={80} /&gt;&lt;/label&gt;</pre>
     </div>
   </div>
   <table class="props">
@@ -1545,12 +1563,14 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue"><span class="k">import</span> { toast } <span class="k">from</span> <span class="s">"@halftone-ui/vue"</span>
+      <pre data-lang="vue"><span class="c"># not yet a kit component — pressed with the framework-free core</span>
+<span class="k">import</span> { createPressContext, press } <span class="k">from</span> <span class="s">"./halftone/core/index.js"</span>
 
-toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"</span>, duration: 3500 })</pre>
-      <pre data-lang="react" hidden><span class="k">import</span> { toast } <span class="k">from</span> <span class="s">"@halftone-ui/react"</span>
+press(el.querySelector(<span class="s">'.toast-ink'</span>), { field: () =&gt; 1 })</pre>
+      <pre data-lang="react" hidden><span class="c"># not yet a kit component — pressed with the framework-free core</span>
+<span class="k">import</span> { createPressContext, press } <span class="k">from</span> <span class="s">"./halftone/core/index.js"</span>
 
-toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"</span>, duration: 3500 })</pre>
+press(el.querySelector(<span class="s">'.toast-ink'</span>), { field: () =&gt; 1 })</pre>
     </div>
   </div>
   <table class="props">
@@ -1622,7 +1642,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HImage src=<span class="s">"/eric.jpg"</span> :grain=<span class="s">"1.9"</span> /&gt;</pre>
+      <pre data-lang="vue">&lt;Image src=<span class="s">"/eric.jpg"</span> :grain=<span class="s">"1.9"</span> /&gt;</pre>
       <pre data-lang="react" hidden>&lt;Image src=<span class="s">"/eric.jpg"</span> :grain=<span class="s">"1.9"</span> /&gt;</pre>
     </div>
   </div>
@@ -1861,8 +1881,22 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HTextarea v-model=<span class="s">"notes"</span> label=<span class="s">"Release notes"</span> :rows=<span class="s">"4"</span> /&gt;</pre>
-      <pre data-lang="react" hidden>&lt;Textarea value={notes} onChange={setNotes} label=<span class="s">"Release notes"</span> rows={4} /&gt;</pre>
+      <pre data-lang="vue"><span class="c"># Tabs/Textarea are not yet halftone-kit components — this demo is pressed by the docs engine; build your own markup and ink it with the core</span>
+
+&lt;label for=<span class="s">"notes"</span>&gt;Release notes&lt;/label&gt;
+&lt;textarea id=<span class="s">"notes"</span> rows=<span class="s">"4"</span>&gt;&lt;/textarea&gt;
+&lt;canvas class=<span class="s">"ink"</span> aria-hidden=<span class="s">"true"</span>&gt;&lt;/canvas&gt;
+
+<span class="k">import</span> { press } <span class="k">from</span> <span class="s">"./halftone/core/index.js"</span>
+press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })</pre>
+      <pre data-lang="react" hidden><span class="c"># Tabs/Textarea are not yet halftone-kit components — this demo is pressed by the docs engine; build your own markup and ink it with the core</span>
+
+&lt;label for=<span class="s">"notes"</span>&gt;Release notes&lt;/label&gt;
+&lt;textarea id=<span class="s">"notes"</span> rows=<span class="s">"4"</span>&gt;&lt;/textarea&gt;
+&lt;canvas class=<span class="s">"ink"</span> aria-hidden=<span class="s">"true"</span>&gt;&lt;/canvas&gt;
+
+<span class="k">import</span> { press } <span class="k">from</span> <span class="s">"./halftone/core/index.js"</span>
+press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })</pre>
     </div>
   </div>
 </section>
@@ -1934,7 +1968,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       <pre data-lang="vue">&lt;HForm @submit=<span class="s">"create"</span>&gt;
   &lt;HInput v-model=<span class="s">"project"</span> label=<span class="s">"Project"</span> /&gt;
   &lt;HSelect v-model=<span class="s">"region"</span> label=<span class="s">"Region"</span> :options=<span class="s">"regions"</span> /&gt;
-  &lt;HButton color=<span class="s">"green"</span> type=<span class="s">"submit"</span> block&gt;Create project&lt;/HButton&gt;
+  &lt;Button color=<span class="s">"green"</span> type=<span class="s">"submit"</span> block&gt;Create project&lt;/Button&gt;
 &lt;/HForm&gt;</pre>
       <pre data-lang="react" hidden>&lt;Form onSubmit={create}&gt;
   &lt;Input value={project} onChange={setProject} label=<span class="s">"Project"</span> /&gt;
@@ -2156,8 +2190,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       <pre data-lang="vue">&lt;HDialog v-model:open=<span class="s">"open"</span> title=<span class="s">"Rename workspace"</span>&gt;
   This changes the URL of every published board.
   &lt;template #footer&gt;
-    &lt;HButton variant=<span class="s">"outline"</span> @click=<span class="s">"open = false"</span>&gt;Cancel&lt;/HButton&gt;
-    &lt;HButton color=<span class="s">"blue"</span> @click=<span class="s">"rename"</span>&gt;Rename&lt;/HButton&gt;
+    &lt;Button variant=<span class="s">"outline"</span> @click=<span class="s">"open = false"</span>&gt;Cancel&lt;/Button&gt;
+    &lt;Button color=<span class="s">"blue"</span> @click=<span class="s">"rename"</span>&gt;Rename&lt;/Button&gt;
   &lt;/template&gt;
 &lt;/HDialog&gt;</pre>
       <pre data-lang="react" hidden>&lt;Dialog open={open} onOpenChange={setOpen} title=<span class="s">"Rename workspace"</span>&gt;
@@ -2242,7 +2276,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       <div class="langs" role="tablist"></div>
       <pre data-lang="vue">&lt;HPopover label=<span class="s">"Share"</span>&gt;
   Anyone with the link can view this board.
-  &lt;HButton size=<span class="s">"sm"</span>&gt;Copy link&lt;/HButton&gt;
+  &lt;Button size=<span class="s">"sm"</span>&gt;Copy link&lt;/Button&gt;
 &lt;/HPopover&gt;</pre>
       <pre data-lang="react" hidden>&lt;Popover label=<span class="s">"Share"</span>&gt;
   Anyone with the link can view this board.
@@ -2391,7 +2425,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   &lt;HToggle v-model=<span class="s">"bold"</span>&gt;B&lt;/HToggle&gt;
   &lt;HToggle v-model=<span class="s">"italic"</span>&gt;I&lt;/HToggle&gt;
   &lt;HSeparator vertical /&gt;
-  &lt;HButton variant=<span class="s">"ghost"</span>&gt;Link&lt;/HButton&gt;
+  &lt;Button variant=<span class="s">"ghost"</span>&gt;Link&lt;/Button&gt;
 &lt;/HToolbar&gt;</pre>
       <pre data-lang="react" hidden>&lt;Toolbar&gt;
   &lt;Toggle pressed={bold} onPressedChange={setBold}&gt;B&lt;/Toggle&gt;
@@ -2658,7 +2692,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   <h2>Sign in</h2>
   <p class="desc">An auth card washed by the press — the card is an <code>HInkPanel</code> on dark
   paper, so the four-screen crosshatch prints opaque and keys white toward the base. The form stays
-  plain; the CTA is an <code>HButton</code> running the same two inks.</p>
+  plain; the CTA is a <code>Button</code> running the same two inks.</p>
   <div class="inkswap" data-swap="signin" data-def="1"></div>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
@@ -2680,7 +2714,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       <pre data-lang="vue">&lt;HInkPanel pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['purple','pink']"</span> paper=<span class="s">"dark"</span> :misreg=<span class="s">"1.2"</span>&gt;
   &lt;HInput v-model=<span class="s">"email"</span> type=<span class="s">"email"</span> /&gt;
   &lt;HInput v-model=<span class="s">"password"</span> type=<span class="s">"password"</span> /&gt;
-  &lt;HButton pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['purple','pink']"</span> :body=<span class="s">"0.7"</span> block&gt;Sign in&lt;/HButton&gt;
+  &lt;Button pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['purple','pink']"</span> :body=<span class="s">"0.7"</span> block&gt;Sign in&lt;/Button&gt;
 &lt;/HInkPanel&gt;</pre>
       <pre data-lang="react" hidden>&lt;InkPanel pattern=<span class="s">"hatch"</span> inks={[<span class="s">'purple'</span>,<span class="s">'pink'</span>]} paper=<span class="s">"dark"</span> misreg={1.2}&gt;
   &lt;Input value={email} onChange={setEmail} type=<span class="s">"email"</span> /&gt;
@@ -2719,7 +2753,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="ink-bars">
   <h2>Bar Chart</h2>
-  <p class="desc">Crosshatch in the bars — each bar of an <code>HBarChart</code> is its own little
+  <p class="desc">Crosshatch in the bars — each bar of a <code>BarChart</code> is its own little
   press run: one screen at the top, the plates stacking as the bar falls toward the baseline, the
   tall bars reaching the black key. Value is encoded twice — height and ink.</p>
   <div class="inkswap" data-swap="bars" data-def="3"></div>
@@ -2734,7 +2768,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HBarChart :data=<span class="s">"deploys"</span> pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['red','black']"</span>
+      <pre data-lang="vue">&lt;BarChart :data=<span class="s">"deploys"</span> pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['red','black']"</span>
            :body=<span class="s">"0.7"</span> :misreg=<span class="s">"0.8"</span> :scale=<span class="s">"3"</span> /&gt;</pre>
       <pre data-lang="react" hidden>&lt;BarChart data={deploys} pattern=<span class="s">"hatch"</span> inks={[<span class="s">'red'</span>,<span class="s">'black'</span>]}
           body={0.7} misreg={0.8} scale={3} /&gt;</pre>
@@ -2744,7 +2778,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="ink-line">
   <h2>Line Chart</h2>
-  <p class="desc">An <code>HLineChart</code> run through the press — the inverse of the area chart.
+  <p class="desc">A <code>LineChart</code> run through the press — the inverse of the area chart.
   The stroke itself is the darkest pass, all four plates on the line, and the ink hangs off it
   like a comet tail: lighter screens falling away beneath, bare paper above.</p>
   <div class="inkswap" data-swap="line" data-def="4"></div>
@@ -2759,7 +2793,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HLineChart :data=<span class="s">"latency"</span> pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['pink','blue']"</span>
+      <pre data-lang="vue">&lt;LineChart :data=<span class="s">"latency"</span> pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['pink','blue']"</span>
             :body=<span class="s">"0.65"</span> :misreg=<span class="s">"0.9"</span> :scale=<span class="s">"2.8"</span> /&gt;</pre>
       <pre data-lang="react" hidden>&lt;LineChart data={latency} pattern=<span class="s">"hatch"</span> inks={[<span class="s">'pink'</span>,<span class="s">'blue'</span>]}
            body={0.65} misreg={0.9} scale={2.8} /&gt;</pre>
@@ -2819,7 +2853,7 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
 
 <section class="doc" id="ink-button">
   <h2>Ink Button</h2>
-  <p class="desc">The same <code>HButton</code> — <code>inks</code> switches its fill to a press run.
+  <p class="desc">The same <code>Button</code> — <code>inks</code> switches its fill to a press run.
   Hover leans on the ink. The last one prints opaque on dark paper, black-tee style.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
@@ -2834,10 +2868,10 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HButton pattern=<span class="s">"waves"</span> :inks=<span class="s">"['blue','orange']"</span>&gt;Print&lt;/HButton&gt;
-&lt;HButton pattern=<span class="s">"lines"</span> :inks=<span class="s">"['purple','pink']"</span> :body=<span class="s">"0.5"</span>&gt;Preview&lt;/HButton&gt;
-&lt;HButton pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['blue','orange']"</span> :body=<span class="s">"0.7"</span>&gt;Overprint&lt;/HButton&gt;
-&lt;HButton pattern=<span class="s">"waves"</span> :inks=<span class="s">"['orange','blue']"</span> paper=<span class="s">"dark"</span>&gt;Black tee&lt;/HButton&gt;</pre>
+      <pre data-lang="vue">&lt;Button pattern=<span class="s">"waves"</span> :inks=<span class="s">"['blue','orange']"</span>&gt;Print&lt;/Button&gt;
+&lt;Button pattern=<span class="s">"lines"</span> :inks=<span class="s">"['purple','pink']"</span> :body=<span class="s">"0.5"</span>&gt;Preview&lt;/Button&gt;
+&lt;Button pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['blue','orange']"</span> :body=<span class="s">"0.7"</span>&gt;Overprint&lt;/Button&gt;
+&lt;Button pattern=<span class="s">"waves"</span> :inks=<span class="s">"['orange','blue']"</span> paper=<span class="s">"dark"</span>&gt;Black tee&lt;/Button&gt;</pre>
       <pre data-lang="react" hidden>&lt;Button pattern=<span class="s">"waves"</span> inks={[<span class="s">'blue'</span>,<span class="s">'orange'</span>]}&gt;Print&lt;/Button&gt;
 &lt;Button pattern=<span class="s">"lines"</span> inks={[<span class="s">'purple'</span>,<span class="s">'pink'</span>]} body={0.5}&gt;Preview&lt;/Button&gt;
 &lt;Button pattern=<span class="s">"hatch"</span> inks={[<span class="s">'blue'</span>,<span class="s">'orange'</span>]} body={0.7}&gt;Overprint&lt;/Button&gt;
@@ -2861,8 +2895,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;HMeter label=<span class="s">"Coverage"</span> :value=<span class="s">"72"</span> pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['purple','pink']"</span> /&gt;</pre>
-      <pre data-lang="react" hidden>&lt;Meter label=<span class="s">"Coverage"</span> value={72} pattern=<span class="s">"hatch"</span> inks={[<span class="s">'purple'</span>,<span class="s">'pink'</span>]} /&gt;</pre>
+      <pre data-lang="vue">&lt;label&gt;Coverage &lt;Meter :value=<span class="s">"0.72"</span> pattern=<span class="s">"hatch"</span> :inks=<span class="s">"['purple','pink']"</span> /&gt;&lt;/label&gt;</pre>
+      <pre data-lang="react" hidden>&lt;label&gt;Coverage &lt;Meter value={0.72} pattern=<span class="s">"hatch"</span> inks={[<span class="s">'purple'</span>,<span class="s">'pink'</span>]} /&gt;&lt;/label&gt;</pre>
     </div>
   </div>
 </section>
