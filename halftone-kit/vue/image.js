@@ -112,8 +112,9 @@ export const Image = defineComponent({
     watch(() => [props.src, props.resolution], () => { unload?.(); unload = load(); });
     onBeforeUnmount(() => { unload?.(); });
 
-    // gamma/gain change the tone, not the geometry — a plain redraw (field reads props live).
-    watch(() => [props.gamma, props.gain], () => { press.rebuild(); });
+    // gamma/gain change the tone, not the geometry — draw() repaints without re-running the Poisson
+    // point sampling that rebuild() would (field reads props live).
+    watch(() => [props.gamma, props.gain], () => { press.draw(); });
 
     return () => h('canvas', mergeProps(
       { style: 'display:block;width:100%' },

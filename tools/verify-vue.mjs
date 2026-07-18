@@ -172,8 +172,8 @@ ok('Text: unmount cleans up (registry back to baseline)', tctx.size === tBase, `
 const ictx = createPressContext({});
 const icontainer = window.document.createElement('div');
 window.document.body.appendChild(icontainer);
-const iState = reactive({ src: 'a.png' });
-const iApp = createApp({ render: () => h(HalftoneProvider, { context: ictx }, () => h(Image, { src: iState.src })) });
+const iState = reactive({ src: 'a.png', gamma: 1.3 });
+const iApp = createApp({ render: () => h(HalftoneProvider, { context: ictx }, () => h(Image, { src: iState.src, gamma: iState.gamma })) });
 const iBase = ictx.size;
 iApp.mount(icontainer);
 await tick();
@@ -215,6 +215,14 @@ const clearsBeforeErr = clearsOf(icanvas);
 errImg.onerror && errImg.onerror();
 await tick();
 ok('Image: onerror blanks the field (rebuild recorded)', clearsOf(icanvas) > clearsBeforeErr, `clears ${clearsBeforeErr} -> ${clearsOf(icanvas)}`);
+
+// gamma/gain feed only the tone math, never geometry — the adapter should repaint (draw()) rather
+// than rebuild() (which would re-run the Poisson point sampling). src is unchanged, so the load
+// watch doesn't re-fire; only the [gamma, gain] watch should, and it must still visibly redraw.
+const clearsBeforeGamma = clearsOf(icanvas);
+iState.gamma = 1.8;
+await tick();
+ok('Image: a gamma-only change still repaints (tone-only; adapter uses draw(), not rebuild())', clearsOf(icanvas) > clearsBeforeGamma, `clears ${clearsBeforeGamma} -> ${clearsOf(icanvas)}`);
 
 iApp.unmount();
 await tick();

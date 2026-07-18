@@ -52,6 +52,10 @@ export function usePress(elRef, getOpts = () => ({}), watchSources = () => []) {
     get current() { return handle; },
     set: (patch) => handle?.set(patch),
     rebuild: () => handle?.rebuild(),
+    // Repaint only — skips rebuild()'s point re-sampling. For callers whose changed prop feeds only
+    // the field's tone math (e.g. gamma/gain), never geometry, so re-running Poisson sampling would
+    // be wasted work.
+    draw: () => handle?.draw(),
     pressIn: (ms) => handle?.pressIn(ms),
     proof: () => handle?.proof() ?? null,
   };

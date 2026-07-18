@@ -86,8 +86,9 @@ export function Image({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, resolution]);
 
-  // gamma/gain change the tone, not the geometry — a plain redraw (field reads the refs live).
-  useEffect(() => { press.rebuild(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [gamma, gain]);
+  // gamma/gain change the tone, not the geometry — draw() repaints without re-running the Poisson
+  // point sampling that rebuild() would (field reads the gamma/gain refs live).
+  useEffect(() => { press.draw(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [gamma, gain]);
 
   return (
     <canvas

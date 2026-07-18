@@ -151,6 +151,14 @@ const iClearsPre = clearsOf(icanvas);
 await act(async () => { madeImages.forEach((im) => im.onload && im.onload()); }); // fire load deterministically
 ok('Image: luminance load re-presses the surface (draws again post-load)', clearsOf(icanvas) > iClearsPre, `clears ${iClearsPre} -> ${clearsOf(icanvas)}`);
 ok('Image: took the image aspect ratio (no distortion by default)', !!icanvas && (icanvas.style.aspectRatio || '') !== '', `aspectRatio=${icanvas?.style.aspectRatio || '(none)'}`);
+
+// gamma/gain feed only the tone math, never geometry — the adapter should repaint (draw()) rather
+// than rebuild() (which would re-run the Poisson point sampling). Same `src`, so the load effect
+// doesn't re-fire; only the [gamma, gain] effect should, and it must still visibly redraw.
+const iClearsPreGamma = clearsOf(icanvas);
+await act(async () => { iroot.render(h(HalftoneProvider, { context: ictx }, h(Image, { src: 'x.png', gamma: 1.8 }))); });
+ok('Image: a gamma-only change still repaints (tone-only; adapter uses draw(), not rebuild())', clearsOf(icanvas) > iClearsPreGamma, `clears ${iClearsPreGamma} -> ${clearsOf(icanvas)}`);
+
 await act(async () => { iroot.unmount(); });
 ok('Image: unmount cleans up (registry back to baseline)', ictx.size === iBase, `size=${ictx.size}`);
 
