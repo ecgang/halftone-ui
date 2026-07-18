@@ -70,6 +70,9 @@ design/spike plan:
 1. **Close the docs↔kit gap**: donut/pie/radar/sparkline/heatmap as new tone
    fields over `core/charts.js` — the highest-visibility docs demos users
    can't install. (M–L; doubles the React+Vue mirror surface per component.)
+   Also in this gap (found by plan 003's executor): **Tabs** and **Textarea**
+   — docs demo them, kit has neither; their samples are labeled
+   "not yet in the kit" until built.
 2. **Productize the 4-plate press**: misregistration/CMYK exists in the engine
    (masthead, `drawPlates`) but no adapter exposes it — the signature
    differentiator is invisible above raw `press()`. (M spike.)

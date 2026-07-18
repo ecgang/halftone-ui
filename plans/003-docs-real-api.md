@@ -148,8 +148,22 @@ import { createPressContext, press } from "./halftone/core/index.js"
 …followed by a minimal real `press(el, { field })` call appropriate to the demo.
 Do not invent adapter APIs.
 
+**Known stateful cases (disposition decided by the reviewer, 2026-07-17):**
+`HTabs` (:1475) and `HTextarea` (:1864) have NO kit equivalent and are full
+stateful components, so the one-line toast shape doesn't fit. For these two,
+the sample becomes an honestly-labeled snippet: a comment line
+`# Tabs/Textarea are not yet halftone-kit components — this demo is pressed by
+the docs engine; build your own markup and ink it with the core`
+followed by a minimal core press of the custom element's decorative surface
+(e.g. `press(el.querySelector('.ink'), { field })` next to plain
+`<div role="tablist">…` / `<textarea>` markup sketched in 2-4 lines). The
+docs-engine DEMO above the sample stays untouched — only the sample text
+changes. Do NOT invent a Tabs/Textarea adapter API; do NOT delete the
+sections. (Tabs/Textarea are hereby recorded as part of the docs↔kit gap
+direction item in plans/README.md.)
+
 **Verify**: `grep -n "toast" docs/index.html | grep -i import` → no adapter
-imports remain.
+imports remain; `grep -c "HTabs\|HTextarea" docs/index.html` → 0.
 
 ### Step 4: Fix the prose
 
@@ -194,8 +208,9 @@ into scratch files and confirm every imported name exists:
 
 - A sample's fix seems to require changing docs-engine JS or kit source.
 - Golden diffs appear on component-demo canvases (not just layout washes).
-- You cannot find a real-API equivalent for a sample and the core fallback
-  (Step 3) doesn't fit either — report the section, don't invent API.
+- You cannot find a real-API equivalent for a sample and neither Step 3 shape
+  fits (the one-line toast form OR the decided HTabs/HTextarea labeled-sketch
+  form) — report the section, don't invent API.
 - A class of brokenness appears that Steps 2-3 don't cover (the raw pair count
   is NOT a stop signal — 83 pairs is known and expected; only broken-pattern
   blocks are in scope).
