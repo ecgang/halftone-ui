@@ -23,7 +23,10 @@ function useSettledWidthKey(w) {
   return key;
 }
 
-function FrameBody({ frame }) {
+// Memoized: the store is immutable, so an unchanged frame keeps referential identity across
+// dispatches — a drag on frame A must not re-run the (potentially expensive) press draw for every
+// other on-stage frame's body.
+const FrameBody = React.memo(function FrameBody({ frame }) {
   const p = frame.props;
   const dials = { screen: p.screen, scale: p.scale, r: p.r, ink: p.ink, roll: p.roll, seed: p.seed, color: p.color };
   switch (frame.type) {
@@ -70,11 +73,15 @@ function FrameBody({ frame }) {
     default:
       return null;
   }
-}
+});
 
 const CORNERS = ['nw', 'ne', 'sw', 'se'];
 
-export function FrameView({ frame, selected, zoom, dispatch }) {
+// Memoized: with an immutable store, an unselected/undragged frame's props are referentially
+// identical across dispatches (only the frame(s) actually being edited get new objects) — without
+// this, every pointermove during a drag re-reconciles every FrameView subtree on the stone, O(frames)
+// React work per mouse event instead of O(1).
+export const FrameView = React.memo(function FrameView({ frame, selected, zoom, dispatch }) {
   // One gesture ref serves both move and resize; `last` dedupes so a sub-pixel wiggle that rounds
   // to the same rect never dispatches (a value-identical transient would still fake a history step).
   const gesture = useRef(null);
@@ -147,4 +154,4 @@ export function FrameView({ frame, selected, zoom, dispatch }) {
       ))}
     </div>
   );
-}
+});
