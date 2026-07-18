@@ -19,7 +19,7 @@
 - **Risk**: LOW
 - **Depends on**: none
 - **Category**: dx
-- **Planned at**: commit `8072748`, 2026-07-17
+- **Planned at**: commit `8072748`, 2026-07-17 (counts reconciled at `4da1d1e` after the Codex hardening rounds)
 
 ## Why this matters
 
@@ -53,14 +53,14 @@ GitHub Actions workflow runs the same thing on every push and pull request.
 
   | Harness | What it proves | Approx runtime |
   |---|---|---|
-  | `verify-core.mjs` | core press lifecycle (24 checks) | seconds |
+  | `verify-core.mjs` | core press lifecycle incl. allocation-budget guards (33 checks) | seconds |
   | `verify-plates.mjs` | AM/plate compositing (8) | seconds |
   | `verify-charts.mjs` | chart field math, pure Node (14) | <1s |
   | `verify-react.mjs` | React adapter lifecycle under jsdom (40) | ~10s |
   | `verify-vue.mjs` | Vue adapter lifecycle under jsdom (46) | ~10s |
   | `verify-react-visual.mjs` | React real pixels, headless Chromium (19) | ~30s |
   | `verify-vue-visual.mjs` | Vue real pixels, headless Chromium (19) | ~30s |
-  | `verify-studio.mjs` | Studio end-to-end, headless Chromium (38) | ~60s |
+  | `verify-studio.mjs` | Studio end-to-end incl. scene/roll budgets, headless Chromium (50) | ~60s |
   | `golden-frames.mjs --check` | 172 docs canvases × 2 themes byte-identical | ~3min |
 
 - Every Playwright-based harness already launches Chromium with
@@ -76,7 +76,7 @@ GitHub Actions workflow runs the same thing on every push and pull request.
 |---|---|---|
 | Install harness deps | `npm ci --prefix tools` | exit 0 |
 | Install browser | `npx --prefix tools playwright install chromium` | exit 0 |
-| Any single suite | `node tools/verify-core.mjs` | `24 passed, 0 failed`, exit 0 |
+| Any single suite | `node tools/verify-core.mjs` | `33 passed, 0 failed`, exit 0 |
 | Golden | `npm run golden:check --prefix tools` | `PASS — every canvas is byte-identical`, exit 0 |
 
 ## Scope
