@@ -229,6 +229,27 @@ let parseErr = null;
 try { await esbuild.transform(hostileCode, { loader: 'jsx' }); } catch (e) { parseErr = e.errors?.[0]?.text || String(e); }
 ok('generated JSX with hostile label still PARSES (esbuild jsx)', parseErr === null, parseErr || 'parsed clean');
 
+// ---- hostile scene import cannot exhaust the canvas ---------------------------------------------
+// sanitizeScene bounds BOTH ends of x/y/w/h: a 1e9-px frame would make the press allocate an
+// enormous backing store (tab freeze / null 2d context), so extreme imports must land clamped.
+const hostileScene = JSON.stringify({ frames: [
+  { type: 'barchart', x: 1e15, y: -1e15, w: 1e9, h: 1e9, props: { data: [4, 9, 6] } },
+  { type: 'button', x: 0, y: 0, w: -50, h: 1, props: { label: 'tiny' } },
+] });
+await page.setInputFiles('input[type="file"]', { name: 'evil.json', mimeType: 'application/json', buffer: Buffer.from(hostileScene) });
+await page.waitForTimeout(600);
+const bounds = await page.evaluate(() => [...document.querySelectorAll('[data-frame]')].map((el) => ({
+  x: Math.abs(parseInt(el.style.left, 10)), y: Math.abs(parseInt(el.style.top, 10)),
+  w: parseInt(el.style.width, 10), h: parseInt(el.style.height, 10),
+})));
+ok('hostile import: every frame lands within the sanitizer ceilings (w/h in [40,4096], |x|,|y| <= 100000)',
+  bounds.length === 2 && bounds.every((b) => b.w >= 40 && b.w <= 4096 && b.h >= 40 && b.h <= 4096 && b.x <= 100000 && b.y <= 100000),
+  JSON.stringify(bounds));
+await page.click('#zoom-fit').catch(() => {}); // bring the clamped frames into view if possible
+await page.waitForTimeout(400);
+ok('hostile import: the studio stays alive and responsive (no page errors, frames present)',
+  (await page.locator('[data-frame]').count()) === 2 && errors.length === 0, errors.slice(-2).join(' | ') || 'clean');
+
 const png = path.join(HERE, '.verify-studio.png');
 await page.screenshot({ path: png, fullPage: true });
 await browser.close();

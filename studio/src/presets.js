@@ -70,6 +70,8 @@ export function starterFrame(type, x, y) {
 
 // ---- scene import: never trust a file. Rebuild every frame from known keys with fresh ids -------
 const num = (v, d) => (Number.isFinite(+v) ? +v : d);
+const MAX_DIM = 4096;     // frame w/h ceiling — beyond any real workspace frame, safe to allocate
+const MAX_POS = 100000;   // |x|,|y| ceiling — anything further is unreachable on the bed anyway
 export function sanitizeScene(raw) {
   const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.frames) ? raw.frames : null);
   if (!list) return null;
@@ -92,8 +94,13 @@ export function sanitizeScene(raw) {
     frames.push({
       id: newId(), type: f.type,
       name: typeof f.name === 'string' && f.name.trim() ? f.name.slice(0, 80) : c.label,
-      x: num(f.x, 0), y: num(f.y, 0),
-      w: Math.max(40, num(f.w, c.w)), h: Math.max(40, num(f.h, c.h)),
+      // Bound BOTH ends: a hostile scene with 1e9-px frames would make the press allocate an
+      // enormous canvas backing store (tab freeze / null 2d context), and a frame parked at
+      // x=1e15 is unreachable. 4096px is far beyond any real workspace frame.
+      x: Math.max(-MAX_POS, Math.min(MAX_POS, num(f.x, 0))),
+      y: Math.max(-MAX_POS, Math.min(MAX_POS, num(f.y, 0))),
+      w: Math.max(40, Math.min(MAX_DIM, num(f.w, c.w))),
+      h: Math.max(40, Math.min(MAX_DIM, num(f.h, c.h))),
       visible: f.visible !== false,
       props,
     });
