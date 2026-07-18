@@ -17,6 +17,34 @@ const ROOT = path.resolve(HERE, '..');
 let pass = 0, fail = 0;
 const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' : 'FAIL'}  ${n}${x ? '  — ' + x : ''}`); };
 
+// ---- reducer geometry choke point: unit-level, no browser ---------------------------------------
+// The reducer is pure ESM with zero imports, so hostile actions can be dispatched at it directly —
+// this covers the paths the UI can't easily reach (add after an extreme camera pan, an import
+// caller that skipped sanitizeScene). Every action that writes geometry must clamp; non-finite
+// values must fall to defaults, not ride through as NaN.
+{
+  const { reducer, initialState, GEOM } = await import(pathToFileURL(path.join(ROOT, 'studio', 'src', 'store.js')).href);
+  const frame = (g) => ({ id: 'fx1', type: 'text', name: 't', visible: true, props: {}, ...g });
+  const s1 = reducer(initialState(), { type: 'add', frame: frame({ x: 1e9, y: -1e9, w: 1e9, h: 0 }) });
+  const f1 = s1.frames[0];
+  ok('reducer ADD clamps hostile geometry', f1.x === GEOM.MAX_POS && f1.y === -GEOM.MAX_POS && f1.w === GEOM.MAX_DIM && f1.h === GEOM.MIN_DIM,
+    `x=${f1.x} y=${f1.y} w=${f1.w} h=${f1.h}`);
+  const s2 = reducer(initialState(), { type: 'add', frame: frame({ x: NaN, y: Infinity, w: NaN, h: -Infinity }) });
+  const f2 = s2.frames[0];
+  ok('reducer ADD maps non-finite geometry to safe defaults', f2.x === 0 && f2.y === 0 && f2.w === GEOM.MIN_DIM && f2.h === GEOM.MIN_DIM,
+    `x=${f2.x} y=${f2.y} w=${f2.w} h=${f2.h}`);
+  const s3 = reducer(initialState(), { type: 'import', frames: [frame({ x: 5e7, y: 0, w: 40, h: 1e12 })] });
+  const f3 = s3.frames[0];
+  ok('reducer IMPORT clamps frames even when sanitizeScene was skipped', f3.x === GEOM.MAX_POS && f3.h === GEOM.MAX_DIM,
+    `x=${f3.x} h=${f3.h}`);
+  // Round-trip fidelity: whatever geometry ADD lets into state must survive import unchanged —
+  // the reducer clamping BOTH doors is what makes export -> re-import position-stable.
+  const added = reducer(initialState(), { type: 'add', frame: frame({ x: 2e6, y: 3, w: 200, h: 90 }) }).frames[0];
+  const back = reducer(initialState(), { type: 'import', frames: [{ ...added }] }).frames[0];
+  ok('geometry round-trips add -> import without moving', back.x === added.x && back.y === added.y && back.w === added.w && back.h === added.h,
+    `add x=${added.x} import x=${back.x}`);
+}
+
 // ---- build the artifact first: the test target IS the committed file ----------------------------
 execFileSync(process.execPath, [path.join(HERE, 'build-studio.mjs')], { stdio: 'inherit' });
 

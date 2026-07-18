@@ -32,17 +32,19 @@ const step = (state, frames, extra = {}) =>
   ({ ...state, ...extra, frames, past: cap([...state.past, state.frames]), future: [], pending: null });
 const withFrame = (frames, id, fn) => frames.map((f) => (f.id === id ? fn(f) : f));
 
-// Geometry bounds shared by EVERY mutation path — scene import (presets.js sanitizeScene),
-// inspector commits, pointer-resize transients, duplicates. Frame dimensions reach the canvas
-// backing store and the Poisson allocator (ceil(w/cell)*ceil(h/cell) Int32Array), so an unbounded
-// W typed into the inspector is the same terabyte allocation a hostile import was. applyPatch is
-// the choke point for patch+transient; duplicate bounds its offset copy itself.
+// Geometry bounds shared by EVERY mutation path — every action that writes frame geometry
+// (add, import, patch, transient, duplicate) passes boundGeom before the frame enters state, so
+// nothing upstream (a panned-out camera feeding starterFrame, a caller skipping sanitizeScene)
+// can land out-of-range geometry. Frame dimensions reach the canvas backing store and the Poisson
+// allocator (ceil(w/cell)*ceil(h/cell) Int32Array), so an unbounded W is a terabyte allocation
+// whichever door it came through. Non-finite values (NaN/Infinity) fall to safe defaults rather
+// than passing through Math.min/max as NaN.
 export const GEOM = { MIN_DIM: 40, MAX_DIM: 4096, MAX_POS: 100000 };
-const lim = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-const boundGeom = (f) => ({
+const lim = (v, lo, hi, d) => (Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d);
+export const boundGeom = (f) => ({
   ...f,
-  x: lim(f.x, -GEOM.MAX_POS, GEOM.MAX_POS), y: lim(f.y, -GEOM.MAX_POS, GEOM.MAX_POS),
-  w: lim(f.w, GEOM.MIN_DIM, GEOM.MAX_DIM), h: lim(f.h, GEOM.MIN_DIM, GEOM.MAX_DIM),
+  x: lim(f.x, -GEOM.MAX_POS, GEOM.MAX_POS, 0), y: lim(f.y, -GEOM.MAX_POS, GEOM.MAX_POS, 0),
+  w: lim(f.w, GEOM.MIN_DIM, GEOM.MAX_DIM, GEOM.MIN_DIM), h: lim(f.h, GEOM.MIN_DIM, GEOM.MAX_DIM, GEOM.MIN_DIM),
 });
 const applyPatch = (f, a) => boundGeom({ ...f, ...(a.frame || {}), props: { ...f.props, ...(a.props || {}) } });
 
@@ -69,7 +71,7 @@ function rolled(f) {
 export function reducer(state, a) {
   switch (a.type) {
     // ---- undoable, discrete ----
-    case 'add': return step(state, [...state.frames, a.frame], { selectedId: a.frame.id });
+    case 'add': return step(state, [...state.frames, boundGeom(a.frame)], { selectedId: a.frame.id });
     case 'patch': return step(state, withFrame(state.frames, a.id, (f) => applyPatch(f, a)));
     case 'remove':
       return step(state, state.frames.filter((f) => f.id !== a.id),
@@ -92,7 +94,7 @@ export function reducer(state, a) {
     }
     case 'roll':
       return step(state, state.frames.map((f) => (a.id == null || f.id === a.id ? rolled(f) : f)));
-    case 'import': return step(state, a.frames, { selectedId: null });
+    case 'import': return step(state, a.frames.map(boundGeom), { selectedId: null });
 
     // ---- gestures: one history entry for the whole stroke ----
     case 'begin': return state.pending ? state : { ...state, pending: state.frames };
