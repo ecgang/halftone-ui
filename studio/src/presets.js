@@ -2,8 +2,7 @@
 // scene<->code borders: field presets (a Surface field is a closure, so scenes store its NAME and
 // resolve it here), scene-JSON sanitizing, and JSX code generation.
 
-import { newId, SCREENS, GEOM } from './store.js';
-import { grainCost } from '../../halftone-kit/core/screens.js';
+import { newId, SCREENS, GEOM, MAX_WORK, frameCost } from './store.js';
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
@@ -81,13 +80,13 @@ const { MIN_DIM, MAX_DIM, MAX_POS } = GEOM;
 // clicks, so multiplication is impossible while any real scene sails through:
 //   MAX_FRAMES — React mounts / DOM nodes;
 //   MAX_AREA   — canvas backing stores (area IS the right proxy for pixels);
-//   MAX_WORK   — point generation, charged through core's own grainCost estimator, because
-//                area is the WRONG proxy for sweep work (quadratic in the diagonal: 64 thin
-//                4096x40 hatch frames pass any area cap while costing ~5.6M candidates each).
+//   MAX_WORK   — point generation, charged through core's own grainCost estimator (shared
+//                with the reducer's roll accounting via store.js frameCost), because area is
+//                the WRONG proxy for sweep work (quadratic in the diagonal: 64 thin 4096x40
+//                hatch frames pass any area cap while costing ~5.6M candidates each).
 // Frames past any budget are dropped in order.
 const MAX_FRAMES = 64;
 const MAX_AREA = 2 * 4096 * 4096;
-const MAX_WORK = 2 * grainCost(4096, 4096, 1 * 0.8 * 0.4, 'hatch');
 export function sanitizeScene(raw) {
   const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.frames) ? raw.frames : null);
   if (!list) return null;
@@ -125,7 +124,7 @@ export function sanitizeScene(raw) {
     const h = Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.h, c.h)));
     // Charge the frame at the pitch the press will actually use (spec r*0.8*scale, defaults
     // 2.5/1) — props.r/scale are already clamped to DIAL_RANGE above.
-    const cost = grainCost(w, h, (props.r ?? 2.5) * 0.8 * (props.scale ?? 1), props.screen);
+    const cost = frameCost({ w, h, props });
     if (area + w * h > MAX_AREA || work + cost > MAX_WORK) break;
     area += w * h;
     work += cost;

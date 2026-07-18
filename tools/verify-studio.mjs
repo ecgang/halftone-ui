@@ -23,7 +23,7 @@ const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' 
 // caller that skipped sanitizeScene). Every action that writes geometry must clamp; non-finite
 // values must fall to defaults, not ride through as NaN.
 {
-  const { reducer, initialState, GEOM } = await import(pathToFileURL(path.join(ROOT, 'studio', 'src', 'store.js')).href);
+  const { reducer, initialState, GEOM, MAX_WORK, frameCost } = await import(pathToFileURL(path.join(ROOT, 'studio', 'src', 'store.js')).href);
   const frame = (g) => ({ id: 'fx1', type: 'text', name: 't', visible: true, props: {}, ...g });
   const s1 = reducer(initialState(), { type: 'add', frame: frame({ x: 1e9, y: -1e9, w: 1e9, h: 0 }) });
   const f1 = s1.frames[0];
@@ -61,6 +61,22 @@ const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' 
   })));
   ok('scene budget: 64 thin 4096x40 min-pitch hatch frames cut by WORK, not area',
     thin.length >= 1 && thin.length <= 2, `kept=${thin.length}`);
+  // Roll amplification: admission charges frames at their CURRENT screen, but a global
+  // "Roll a press" re-screens every frame in one click — on thin geometry the lattice families
+  // cost ~6x what am does, so a near-budget all-am scene could amplify to ~6x MAX_WORK. The
+  // reducer draws each new screen under the running budget (cheapest different screen when
+  // nothing fits), so the post-roll aggregate is bounded by ~2x instead of 6x+.
+  const amThin = sanitizeScene(Array.from({ length: 64 }, () => ({
+    type: 'surface', x: 0, y: 0, w: 4096, h: 40,
+    props: { fieldName: 'gradient', screen: 'am', r: 1, scale: 0.4 },
+  })));
+  const preWork = amThin.reduce((s, f) => s + frameCost(f), 0);
+  const rolledSt = reducer(reducer(initialState(), { type: 'import', frames: amThin }), { type: 'roll', id: null });
+  const postWork = rolledSt.frames.reduce((s, f) => s + frameCost(f), 0);
+  ok('global roll keeps aggregate work bounded (cheap->expensive re-screen amplification blocked)',
+    amThin.length >= 5 && preWork <= MAX_WORK
+      && rolledSt.frames.every((f) => f.props.screen !== 'am') && postWork <= MAX_WORK * 2,
+    `${amThin.length} frames, pre=${(preWork / 1e6).toFixed(1)}M post=${(postWork / 1e6).toFixed(1)}M cap=${(MAX_WORK / 1e6).toFixed(1)}M`);
 }
 
 // ---- build the artifact first: the test target IS the committed file ----------------------------
@@ -344,6 +360,24 @@ const thinResponsive = await page.evaluate(() => 1 + 1); // a round-trip proves 
 ok('thin-lattice import: work budget admits <=2 frames, studio responsive, no errors',
   thinMounted >= 1 && thinMounted <= 2 && thinResponsive === 2 && Date.now() - tThin < 10000 && errors.length === 0,
   `mounted=${thinMounted} in ${Date.now() - tThin}ms`);
+
+// Roll amplification through the real path: import a near-budget all-am thin scene (cheap,
+// several frames admitted), then the toolbar's global "Roll a press" — the budget-aware roll
+// must re-screen without amplifying past the ceiling, and the thread must come back promptly.
+const amScene = JSON.stringify({ frames: Array.from({ length: 64 }, () => ({
+  type: 'surface', x: 0, y: 0, w: 4096, h: 40,
+  props: { fieldName: 'gradient', screen: 'am', r: 1, scale: 0.4 },
+})) });
+await page.setInputFiles('input[type="file"]', { name: 'am.json', mimeType: 'application/json', buffer: Buffer.from(amScene) });
+await page.waitForTimeout(1000);
+const amMounted = await page.locator('[data-frame]').count();
+const tRoll = Date.now();
+await page.click('#roll-press'); // nothing selected after import -> rolls EVERY frame
+await page.waitForTimeout(1500);
+const rollAlive = await page.evaluate(() => 1 + 1);
+ok('global roll on a near-budget scene stays responsive (no amplification hang, no errors)',
+  amMounted >= 5 && rollAlive === 2 && Date.now() - tRoll < 12000 && errors.length === 0,
+  `${amMounted} frames rolled in ${Date.now() - tRoll}ms`);
 
 const png = path.join(HERE, '.verify-studio.png');
 await page.screenshot({ path: png, fullPage: true });

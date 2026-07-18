@@ -8,6 +8,8 @@
 // `begin` parks the pre-gesture frames in `pending`, `transient` mutates freely with NO history,
 // and `commit` pushes the parked snapshot once — so a 300-event drag costs one undo step.
 
+import { grainCost } from '../../halftone-kit/core/screens.js';
+
 export const SCREENS = ['stipple', 'lines', 'waves', 'hatch', 'am'];
 const HISTORY_MAX = 64;
 
@@ -48,13 +50,29 @@ export const boundGeom = (f) => ({
 });
 const applyPatch = (f, a) => boundGeom({ ...f, ...(a.frame || {}), props: { ...f.props, ...(a.props || {}) } });
 
+// Work accounting shared by scene ADMISSION (sanitizeScene charges imported frames) and the
+// roll MUTATION below. One frame's generation cost at the pitch the press will actually use
+// (spec r*0.8*scale), estimated by core's own grainCost so it can't drift from the generator.
+export const frameCost = (f, screen) =>
+  grainCost(f.w, f.h, (f.props.r ?? 2.5) * 0.8 * (f.props.scale ?? 1), screen ?? f.props.screen ?? 'stipple');
+// Two worst legal frames' worth — computed from the estimator, not a constant.
+export const MAX_WORK = 2 * grainCost(GEOM.MAX_DIM, GEOM.MAX_DIM, 1 * 0.8 * 0.4, 'hatch');
+
 // "Roll a press" — the slot machine. Seed drives the entrance transient, roll the RESTING geometry
 // (core: restSeed = base + off + roll), so roll MUST land on a new value or the frame would not
 // re-seed. The screen must land on a DIFFERENT screen too: on a solid/binary field (button, meter,
 // bars) the line/hatch/am geometries are rng-insensitive — every point inks regardless of jitter —
 // so a re-roll that kept the screen could change nothing visible and the hero button would feel dead.
-function rolled(f) {
+// `remaining` is the scene work budget still unspent: a global roll re-screens EVERY frame in one
+// click, and on thin geometry the lattice families cost ~6x what am does, so an admitted
+// near-budget scene could amplify well past MAX_WORK. The new screen is drawn from the candidates
+// that fit; when none fit, the cheapest different screen (the contract still holds, and the
+// overshoot is bounded by one frame's cost).
+function rolled(f, remaining) {
   const others = SCREENS.filter((s) => s !== (f.props.screen ?? 'stipple'));
+  const fits = others.filter((s) => frameCost(f, s) <= remaining);
+  const pool = fits.length ? fits
+    : [others.reduce((a, b) => (frameCost(f, a) <= frameCost(f, b) ? a : b))];
   let roll;
   do { roll = 1 + Math.floor(Math.random() * 99999); } while (roll === (f.props.roll ?? 0));
   return {
@@ -63,7 +81,7 @@ function rolled(f) {
       ...f.props,
       seed: 1 + Math.floor(Math.random() * 99999),
       roll,
-      screen: others[Math.floor(Math.random() * others.length)],
+      screen: pool[Math.floor(Math.random() * pool.length)],
     },
   };
 }
@@ -92,8 +110,18 @@ export function reducer(state, a) {
       [frames[i], frames[j]] = [frames[j], frames[i]];
       return step(state, frames);
     }
-    case 'roll':
-      return step(state, state.frames.map((f) => (a.id == null || f.id === a.id ? rolled(f) : f)));
+    case 'roll': {
+      // Sequential accounting: frames not being rolled keep charging their current cost, and
+      // each rolled frame spends from what's left.
+      const target = (f) => a.id == null || f.id === a.id;
+      let remaining = MAX_WORK - state.frames.reduce((s, f) => s + (target(f) ? 0 : frameCost(f)), 0);
+      return step(state, state.frames.map((f) => {
+        if (!target(f)) return f;
+        const nf = rolled(f, remaining);
+        remaining -= frameCost(nf);
+        return nf;
+      }));
+    }
     case 'import': return step(state, a.frames.map(boundGeom), { selectedId: null });
 
     // ---- gestures: one history entry for the whole stroke ----
