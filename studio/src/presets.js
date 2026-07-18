@@ -107,30 +107,49 @@ const COMPONENT = {
   meter: 'Meter', card: 'Card', barchart: 'BarChart', linechart: 'LineChart',
 };
 const DIALS = ['screen', 'scale', 'r', 'ink', 'seed', 'roll', 'color'];
-const attr = (k, v) => (typeof v === 'string' ? `${k}=${JSON.stringify(v)}` : `${k}={${JSON.stringify(v)}}`);
+
+// User-controlled text (labels, headings, imported scene strings) must never reach the snippet raw:
+// JSX attribute strings have NO backslash escapes (a lone `"` is unrecoverable) and raw children
+// parse `{`/`<` as syntax — hostile imported text could even smuggle live JSX. Emit the plain form
+// only for a conservative allowlist; everything else rides inside a {JSON.stringify(...)} expression
+// container, where JS string semantics make any content inert.
+const PLAIN_ATTR = /^[A-Za-z0-9 _.,:;!?#()%+@'\/-]*$/;
+const PLAIN_TEXT = /^[A-Za-z0-9 _.,:;!?#()%+@'\/-]*$/;
+const attr = (k, v) => {
+  if (typeof v !== 'string') return `${k}={${JSON.stringify(v)}}`;
+  return PLAIN_ATTR.test(v) ? `${k}="${v}"` : `${k}={${JSON.stringify(v)}}`;
+};
+const child = (v) => {
+  const s = String(v ?? '');
+  return PLAIN_TEXT.test(s) ? s : `{${JSON.stringify(s)}}`;
+};
 
 function frameJSX(f) {
   const p = f.props;
   const parts = [];
-  if (f.type === 'surface') parts.push(`field={${p.fieldName}}`);
+  // fieldName is an identifier spliced into code — only registry names may pass (import already
+  // clamps this, but the exporter must hold on its own since props are live-editable).
+  if (f.type === 'surface') parts.push(`field={${FIELDS[p.fieldName] ? p.fieldName : 'gradient'}}`);
   if (f.type === 'text') parts.push(attr('text', p.text ?? ''));
   if (f.type === 'image') parts.push(attr('src', p.src ?? ''));
   if (f.type === 'meter') parts.push(`value={${JSON.stringify(p.value ?? 0)}}`);
   if (f.type === 'barchart' || f.type === 'linechart') {
-    parts.push(`data={[${(p.data || []).join(', ')}]}`, attr('caption', f.name));
+    const nums = (p.data || []).map((n) => (Number.isFinite(+n) ? +n : 0));
+    parts.push(`data={[${nums.join(', ')}]}`, attr('caption', f.name));
     if (f.type === 'linechart' && p.area) parts.push('area');
   }
   for (const k of DIALS) if (p[k] != null) parts.push(attr(k, p[k]));
   if (f.type !== 'text' && f.type !== 'button' && f.type !== 'card') parts.push(`h={${f.h}}`);
   const open = `<${COMPONENT[f.type]} ${parts.join(' ')}`;
-  if (f.type === 'button') return `${open}>${p.label ?? ''}</Button>`;
-  if (f.type === 'card') return `${open}>\n    <h3>${p.heading ?? ''}</h3>\n    <p>${p.body ?? ''}</p>\n  </Card>`;
+  if (f.type === 'button') return `${open}>${child(p.label)}</Button>`;
+  if (f.type === 'card') return `${open}>\n    <h3>${child(p.heading)}</h3>\n    <p>${child(p.body)}</p>\n  </Card>`;
   return `${open} />`;
 }
 
 export function sceneJSX(frames) {
   const used = [...new Set(frames.map((f) => COMPONENT[f.type]))];
-  const fieldNames = [...new Set(frames.filter((f) => f.type === 'surface').map((f) => f.props.fieldName))];
+  const fieldNames = [...new Set(frames.filter((f) => f.type === 'surface')
+    .map((f) => (FIELDS[f.props.fieldName] ? f.props.fieldName : 'gradient')))];
   const lines = [
     `import { HalftoneProvider${used.length ? ', ' + used.join(', ') : ''} } from './halftone-kit/react/index.js';`,
     '',

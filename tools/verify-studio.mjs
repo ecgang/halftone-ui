@@ -8,6 +8,8 @@ import { execFileSync } from 'node:child_process';
 import { chromium } from 'playwright';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
+import esbuild from 'esbuild';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -188,16 +190,44 @@ await page.click('#theme-toggle');
 ok('theme toggle -> back to dark', await page.evaluate(() => document.documentElement.dataset.mode) === 'dark');
 await page.waitForTimeout(300);
 
-// ---- the two real download paths ----------------------------------------------------------------
+// ---- the two real download paths (validate CONTENT, not just filenames) -------------------------
 await page.click('[data-frame]'); // proof needs a selection
 const proofDl = page.waitForEvent('download', { timeout: 4000 }).catch(() => null);
 await page.click('#export-proof');
 const proof = await proofDl;
-ok('Proof (PNG) downloads the selected frame', !!proof && /^proof-.*\.png$/.test(proof.suggestedFilename()), proof?.suggestedFilename() || '(none)');
+const proofBytes = proof ? fs.readFileSync(await proof.path()) : Buffer.alloc(0);
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+ok('Proof (PNG) downloads a REAL png (magic bytes, non-trivial size)',
+  !!proof && /^proof-.*\.png$/.test(proof.suggestedFilename()) && proofBytes.subarray(0, 8).equals(PNG_MAGIC) && proofBytes.length > 500,
+  proof ? `${proof.suggestedFilename()} ${proofBytes.length}b` : '(none)');
 const dataDl = page.waitForEvent('download', { timeout: 4000 }).catch(() => null);
 await page.click('#export-data');
 const data = await dataDl;
-ok('Data (JSON) downloads studio-scene.json', !!data && data.suggestedFilename() === 'studio-scene.json', data?.suggestedFilename() || '(none)');
+let scene = null;
+try { scene = data ? JSON.parse(fs.readFileSync(await data.path(), 'utf8')) : null; } catch (e) { /* fails below */ }
+const liveFrames = await page.locator('[data-frame]').count();
+const sceneFrames = scene && (Array.isArray(scene) ? scene : scene.frames);
+ok('Data (JSON) downloads VALID json whose frame count matches the stone',
+  !!data && data.suggestedFilename() === 'studio-scene.json' && Array.isArray(sceneFrames) && sceneFrames.length === liveFrames,
+  `frames=${sceneFrames ? sceneFrames.length : 'unparseable'} live=${liveFrames}`);
+
+// ---- hostile text cannot break or hijack the JSX export -----------------------------------------
+// Labels/headings are user-edited and survive scene import; the generator must keep them inert.
+// Braces would parse as expressions, a lone quote kills a JSX attribute (no backslash escapes),
+// and </Button><script> would escape the element entirely if interpolated raw.
+const HOSTILE = `pwn" {evil}</Button><script>alert(1)</script> \\ 'q`;
+await page.click('[data-add="button"]');
+await page.click('[data-frame].selected canvas').catch(() => {});
+await page.fill('#insp-label', HOSTILE);
+await page.keyboard.press('Enter');
+await page.click('#export-code');
+const hostileCode = await page.locator('[data-modal-text]').inputValue();
+await page.keyboard.press('Escape');
+ok('hostile label rides inside an expression container, not raw children',
+  /<Button [^>]*>\{"/.test(hostileCode), (hostileCode.match(/<Button [^>]*>.{0,25}/) || ['(no Button)'])[0]);
+let parseErr = null;
+try { await esbuild.transform(hostileCode, { loader: 'jsx' }); } catch (e) { parseErr = e.errors?.[0]?.text || String(e); }
+ok('generated JSX with hostile label still PARSES (esbuild jsx)', parseErr === null, parseErr || 'parsed clean');
 
 const png = path.join(HERE, '.verify-studio.png');
 await page.screenshot({ path: png, fullPage: true });
