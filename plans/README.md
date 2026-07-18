@@ -20,7 +20,7 @@ row when done.
 | 003 | Docs-site samples teach the real API | P1 | M | — | TODO |
 | 004 | Unit vectors: core math + Studio reducer | P2 | S | — (001 registers it) | DONE (36 vectors, reviewed + integrated 2026-07-17) |
 | 005 | Studio memo + draw-facade + shared adapter modules | P2 | S | — | DONE (3 commits, reviewed + integrated 2026-07-17; Text/Image use dialPropsNoSeed — documented deviation, approved) |
-| 006 | Wire the `wash` dial for real (core + golden cycle) | P2 | M | — | TODO |
+| 006 | Wire the `wash` dial for real (core + golden cycle) | P2 | M | — | DONE (1926ed7, golden byte-identical, reviewed + integrated 2026-07-17) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 REJECTED (with one-line rationale).

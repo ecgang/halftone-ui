@@ -8,7 +8,10 @@
 > maintain the index.
 >
 > **Drift check (run first)**: `git diff --stat 8072748..HEAD -- docs/index.html dist/index.html halftone-kit/react/index.js halftone-kit/vue/index.js`
-> On any drift, re-verify the "Current state" excerpts before proceeding.
+> NOTE (reviewer, 2026-07-17): dist/index.html WILL show drift — it was rebuilt by the
+> security-hardening rounds and by plan 006 (wash wiring), both byte-identical to the golden.
+> docs/index.html and both adapter barrels are untouched; only drift in THOSE is a reason to
+> re-verify the "Current state" excerpts before proceeding.
 
 ## Status
 
