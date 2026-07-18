@@ -3044,8 +3044,8 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   }
   var MAX_CELLS = 2097152;
   function grainPts(W, H, r, rng, pat) {
+    if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
     if (!pat || pat === "stipple") {
-      if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
       if (!(Number.isFinite(r) && r > 0)) r = 2;
       let cell = r / Math.SQRT2;
       while (Math.ceil(W / cell) * Math.ceil(H / cell) > MAX_CELLS) cell *= 2;

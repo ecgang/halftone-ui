@@ -53,10 +53,11 @@ export function amPts(W, H, pitch, ang, rng) {
 const MAX_CELLS = 2097152;
 
 export function grainPts(W, H, r, rng, pat) {
+  // Degenerate dimensions: nothing drawable — guarded BEFORE pattern dispatch, because every
+  // family fails differently: Infinity spins the stipple budget loop AND the line/am sweep
+  // loops (-Infinity + pitch never advances), mixed-sign gw*gh makes Int32Array throw.
+  if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
   if (!pat || pat === 'stipple') {
-    // Degenerate dimensions: nothing drawable. This also keeps NaN/Infinity out of the budget
-    // loop below (Infinity would double forever) and mixed-sign gw*gh out of Int32Array.
-    if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
     // Non-finite or <=0 r would make poisson's grid indices NaN — every neighbor check misses,
     // every candidate places, and the active list never drains (an infinite loop, not a throw).
     if (!(Number.isFinite(r) && r > 0)) r = 2;

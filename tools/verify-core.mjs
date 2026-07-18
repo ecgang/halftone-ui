@@ -252,11 +252,13 @@ function mockCanvas(w = 200, h = 60) {
   const thin = grainPts(4096, 0.001, 0.01, mulberry32(7), 'stipple');
   ok('poisson budget holds on thin canvases (ceil overhead, not area)',
     thin.length >= 1 && Date.now() - t1 < 5000, `${thin.length} pts in ${Date.now() - t1}ms`);
-  // Degenerate dimensions return an empty point set instead of throwing or looping:
-  // Infinity would spin the budget loop forever, mixed-sign dims make Int32Array throw.
+  // Degenerate dimensions return an empty point set instead of throwing or looping, for EVERY
+  // screen family: Infinity spins the stipple budget loop AND the line/am sweep loops
+  // (-Infinity + pitch never advances), mixed-sign dims make Int32Array throw.
   const degenerate = [[0, 200], [-5, 200], [4096, -1], [NaN, 200], [Infinity, 200], [4096, Infinity]];
-  const allEmpty = degenerate.every(([w, h]) => grainPts(w, h, 2, mulberry32(7), 'stipple').length === 0);
-  ok('degenerate dimensions (0, negative, NaN, Infinity) press as empty, never throw', allEmpty);
+  const allEmpty = ['stipple', 'lines', 'waves', 'hatch', 'am'].every((pat) =>
+    degenerate.every(([w, h]) => grainPts(w, h, 2, mulberry32(7), pat).length === 0));
+  ok('degenerate dimensions (0, negative, NaN, Infinity) press as empty on every screen family', allEmpty);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
