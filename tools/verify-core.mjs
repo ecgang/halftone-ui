@@ -259,6 +259,16 @@ function mockCanvas(w = 200, h = 60) {
   const allEmpty = ['stipple', 'lines', 'waves', 'hatch', 'am'].every((pat) =>
     degenerate.every(([w, h]) => grainPts(w, h, 2, mulberry32(7), pat).length === 0));
   ok('degenerate dimensions (0, negative, NaN, Infinity) press as empty on every screen family', allEmpty);
+  // The lattice families' absolute pitch floors bound density, not TOTAL work — at the studio's
+  // 4096px geometry ceiling an unbudgeted hatch is ~11M retained point objects on the UI thread.
+  // Every family at max geometry + min pitch must complete fast with a bounded point count.
+  for (const pat of ['lines', 'waves', 'hatch', 'am']) {
+    const t = Date.now();
+    const p = grainPts(4096, 4096, 1 * 0.8 * 0.4, mulberry32(7), pat);
+    ok(`sweep budget holds for ${pat} at 4096x4096 + min pitch`,
+      p.length > 1000 && p.length < 4_000_000 && Date.now() - t < 8000,
+      `${p.length} pts in ${Date.now() - t}ms`);
+  }
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

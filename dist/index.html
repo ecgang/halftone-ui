@@ -3045,14 +3045,21 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   var MAX_CELLS = 2097152;
   function grainPts(W, H, r, rng, pat) {
     if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
+    if (!(Number.isFinite(r) && r > 0)) r = 2;
     if (!pat || pat === "stipple") {
-      if (!(Number.isFinite(r) && r > 0)) r = 2;
       let cell = r / Math.SQRT2;
       while (Math.ceil(W / cell) * Math.ceil(H / cell) > MAX_CELLS) cell *= 2;
       return poisson(W, H, cell * Math.SQRT2, rng);
     }
-    if (pat === "am") return amPts(W, H, Math.max(4.4, r * 3.4), 0.785, rng);
-    const pts = [], pitch = Math.max(2.8, r * 2.2);
+    const diag = Math.hypot(W, H);
+    if (pat === "am") {
+      let p = Math.max(4.4, r * 3.4);
+      while (((diag + 2 * p) / p) ** 2 > MAX_CELLS) p *= 2;
+      return amPts(W, H, p, 0.785, rng);
+    }
+    let pitch = Math.max(2.8, r * 2.2);
+    while ((diag + 2 * pitch) / pitch * ((diag + 2 * pitch) / Math.max(1.6, pitch * 0.26)) > MAX_CELLS) pitch *= 2;
+    const pts = [];
     const fams = pat === "hatch" ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1]] : [[pat === "waves" ? 0 : -0.62, 0.05, 1]];
     for (const [a, lo, hi] of fams)
       for (const q of screenPts(W, H, pitch, a, rng, pat === "waves"))

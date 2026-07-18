@@ -43,13 +43,16 @@ export function amPts(W, H, pitch, ang, rng) {
 // The screen selector. A surface presses as stipple, lines, waves, hatch or am. `hatch` is three
 // line families at different angles/bands; `lines`/`waves` are a single family. `am` delegates to
 // the square grid. `pat` falsy or 'stipple' -> blue noise.
-// Poisson's grid allocation is ceil(W/cell)*ceil(H/cell) Int32 entries with cell = r/SQRT2 —
-// cost couples SIZE to PITCH, so independently-legal extremes (a 4096px frame at the minimum
-// pitch dial) compound into a multi-GB grid no single-value clamp can see. The budget must be
-// enforced on the EXACT ceil product, not the area approximation W*H/cell²: on a thin canvas
-// (W=4096, H=0.001) the ceiling overhead dominates and an area-derived floor still allocates
-// millions of columns. The line/am families don't need this — they already carry absolute
-// pitch floors (2.8 / 4.4) and no grid.
+// One shared work budget for every screen family: poisson grid cells for stipple, sweep
+// candidates per family for the line/am lattices. Cost couples SIZE to PITCH, so
+// independently-legal extremes (a 4096px frame at the minimum pitch dial) compound into
+// multi-GB allocations or millions of retained point objects that no single-value clamp can
+// see. Two subtleties the budget must respect: (1) stipple's bound is the EXACT
+// ceil(W/cell)*ceil(H/cell) product, not the area approximation — on a thin canvas
+// (W=4096, H=0.001) ceiling overhead dominates and an area-derived floor still allocates
+// millions of columns; (2) the line/am absolute pitch floors (2.8 / 4.4) bound DENSITY but
+// not TOTAL work, which is quadratic in the frame diagonal — a 4096px hatch at floor pitch
+// is ~7.5M candidates per family, x3 families.
 const MAX_CELLS = 2097152;
 
 export function grainPts(W, H, r, rng, pat) {
@@ -57,18 +60,30 @@ export function grainPts(W, H, r, rng, pat) {
   // family fails differently: Infinity spins the stipple budget loop AND the line/am sweep
   // loops (-Infinity + pitch never advances), mixed-sign gw*gh makes Int32Array throw.
   if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
+  // Non-finite or <=0 r would make poisson's grid indices NaN — every neighbor check misses,
+  // every candidate places, and the active list never drains (an infinite loop, not a throw).
+  // On the lattice families it would NaN the pitch and press empty; defaulting is uniform.
+  if (!(Number.isFinite(r) && r > 0)) r = 2;
   if (!pat || pat === 'stipple') {
-    // Non-finite or <=0 r would make poisson's grid indices NaN — every neighbor check misses,
-    // every candidate places, and the active list never drains (an infinite loop, not a throw).
-    if (!(Number.isFinite(r) && r > 0)) r = 2;
     // Grow the cell until the exact allocation fits the budget. Doubling terminates in
     // O(log) steps and overshoots at most 2x (grid >= MAX_CELLS/4 when it engages at all).
     let cell = r / Math.SQRT2;
     while (Math.ceil(W / cell) * Math.ceil(H / cell) > MAX_CELLS) cell *= 2;
     return poisson(W, H, cell * Math.SQRT2, rng);
   }
-  if (pat === 'am') return amPts(W, H, Math.max(4.4, r * 3.4), 0.785, rng);
-  const pts = [], pitch = Math.max(2.8, r * 2.2);
+  // Sweep budget: both lattices iterate ~(2R/pitch) rows x (2R/step) columns per family with
+  // R = hypot(W,H)/2 + pitch (so 2R = diag + 2*pitch). Double the pitch until the candidate
+  // count fits MAX_CELLS. As pitch grows the count converges to a small constant, so the loop
+  // terminates for any finite W/H; it never engages at docs/kit-sane size-to-pitch ratios.
+  const diag = Math.hypot(W, H);
+  if (pat === 'am') {
+    let p = Math.max(4.4, r * 3.4);
+    while (((diag + 2 * p) / p) ** 2 > MAX_CELLS) p *= 2;
+    return amPts(W, H, p, 0.785, rng);
+  }
+  let pitch = Math.max(2.8, r * 2.2);
+  while (((diag + 2 * pitch) / pitch) * ((diag + 2 * pitch) / Math.max(1.6, pitch * 0.26)) > MAX_CELLS) pitch *= 2;
+  const pts = [];
   const fams = pat === 'hatch'
     ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1.0]]
     : [[pat === 'waves' ? 0 : -0.62, 0.05, 1.0]];
