@@ -1531,8 +1531,9 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: (u) =&gt; (u &lt
 
 <section class="doc" id="meter">
   <h2>Meter</h2>
-  <p class="desc">The gauge from the Monitoring example, on its own. Color resolves automatically
-  from the low/high marks unless pinned.</p>
+  <p class="desc">The gauge from the Monitoring example, on its own. A real
+  <code>&lt;progress&gt;</code> carries the value and the accessible readout; the halftone ink fills
+  to the same fraction. Pick the ink with <code>color</code>.</p>
   <div class="ex" data-ex>
     <div class="extabs" role="tablist"></div>
     <div class="stage">
@@ -1542,16 +1543,16 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: (u) =&gt; (u &lt
     </div>
     <div class="codewrap">
       <div class="langs" role="tablist"></div>
-      <pre data-lang="vue">&lt;label&gt;Build cache &lt;Meter :value=<span class="s">"0.54"</span> :low=<span class="s">"40"</span> :high=<span class="s">"80"</span> /&gt;&lt;/label&gt;</pre>
-      <pre data-lang="react" hidden>&lt;label&gt;Build cache &lt;Meter value={0.54} low={40} high={80} /&gt;&lt;/label&gt;</pre>
+      <pre data-lang="vue">&lt;label&gt;Build cache &lt;Meter :value=<span class="s">"54"</span> :max=<span class="s">"100"</span> color=<span class="s">"green"</span> /&gt;&lt;/label&gt;</pre>
+      <pre data-lang="react" hidden>&lt;label&gt;Build cache &lt;Meter value={54} max={100} color=<span class="s">"green"</span> /&gt;&lt;/label&gt;</pre>
     </div>
   </div>
   <table class="props">
     <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
-    <tr><td>value</td><td>number</td><td>—</td></tr>
-    <tr><td>low</td><td>number</td><td>40</td></tr>
-    <tr><td>high</td><td>number</td><td>80</td></tr>
-    <tr><td>color</td><td>HalftoneColor</td><td>auto</td></tr>
+    <tr><td>value</td><td>number</td><td>0</td></tr>
+    <tr><td>max</td><td>number</td><td>1</td></tr>
+    <tr><td>h</td><td>number</td><td>12</td></tr>
+    <tr><td>color</td><td>HalftoneColor</td><td>—</td></tr>
   </table>
 </section>
 
