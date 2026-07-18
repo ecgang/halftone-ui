@@ -3042,8 +3042,12 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
       }
     return pts;
   }
+  var MAX_CELLS = 2097152;
   function grainPts(W, H, r, rng, pat) {
-    if (!pat || pat === "stipple") return poisson(W, H, r, rng);
+    if (!pat || pat === "stipple") {
+      if (!(Number.isFinite(r) && r > 0)) r = 2;
+      return poisson(W, H, Math.max(r, Math.sqrt(2 * W * H / MAX_CELLS)), rng);
+    }
     if (pat === "am") return amPts(W, H, Math.max(4.4, r * 3.4), 0.785, rng);
     const pts = [], pitch = Math.max(2.8, r * 2.2);
     const fams = pat === "hatch" ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1]] : [[pat === "waves" ? 0 : -0.62, 0.05, 1]];

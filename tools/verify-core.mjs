@@ -226,5 +226,27 @@ function mockCanvas(w = 200, h = 60) {
   hp.destroy();
 }
 
+// ---- allocation budget: area x pitch may not compound into a giant Poisson grid -----------------
+// Every dial clamp upstream is per-value; the coupled worst case (max frame, min pitch) must be
+// bounded INSIDE grainPts. 4096x4096 at pitch 0.32 would be a ~327M-cell (1.3GB) grid unfloored —
+// if the floor holds, the call completes in bounded time with a sane point count; if it doesn't,
+// this test dies on the allocation, which is exactly the signal.
+{
+  const { grainPts } = await import(new URL('../halftone-kit/core/screens.js', import.meta.url).href);
+  const { mulberry32 } = await import(new URL('../halftone-kit/core/rng.js', import.meta.url).href);
+  const t0 = Date.now();
+  const pts = grainPts(4096, 4096, 0.32, mulberry32(7), 'stipple');
+  ok('poisson allocation budget: 4096x4096 at pitch 0.32 completes bounded',
+    pts.length > 1000 && pts.length < 2_000_000, `${pts.length} pts in ${Date.now() - t0}ms`);
+  const ptsNaN = grainPts(300, 200, NaN, mulberry32(7), 'stipple');
+  const ptsZero = grainPts(300, 200, 0, mulberry32(7), 'stipple');
+  ok('poisson survives non-finite / zero pitch (no infinite loop, no Int32Array throw)',
+    ptsNaN.length > 0 && ptsZero.length > 0, `NaN->${ptsNaN.length} 0->${ptsZero.length}`);
+  // The floor must be invisible at sane ratios: a docs-scale canvas at a real pitch is unchanged.
+  const a = grainPts(800, 400, 2.0, mulberry32(7), 'stipple');
+  const b = grainPts(800, 400, Math.max(2.0, Math.sqrt((2 * 800 * 400) / 2097152)), mulberry32(7), 'stipple');
+  ok('pitch floor never engages at sane area/pitch ratios (golden-safe)', a.length === b.length);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

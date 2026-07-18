@@ -43,8 +43,20 @@ export function amPts(W, H, pitch, ang, rng) {
 // The screen selector. A surface presses as stipple, lines, waves, hatch or am. `hatch` is three
 // line families at different angles/bands; `lines`/`waves` are a single family. `am` delegates to
 // the square grid. `pat` falsy or 'stipple' -> blue noise.
+// Poisson's grid allocation is ceil(W/cell)*ceil(H/cell) Int32 entries with cell = r/SQRT2 —
+// cost couples AREA to PITCH, so independently-legal extremes (a 4096px frame at the minimum
+// pitch dial) compound into a multi-GB grid no single-value clamp can see. Floor the pitch so
+// the grid never exceeds MAX_CELLS (~8.4MB): r >= sqrt(2*W*H/MAX_CELLS). The line/am families
+// don't need this — they already carry absolute pitch floors (2.8 / 4.4) and no grid.
+const MAX_CELLS = 2097152;
+
 export function grainPts(W, H, r, rng, pat) {
-  if (!pat || pat === 'stipple') return poisson(W, H, r, rng);
+  if (!pat || pat === 'stipple') {
+    // Non-finite or <=0 r would make poisson's grid indices NaN — every neighbor check misses,
+    // every candidate places, and the active list never drains (an infinite loop, not a throw).
+    if (!(Number.isFinite(r) && r > 0)) r = 2;
+    return poisson(W, H, Math.max(r, Math.sqrt((2 * W * H) / MAX_CELLS)), rng);
+  }
   if (pat === 'am') return amPts(W, H, Math.max(4.4, r * 3.4), 0.785, rng);
   const pts = [], pitch = Math.max(2.8, r * 2.2);
   const fams = pat === 'hatch'
