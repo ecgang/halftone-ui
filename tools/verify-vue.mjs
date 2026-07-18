@@ -147,7 +147,8 @@ ok('destroy: unmount drops the surface from the registry (size back to baseline 
 const tctx = createPressContext({});
 const tcontainer = window.document.createElement('div');
 window.document.body.appendChild(tcontainer);
-const tApp = createApp({ render: () => h(HalftoneProvider, { context: tctx }, () => h(Text, { text: 'HALFTONE UI' })) });
+const tState = reactive({ text: 'HALFTONE UI' });
+const tApp = createApp({ render: () => h(HalftoneProvider, { context: tctx }, () => h(Text, { text: tState.text })) });
 const tBase = tctx.size;
 let threw = null;
 try { tApp.mount(tcontainer); await tick(); } catch (e) { threw = e; }
@@ -155,6 +156,14 @@ const tcanvas = tcontainer.querySelector('canvas');
 ok('Text: mounts + rasterises without throwing (textField over stubbed 2D ctx)', threw === null, threw?.message);
 ok('Text: registered and drew on the shared context', tcanvas && tctx.size === tBase + 1 && clearsOf(tcanvas) >= 1, `size=${tctx.size} clears=${tcanvas ? clearsOf(tcanvas) : 'n/a'}`);
 ok('Text: pushed the wordmark height through the press (canvas got a CSS height)', !!tcanvas && /\d/.test(tcanvas.style.height || ''), `height=${tcanvas?.style.height || '(none)'}`);
+// Vue's watch is lazy — it never fires on setup — so a React-style "skip the first run" guard here
+// would swallow the FIRST real change. Regression for exactly that: one text edit after mount must
+// re-rasterise and re-press (h is a geometry key -> rebuild + draw -> a new clearRect).
+const tClears = clearsOf(tcanvas);
+tState.text = 'REPRINTED';
+await tick();
+ok('Text: the FIRST text change after mount re-rasterises and re-presses (lazy-watch, no skip guard)',
+  clearsOf(tcanvas) > tClears, `clears ${tClears} -> ${clearsOf(tcanvas)}`);
 tApp.unmount();
 await tick();
 ok('Text: unmount cleans up (registry back to baseline)', tctx.size === tBase, `size=${tctx.size}`);

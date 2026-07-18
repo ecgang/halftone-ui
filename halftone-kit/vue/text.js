@@ -32,7 +32,6 @@ export const Text = defineComponent({
     const el = ref(null);
     const raster = ref(null);   // { sample, H, cell } — filled at first rasterise
     const width = ref(0);       // last width we rasterised at
-    let inited = false;
 
     // Stable, point-based field: sample the wordmark at the raw canvas point (raster space == canvas
     // space). Identity never changes, so usePress won't rebuild on it — we drive redraws explicitly
@@ -80,11 +79,11 @@ export const Text = defineComponent({
     });
     onBeforeUnmount(() => { ro?.disconnect(); ro = null; });
 
-    // Re-rasterise when the type or a cell-affecting dial changes, at the current width. Skips the
-    // initial run (Vue's default lazy `watch` never fires on setup) — the width effect above already
-    // rasterised once.
+    // Re-rasterise when the type or a cell-affecting dial changes, at the current width. No skip
+    // guard here: Vue's default `watch` is ALREADY lazy (it never fires on setup, unlike React's
+    // useEffect, which is why the React port needs an `inited` ref) — a guard on top of that would
+    // swallow the FIRST real text/scale/r change.
     watch(() => [props.text, props.scale, props.r], () => {
-      if (!inited) { inited = true; return; }
       if (width.value) rasterize(width.value);
     });
 
