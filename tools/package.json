@@ -6,7 +6,9 @@
   "scripts": {
     "golden:write": "node golden-frames.mjs --write",
     "golden:check": "node golden-frames.mjs --check",
-    "golden:selftest": "node golden-frames.mjs --selftest"
+    "golden:selftest": "node golden-frames.mjs --selftest",
+    "verify": "node verify-all.mjs",
+    "verify:quick": "node verify-all.mjs --no-golden"
   },
   "devDependencies": {
     "@vue/server-renderer": "^3.5.40",
