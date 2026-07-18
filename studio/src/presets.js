@@ -73,11 +73,20 @@ const num = (v, d) => (Number.isFinite(+v) ? +v : d);
 // Geometry ceilings live in the store's GEOM (the reducer clamps EVERY mutation path with them);
 // sanitize shares the same constants so import and live edits can never drift apart.
 const { MIN_DIM, MAX_DIM, MAX_POS } = GEOM;
+// A scene budget on top of the per-frame clamps: per-frame WORK is bounded (core's screen
+// budget), but a hostile file multiplies it — hundreds of max-size frames each mount a canvas
+// whose backing store alone is ~268MB at dpr 2. Cap the frame count AND the total canvas area;
+// two max-frames' worth keeps the ceiling at the same order a user can reach with two clicks
+// while making multiplication impossible. Frames past either budget are dropped in order.
+const MAX_FRAMES = 64;
+const MAX_AREA = 2 * 4096 * 4096;
 export function sanitizeScene(raw) {
   const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.frames) ? raw.frames : null);
   if (!list) return null;
   const frames = [];
+  let area = 0;
   for (const f of list) {
+    if (frames.length >= MAX_FRAMES) break;
     const c = f && CASE_BY_TYPE[f.type];
     if (!c) continue;
     const p = (f.props && typeof f.props === 'object') ? f.props : {};
@@ -101,16 +110,19 @@ export function sanitizeScene(raw) {
     if (props.fieldName && !FIELDS[props.fieldName]) props.fieldName = 'gradient';
     if (Array.isArray(p.data)) props.data = p.data.map((n) => num(n, 0)).slice(0, 64);
     if (typeof p.area === 'boolean') props.area = p.area;
+    // Bound BOTH ends: a hostile scene with 1e9-px frames would make the press allocate an
+    // enormous canvas backing store (tab freeze / null 2d context), and a frame parked at
+    // x=1e15 is unreachable. 4096px is far beyond any real workspace frame.
+    const w = Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.w, c.w)));
+    const h = Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.h, c.h)));
+    if (area + w * h > MAX_AREA) break;
+    area += w * h;
     frames.push({
       id: newId(), type: f.type,
       name: typeof f.name === 'string' && f.name.trim() ? f.name.slice(0, 80) : c.label,
-      // Bound BOTH ends: a hostile scene with 1e9-px frames would make the press allocate an
-      // enormous canvas backing store (tab freeze / null 2d context), and a frame parked at
-      // x=1e15 is unreachable. 4096px is far beyond any real workspace frame.
       x: Math.max(-MAX_POS, Math.min(MAX_POS, num(f.x, 0))),
       y: Math.max(-MAX_POS, Math.min(MAX_POS, num(f.y, 0))),
-      w: Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.w, c.w))),
-      h: Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.h, c.h))),
+      w, h,
       visible: f.visible !== false,
       props,
     });

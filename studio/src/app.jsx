@@ -162,6 +162,9 @@ function StudioBody({ state, dispatch }) {
 
   const onImport = async (file) => {
     try {
+      // Size-gate BEFORE file.text()/JSON.parse — a multi-GB file would block the main thread
+      // in the parser long before sanitizeScene's frame budget ever sees it.
+      if (file.size > 16_000_000) throw new Error('scene file is too large (16MB max)');
       const frames = sanitizeScene(JSON.parse(await file.text()));
       if (!frames) throw new Error('no frames array');
       dispatch({ type: 'import', frames });

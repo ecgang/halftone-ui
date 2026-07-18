@@ -43,6 +43,14 @@ const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' 
   const back = reducer(initialState(), { type: 'import', frames: [{ ...added }] }).frames[0];
   ok('geometry round-trips add -> import without moving', back.x === added.x && back.y === added.y && back.w === added.w && back.h === added.h,
     `add x=${added.x} import x=${back.x}`);
+  // Scene budget: per-frame work is bounded by core's screen budget, so the remaining attack is
+  // MULTIPLYING it — a file with hundreds of frames. sanitizeScene caps the frame count AND the
+  // total canvas area (one 4096x4096's worth), dropping the tail in order.
+  const { sanitizeScene } = await import(pathToFileURL(path.join(ROOT, 'studio', 'src', 'presets.js')).href);
+  const many = sanitizeScene(Array.from({ length: 500 }, () => ({ type: 'text', x: 0, y: 0, w: 100, h: 60, props: {} })));
+  ok('scene budget: a 500-frame import keeps at most 64', many.length === 64, `kept=${many.length}`);
+  const maxed = sanitizeScene(Array.from({ length: 10 }, () => ({ type: 'surface', x: 0, y: 0, w: 4096, h: 4096, props: { fieldName: 'gradient' } })));
+  ok('scene budget: total canvas area capped at two 4096x4096 worth', maxed.length === 2, `kept=${maxed.length}`);
 }
 
 // ---- build the artifact first: the test target IS the committed file ----------------------------
@@ -299,6 +307,18 @@ await page.click('#zoom-fit').catch(() => {}); // bring the clamped frames into 
 await page.waitForTimeout(400);
 ok('hostile import: the studio stays alive and responsive (no page errors, frames present)',
   (await page.locator('[data-frame]').count()) === 4 && errors.length === 0, errors.slice(-2).join(' | ') || 'clean');
+
+// An oversized file must be rejected BEFORE file.text()/JSON.parse — the parser would block the
+// main thread on a multi-GB payload long before the frame budget sees it. 17MB of junk -> the
+// import-failed modal, and the stone keeps its current frames.
+await page.setInputFiles('input[type="file"]', {
+  name: 'big.json', mimeType: 'application/json', buffer: Buffer.alloc(17_000_000, 0x20),
+});
+await page.waitForTimeout(400);
+const sizeMsg = await page.locator('[data-modal-text]').inputValue().catch(() => '');
+ok('oversized scene file (17MB) is size-gated with the import-failed modal',
+  sizeMsg.includes('too large') && (await page.locator('[data-frame]').count()) === 4, sizeMsg.slice(0, 60));
+await page.keyboard.press('Escape');
 
 const png = path.join(HERE, '.verify-studio.png');
 await page.screenshot({ path: png, fullPage: true });
