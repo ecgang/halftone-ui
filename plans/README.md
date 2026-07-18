@@ -19,7 +19,7 @@ row when done.
 | 002 | Repo-level CLAUDE.md (operational knowledge) | P1 | S | — (001 refines it) | DONE (1f0fcfa, reviewed + integrated 2026-07-17) |
 | 003 | Docs-site samples teach the real API | P1 | M | — | TODO |
 | 004 | Unit vectors: core math + Studio reducer | P2 | S | — (001 registers it) | DONE (36 vectors, reviewed + integrated 2026-07-17) |
-| 005 | Studio memo + draw-facade + shared adapter modules | P2 | S | — | TODO |
+| 005 | Studio memo + draw-facade + shared adapter modules | P2 | S | — | DONE (3 commits, reviewed + integrated 2026-07-17; Text/Image use dialPropsNoSeed — documented deviation, approved) |
 | 006 | Wire the `wash` dial for real (core + golden cycle) | P2 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
