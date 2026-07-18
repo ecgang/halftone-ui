@@ -8,6 +8,7 @@
 
 import { defineComponent, h, mergeProps } from 'vue';
 import { Surface } from './surface.js';
+import { dialProps } from './_props.js';
 
 const WHISPER = () => 0.12; // a light constant tone -> small/sparse dots, a paper-grain backdrop
 
@@ -19,14 +20,8 @@ export const Card = defineComponent({
   props: {
     field: { type: Function, default: undefined },
     as: { type: String, default: 'div' }, // same prop name as the React adapter — API parity
-    screen: { type: String, default: undefined },
-    scale: { type: [Number, String], default: undefined },
-    r: { type: [Number, String, Function], default: undefined },
-    ink: { type: [Number, String], default: undefined },
+    ...dialProps,
     wash: { type: [Number, String], default: undefined },
-    roll: { type: [Number, String], default: undefined },
-    seed: { type: [Number, String], default: undefined },
-    color: { type: String, default: undefined },
     surfaceStyle: { type: [String, Object, Array], default: undefined },
     surfaceClass: { type: [String, Object, Array], default: undefined },
   },

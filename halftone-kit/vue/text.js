@@ -11,19 +11,15 @@ import { defineComponent, h, ref, mergeProps, onMounted, onBeforeUnmount, watch 
 import { textField } from '../core/index.js';
 import { usePress } from './use-press.js';
 import { useHalftoneContext } from './context.js';
+import { dialPropsNoSeed } from './_props.js';
 
 export const Text = defineComponent({
   name: 'Text',
   inheritAttrs: false,
   props: {
     text: { type: String, default: '' },
-    screen: { type: String, default: undefined },
-    scale: { type: [Number, String], default: undefined },
-    r: { type: [Number, String, Function], default: undefined },
-    ink: { type: [Number, String], default: undefined },
+    ...dialPropsNoSeed,
     wash: { type: [Number, String], default: undefined },
-    roll: { type: [Number, String], default: undefined },
-    color: { type: String, default: undefined },
     animate: { type: Boolean, default: undefined },
     pressMs: { type: Number, default: undefined },
   },

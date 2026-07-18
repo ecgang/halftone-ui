@@ -9,6 +9,7 @@
 
 import { defineComponent, h, ref, mergeProps, onMounted, onBeforeUnmount, watch } from 'vue';
 import { usePress } from './use-press.js';
+import { dialPropsNoSeed } from './_props.js';
 
 export const Image = defineComponent({
   name: 'Image',
@@ -18,14 +19,9 @@ export const Image = defineComponent({
     gamma: { type: Number, default: 1.3 },
     gain: { type: Number, default: 1.35 },
     resolution: { type: Number, default: 160 },
-    screen: { type: String, default: undefined },
-    scale: { type: [Number, String], default: undefined },
-    r: { type: [Number, String, Function], default: undefined },
-    ink: { type: [Number, String], default: undefined },
+    ...dialPropsNoSeed,
     wash: { type: [Number, String], default: undefined },
-    roll: { type: [Number, String], default: undefined },
     h: { type: [Number, String], default: undefined }, // canvas height dial (not the `h()` render fn)
-    color: { type: String, default: undefined },
     animate: { type: Boolean, default: undefined },
     pressMs: { type: Number, default: undefined },
   },

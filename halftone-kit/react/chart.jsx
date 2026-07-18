@@ -10,12 +10,7 @@
 import React from 'react';
 import { Surface } from './surface.jsx';
 import { barsField, areaField, lineField } from '../core/charts.js';
-
-// Visually hidden, still in the accessibility tree (the standard sr-only recipe).
-const SR_ONLY = {
-  position: 'absolute', width: 1, height: 1, padding: 0, margin: -1,
-  overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0,
-};
+import { SR_ONLY } from './_a11y.js';
 
 // Accept [numbers] or [{label, value}]; normalize to {label, value} rows with 1-based fallback labels.
 function rowsOf(data) {

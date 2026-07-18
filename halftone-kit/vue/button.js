@@ -9,6 +9,7 @@
 
 import { defineComponent, h, ref, mergeProps } from 'vue';
 import { Surface } from './surface.js';
+import { dialProps } from './_props.js';
 
 const SOLID = () => 1; // a full ink plate; the screen supplies the texture, `color` the ink
 
@@ -19,14 +20,8 @@ export const Button = defineComponent({
   inheritAttrs: false,
   props: {
     field: { type: Function, default: undefined },
-    screen: { type: String, default: undefined },
-    scale: { type: [Number, String], default: undefined },
-    r: { type: [Number, String, Function], default: undefined },
-    ink: { type: [Number, String], default: undefined },
+    ...dialProps,
     wash: { type: [Number, String], default: undefined },
-    roll: { type: [Number, String], default: undefined },
-    seed: { type: [Number, String], default: undefined },
-    color: { type: String, default: undefined },
     animate: { type: Boolean, default: false },
     pressMs: { type: Number, default: undefined },
     surfaceStyle: { type: [String, Object, Array], default: undefined },

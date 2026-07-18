@@ -10,12 +10,8 @@
 import { defineComponent, h, computed, mergeProps } from 'vue';
 import { Surface } from './surface.js';
 import { barsField, areaField, lineField } from '../core/charts.js';
-
-// Visually hidden, still in the accessibility tree (the standard sr-only recipe).
-const SR_ONLY = {
-  position: 'absolute', width: '1px', height: '1px', padding: '0', margin: '-1px',
-  overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: '0',
-};
+import { SR_ONLY } from './_a11y.js';
+import { dialProps } from './_props.js';
 
 // Accept [numbers] or [{label, value}]; normalize to {label, value} rows with 1-based fallback labels.
 function rowsOf(data) {
@@ -33,17 +29,6 @@ function renderDataTable(rows, caption) {
     h('tbody', null, rows.map((r, i) => h('tr', { key: i }, [h('th', { scope: 'row' }, r.label), h('td', null, r.value)]))),
   ]);
 }
-
-// Dial props shared by both charts — same names/shapes as Surface, forwarded straight through.
-const dialProps = {
-  screen: { type: String, default: undefined },
-  scale: { type: [Number, String], default: undefined },
-  r: { type: [Number, String, Function], default: undefined },
-  ink: { type: [Number, String], default: undefined },
-  roll: { type: [Number, String], default: undefined },
-  seed: { type: [Number, String], default: undefined },
-  color: { type: String, default: undefined },
-};
 
 export const BarChart = defineComponent({
   name: 'BarChart',

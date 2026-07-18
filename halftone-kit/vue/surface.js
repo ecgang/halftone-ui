@@ -10,6 +10,7 @@
 
 import { defineComponent, h, ref, mergeProps, onMounted, onBeforeUnmount } from 'vue';
 import { usePress } from './use-press.js';
+import { dialProps } from './_props.js';
 
 export const Surface = defineComponent({
   name: 'Surface',
@@ -18,15 +19,9 @@ export const Surface = defineComponent({
   inheritAttrs: false,
   props: {
     field: { type: Function, default: undefined },
-    screen: { type: String, default: undefined },
-    scale: { type: [Number, String], default: undefined },
-    r: { type: [Number, String, Function], default: undefined },
-    ink: { type: [Number, String], default: undefined },
+    ...dialProps,
     wash: { type: [Number, String], default: undefined },
-    roll: { type: [Number, String], default: undefined },
     h: { type: [Number, String], default: undefined }, // canvas height dial (not the `h()` render fn)
-    seed: { type: [Number, String], default: undefined },
-    color: { type: String, default: undefined },
     animate: { type: Boolean, default: undefined },
     pressMs: { type: Number, default: undefined },
     deps: { type: Array, default: undefined }, // explicit watch source; overrides the scalar-dial default

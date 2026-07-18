@@ -9,10 +9,8 @@
 
 import { defineComponent, h } from 'vue';
 import { Surface } from './surface.js';
-
-// Visually hidden, still in the accessibility tree (the standard sr-only recipe).
-const SR_ONLY = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;' +
-  'clip:rect(0,0,0,0);white-space:nowrap;border:0';
+import { SR_ONLY } from './_a11y.js';
+import { dialProps } from './_props.js';
 
 export const Meter = defineComponent({
   name: 'Meter',
@@ -22,14 +20,8 @@ export const Meter = defineComponent({
   props: {
     value: { type: [Number, String], default: 0 },
     max: { type: [Number, String], default: 1 },
-    screen: { type: String, default: undefined },
-    scale: { type: [Number, String], default: undefined },
-    r: { type: [Number, String, Function], default: undefined },
-    ink: { type: [Number, String], default: undefined },
+    ...dialProps,
     wash: { type: [Number, String], default: undefined },
-    roll: { type: [Number, String], default: undefined },
-    seed: { type: [Number, String], default: undefined },
-    color: { type: String, default: undefined },
     h: { type: [Number, String], default: 12 }, // canvas height dial (not the `h()` render fn)
     surfaceStyle: { type: [String, Object, Array], default: undefined },
     surfaceClass: { type: [String, Object, Array], default: undefined },
