@@ -54,6 +54,9 @@ export function fieldSampler(field) {
 //            seed/roll-invariant given its pts.
 export function drawPress(ctx, { pts, W, H, field, screen, grain = {}, pr = 1, roll = 0, dot = null }) {
   const ink = grain.ink ?? 1;
+  // wash is the field-tone dial (docs wash surfaces scale by it); default 1 keeps every existing
+  // caller bit-identical (IEEE-754: v * 1 === v exactly for every finite v).
+  const wash = grain.wash ?? 1;
   const d = dot ? { ...DOT, ...dot } : DOT;   // merge so a caller can override just `round` or `cap`
   const [rb, rs] = d.round, [sb, ss] = d.square, cap = d.cap;
 
@@ -61,7 +64,7 @@ export function drawPress(ctx, { pts, W, H, field, screen, grain = {}, pr = 1, r
   const round = !screen || screen === 'stipple';
   for (const p of pts) {
     if (p.th > pr) continue;
-    const v = sample(p.x / W, p.y / H, p) * ink;
+    const v = sample(p.x / W, p.y / H, p) * ink * wash;
     if (p.c) { amDot(ctx, p, v); continue; }
     if (v > p.th) {
       if (round) {

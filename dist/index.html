@@ -3187,13 +3187,14 @@ toast(<span class="s">"Deploy finished"</span>, { color: <span class="s">"blue"<
   }
   function drawPress(ctx, { pts, W, H, field, screen, grain = {}, pr = 1, roll = 0, dot = null }) {
     const ink = grain.ink ?? 1;
+    const wash = grain.wash ?? 1;
     const d = dot ? { ...DOT, ...dot } : DOT;
     const [rb, rs] = d.round, [sb, ss] = d.square, cap = d.cap;
     const sample = fieldSampler(field);
     const round = !screen || screen === "stipple";
     for (const p of pts) {
       if (p.th > pr) continue;
-      const v = sample(p.x / W, p.y / H, p) * ink;
+      const v = sample(p.x / W, p.y / H, p) * ink * wash;
       if (p.c) {
         amDot(ctx, p, v);
         continue;

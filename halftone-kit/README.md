@@ -48,6 +48,10 @@ press(el, opts, ctx)                 // = mount(el, resolvePress(opts, ctx), ctx
   Key methods: `setTheme`, `setRoll`, `setPal`, `palette(name)`, `ink(name)`, `fore()`, `repaint()`.
 - **`resolvePress(opts, ctx)`** merges instance opts over context defaults over built-ins into a
   plain spec object. Pure — no side effects, safe to call in a test with no canvas.
+  - Two render dials multiply the field's tone before the screen thresholds it: `ink` is the
+    component's own pressure dial; `wash` scales the whole field's tone the way the docs' wash
+    surfaces scale theirs (0 = blank, 1 = as authored, >1 darkens). They compose multiplicatively
+    and both default to `1`.
 - **`mount(el, spec, ctx)`** binds that spec to a real `<canvas>` element and returns the imperative
   **handle**:
   - `handle.set(patch)` — merge a patch. Geometry keys (`screen`, `scale`, `r`, `h`, `roll`) force a

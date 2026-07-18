@@ -109,7 +109,7 @@ export function mount(el, spec, ctx) {
     drawPress(s.g, {
       pts: s.pts, W: s.W, H: s.H,
       field: spec.field, screen: spec.screen,
-      grain: { ink: spec.ink }, pr: s.pr, roll: spec.roll,
+      grain: { ink: spec.ink, wash: spec.wash }, pr: s.pr, roll: spec.roll,
     });
   };
 

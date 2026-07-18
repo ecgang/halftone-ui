@@ -169,6 +169,35 @@ function mockCanvas(w = 200, h = 60) {
   ok('custom dot law (area chart 0.45/0.9) folds byte-identical', gc.ops.join('|') === docsDrawCustom());
 }
 
+// ---- plan 006: wash actually multiplies tone (spec resolution + fewer marks under wash < 1) -----
+{
+  ok('resolvePress resolves wash from opts', resolvePress({ wash: 0.5 }, null).wash === 0.5);
+
+  // Controlled points (same pattern as the byte-identical block above): th values straddling the
+  // wash-1 vs wash-0.5 tone for an identical mid-tone field, so the mark count differs
+  // deterministically rather than relying on randomized geometry.
+  const W = 200, H = 60, pr = 1;
+  const pts = [
+    { x: 10, y: 12, th: 0.1 },
+    { x: 40, y: 20, th: 0.3 },
+    { x: 70, y: 25, th: 0.45 },   // marks at wash 1 (v=0.5), not at wash 0.5 (v=0.25)
+    { x: 100, y: 30, th: 0.48 },  // same
+    { x: 140, y: 40, th: 0.6 },   // never marks (0.5 tone too low even at wash 1)
+  ];
+  const midField = () => 0.5; // mid-tone field, before ink/wash
+
+  const gWash1 = mockCtx();
+  drawPress(gWash1, { pts, W, H, field: midField, screen: 'stipple', grain: { ink: 1, wash: 1 }, pr });
+  const marksWash1 = gWash1.ops.filter((o) => o === 'fill').length;
+
+  const gWash05 = mockCtx();
+  drawPress(gWash05, { pts, W, H, field: midField, screen: 'stipple', grain: { ink: 1, wash: 0.5 }, pr });
+  const marksWash05 = gWash05.ops.filter((o) => o === 'fill').length;
+
+  ok('wash 0.5 inks strictly fewer marks than wash 1 for an identical mid-tone field',
+    marksWash05 < marksWash1, `wash1=${marksWash1} wash0.5=${marksWash05}`);
+}
+
 // ---- plates seam retired (P2c-2): drawPress is FM-only, drawPlates owns AM/composite -----------
 {
   const { drawPlates } = mod;

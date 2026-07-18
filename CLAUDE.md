@@ -82,7 +82,6 @@ separate release step.
   guard into a Vue `watch`; one such transplant ate the first prop change silently.
 - React range inputs re-fire a synthetic `onChange` per input event during a drag. Commit undo
   history on the NATIVE `change` event instead, or a single scrub becomes many undo steps.
-- `wash` is currently resolved but not consumed by the kit draw path (see plan 006 if it exists).
 - Scene JSON import is untrusted: the sanitizer (`sanitizeScene` in `studio/src/presets.js`) clamps
   geometry AND press dials AND budgets the scene aggregate (frame count, total canvas area, and
   total generation work charged through core's `grainCost` estimator) — keep it that way. The
@@ -96,4 +95,4 @@ separate release step.
 ## Maintenance
 
 This file rots fastest at the Verification section — any PR adding a harness or npm script should
-update this file in the same commit. If plan 006 (wash wiring) lands, delete the wash gotcha line.
+update this file in the same commit.

@@ -52,6 +52,10 @@ const app = `
       React.createElement('div', { style: { display: 'grid', gap: 24, padding: 24, width: 360 } },
         React.createElement('div', { 'data-box': 'surface' },
           React.createElement(Surface, { field: gradient, screen: 'stipple', h: 120, color: 'blue' })),
+        React.createElement('div', { 'data-box': 'wash1' },
+          React.createElement(Surface, { field: () => 0.6, screen: 'stipple', scale: 1, seed: 42, h: 120, color: 'blue', wash: 1 })),
+        React.createElement('div', { 'data-box': 'wash03' },
+          React.createElement(Surface, { field: () => 0.6, screen: 'stipple', scale: 1, seed: 42, h: 120, color: 'blue', wash: 0.3 })),
         React.createElement('div', { 'data-box': 'text' },
           React.createElement(Text, { text: 'HALFTONE UI', screen: 'stipple' })),
         React.createElement('div', { 'data-box': 'image' },
@@ -108,7 +112,7 @@ let inks = [];
 try {
   await page.waitForFunction(() => {
     const cs = [...document.querySelectorAll('canvas')];
-    if (cs.length < 11) return false;
+    if (cs.length < 13) return false;
     return cs.every((cv) => {
       if (!cv.width) return false;
       const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -166,18 +170,30 @@ const swapGoesBlank = async (box, btn) => {
 const swBroken = await swapGoesBlank('swapbroken', 'swap-broken');
 const swEmpty = await swapGoesBlank('swapempty', 'swap-empty');
 
+// plan 006: wash actually scales the field tone -- an identical field/seed/size Surface at
+// wash 0.3 must ink strictly fewer pixels than one at wash 1 (and still ink something, > 0).
+const inkCount = (sel) => page.evaluate((s) => {
+  const cv = document.querySelector(s);
+  if (!cv || !cv.width) return -1;
+  const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+  let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 10) n++; return n;
+}, sel);
+const washInk1 = await inkCount('[data-box="wash1"] canvas');
+const washInk03 = await inkCount('[data-box="wash03"] canvas');
+
 const pngPath = path.join(HERE, '.verify-react-visual.png');
 await page.screenshot({ path: pngPath, fullPage: true });
 await browser.close();
 
-const label = ['Surface (gradient)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)', 'Image (transparent bg)', 'Image (swap-broken, pre-click)', 'Image (swap-empty, pre-click)'];
-ok('eleven canvases mounted', inks.length === 11, `count=${inks.length}`);
+const label = ['Surface (gradient)', 'Surface (wash 1.0)', 'Surface (wash 0.3)', 'Text (HALFTONE UI)', 'Image (luminance)', 'Button (solid plate)', 'Meter (0.66 fill)', 'Card (whisper backdrop)', 'BarChart (5 bars)', 'LineChart (area)', 'Image (transparent bg)', 'Image (swap-broken, pre-click)', 'Image (swap-empty, pre-click)'];
+ok('thirteen canvases mounted', inks.length === 13, `count=${inks.length}`);
 inks.forEach((c, i) => ok(`${label[i] || 'canvas ' + i}: real ink drawn`, c.ink > 0, `${c.w}x${c.h}, inkPx=${c.ink}`));
 ok('alpha regression: a transparent background inks nothing (blank corner)', alpha && alpha.corner === 0, `corner=${alpha?.corner}`);
 ok('alpha regression: the opaque shape still inks (center has ink)', alpha && alpha.center > 0, `center=${alpha?.center}`);
 ok('stale regression: valid images ink before the swap (broken + empty cases)', swBroken.before > 0 && swEmpty.before > 0, `broken=${swBroken.before} empty=${swEmpty.before}`);
 ok('stale regression: swapping to a BROKEN src goes BLANK (onerror -> not stale)', swBroken.after === 0, `after=${swBroken.after}`);
 ok('stale regression: REMOVING the src (empty) goes BLANK (falsy path -> not stale)', swEmpty.after === 0, `after=${swEmpty.after}`);
+ok('wash: identical field/seed inks strictly fewer pixels at wash 0.3 than wash 1', washInk03 > 0 && washInk03 < washInk1, `wash1=${washInk1} wash0.3=${washInk03}`);
 ok('no console/page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 console.log(`\nscreenshot: ${pngPath}`);
 
