@@ -31,7 +31,20 @@ const cap = (arr) => (arr.length > HISTORY_MAX ? arr.slice(arr.length - HISTORY_
 const step = (state, frames, extra = {}) =>
   ({ ...state, ...extra, frames, past: cap([...state.past, state.frames]), future: [], pending: null });
 const withFrame = (frames, id, fn) => frames.map((f) => (f.id === id ? fn(f) : f));
-const applyPatch = (f, a) => ({ ...f, ...(a.frame || {}), props: { ...f.props, ...(a.props || {}) } });
+
+// Geometry bounds shared by EVERY mutation path — scene import (presets.js sanitizeScene),
+// inspector commits, pointer-resize transients, duplicates. Frame dimensions reach the canvas
+// backing store and the Poisson allocator (ceil(w/cell)*ceil(h/cell) Int32Array), so an unbounded
+// W typed into the inspector is the same terabyte allocation a hostile import was. applyPatch is
+// the choke point for patch+transient; duplicate bounds its offset copy itself.
+export const GEOM = { MIN_DIM: 40, MAX_DIM: 4096, MAX_POS: 100000 };
+const lim = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const boundGeom = (f) => ({
+  ...f,
+  x: lim(f.x, -GEOM.MAX_POS, GEOM.MAX_POS), y: lim(f.y, -GEOM.MAX_POS, GEOM.MAX_POS),
+  w: lim(f.w, GEOM.MIN_DIM, GEOM.MAX_DIM), h: lim(f.h, GEOM.MIN_DIM, GEOM.MAX_DIM),
+});
+const applyPatch = (f, a) => boundGeom({ ...f, ...(a.frame || {}), props: { ...f.props, ...(a.props || {}) } });
 
 // "Roll a press" — the slot machine. Seed drives the entrance transient, roll the RESTING geometry
 // (core: restSeed = base + off + roll), so roll MUST land on a new value or the frame would not
@@ -64,7 +77,7 @@ export function reducer(state, a) {
     case 'duplicate': {
       const src = state.frames.find((f) => f.id === a.id);
       if (!src) return state;
-      const copy = { ...src, id: newId(), x: src.x + 16, y: src.y + 16, name: `${src.name} copy`, props: { ...src.props } };
+      const copy = boundGeom({ ...src, id: newId(), x: src.x + 16, y: src.y + 16, name: `${src.name} copy`, props: { ...src.props } });
       return step(state, [...state.frames, copy], { selectedId: copy.id });
     }
     case 'rename': return step(state, withFrame(state.frames, a.id, (f) => ({ ...f, name: a.name })));

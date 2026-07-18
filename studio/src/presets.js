@@ -2,7 +2,7 @@
 // scene<->code borders: field presets (a Surface field is a closure, so scenes store its NAME and
 // resolve it here), scene-JSON sanitizing, and JSX code generation.
 
-import { newId, SCREENS } from './store.js';
+import { newId, SCREENS, GEOM } from './store.js';
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
@@ -70,8 +70,9 @@ export function starterFrame(type, x, y) {
 
 // ---- scene import: never trust a file. Rebuild every frame from known keys with fresh ids -------
 const num = (v, d) => (Number.isFinite(+v) ? +v : d);
-const MAX_DIM = 4096;     // frame w/h ceiling — beyond any real workspace frame, safe to allocate
-const MAX_POS = 100000;   // |x|,|y| ceiling — anything further is unreachable on the bed anyway
+// Geometry ceilings live in the store's GEOM (the reducer clamps EVERY mutation path with them);
+// sanitize shares the same constants so import and live edits can never drift apart.
+const { MIN_DIM, MAX_DIM, MAX_POS } = GEOM;
 export function sanitizeScene(raw) {
   const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.frames) ? raw.frames : null);
   if (!list) return null;
@@ -108,8 +109,8 @@ export function sanitizeScene(raw) {
       // x=1e15 is unreachable. 4096px is far beyond any real workspace frame.
       x: Math.max(-MAX_POS, Math.min(MAX_POS, num(f.x, 0))),
       y: Math.max(-MAX_POS, Math.min(MAX_POS, num(f.y, 0))),
-      w: Math.max(40, Math.min(MAX_DIM, num(f.w, c.w))),
-      h: Math.max(40, Math.min(MAX_DIM, num(f.h, c.h))),
+      w: Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.w, c.w))),
+      h: Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.h, c.h))),
       visible: f.visible !== false,
       props,
     });

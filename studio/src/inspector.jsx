@@ -149,8 +149,10 @@ export function Inspector({ frame, dispatch }) {
       <div className="grid2">
         <NumberField id="insp-x" label="X" value={frame.x} onCommit={(x) => geom({ x: Math.round(x) })} />
         <NumberField id="insp-y" label="Y" value={frame.y} onCommit={(y) => geom({ y: Math.round(y) })} />
-        <NumberField id="insp-w" label="W" value={frame.w} min={40} onCommit={(w) => geom({ w: Math.max(40, Math.round(w)) })} />
-        <NumberField id="insp-h" label="H" value={frame.h} min={40} onCommit={(h) => geom({ h: Math.max(40, Math.round(h)) })} />
+        {/* max mirrors the reducer's GEOM.MAX_DIM clamp (store.js) — the reducer is the real guard;
+            these keep the input honest so a typed 1e9 never even flashes. */}
+        <NumberField id="insp-w" label="W" value={frame.w} min={40} max={4096} onCommit={(w) => geom({ w: Math.round(w) })} />
+        <NumberField id="insp-h" label="H" value={frame.h} min={40} max={4096} onCommit={(h) => geom({ h: Math.round(h) })} />
       </div>
 
       <h3>Sort</h3>

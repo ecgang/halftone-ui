@@ -258,6 +258,15 @@ const rVal = parseFloat(await page.locator('#insp-r').inputValue());
 const scaleVal = parseFloat(await page.locator('#insp-scale').inputValue());
 ok('hostile import: pitch dials clamped to UI ranges (r in [1,6], scale in [0.4,2.4])',
   rVal >= 1 && rVal <= 6 && scaleVal >= 0.4 && scaleVal <= 2.4, `r=${rVal} scale=${scaleVal}`);
+// The same allocator bomb through the FRONT door: a user typing 1e9 into the inspector's W field
+// must be clamped by the reducer (GEOM.MAX_DIM), never committed to the live frame — the canvas
+// backing store + Poisson grid would otherwise freeze the tab exactly like the hostile import.
+await page.fill('#insp-w', '1000000000');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+const wAfter = await page.evaluate(() => parseInt(document.querySelector('[data-frame].selected')?.style.width || '0', 10));
+ok('inspector attack: an oversized typed W commits clamped (<= 4096), studio stays alive',
+  wAfter >= 40 && wAfter <= 4096 && errors.length === 0, `w=${wAfter}`);
 await page.click('#zoom-fit').catch(() => {}); // bring the clamped frames into view if possible
 await page.waitForTimeout(400);
 ok('hostile import: the studio stays alive and responsive (no page errors, frames present)',
