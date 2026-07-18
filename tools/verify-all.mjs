@@ -16,6 +16,7 @@ const skipGolden = args.includes('--no-golden');
 
 const suites = [
   { name: 'charts', script: 'verify-charts.mjs' },
+  { name: 'vectors', script: 'verify-vectors.mjs' },
   { name: 'core', script: 'verify-core.mjs' },
   { name: 'plates', script: 'verify-plates.mjs' },
   { name: 'react', script: 'verify-react.mjs' },
