@@ -19,7 +19,9 @@
 - **Depends on**: none (if plan 001 landed, add the new harness to
   `tools/verify-all.mjs`'s fast tier as a final step)
 - **Category**: tests
-- **Planned at**: commit `8072748`, 2026-07-17
+- **Planned at**: commit `8072748`, 2026-07-17 (reconciled at `69dde4e` after the Codex
+  hardening rounds — screens.js gained work budgets + `grainCost`, store.js gained
+  `GEOM`/`boundGeom`/`frameCost`/`MAX_WORK` and a budget-aware roll, verify-core is now 33)
 
 ## Why this matters
 
@@ -38,17 +40,29 @@ sub-second Node harness pinning both.
 
 - `halftone-kit/core/rng.js` — `mulberry32(s)` (line 7, returns a () => float
   generator), `poisson(w, h, r, rng)` (line 17), `makeNoise(seed)` (line 53).
-- `halftone-kit/core/screens.js` — `screenPts` (11), `amPts` (31), `grainPts`
-  (46), `amRadius` (65). Note the pitch floors inside `grainPts`:
-  `am` → `Math.max(4.4, r * 3.4)`, line families → `Math.max(2.8, r * 2.2)`;
-  the `stipple` branch has NO floor (documented behavior — pin it as-is).
+- `halftone-kit/core/screens.js` — `screenPts` (11), `amPts` (31), `grainPts`, `grainCost`,
+  `amRadius` (near end of file — locate by name, line numbers have shifted). `grainPts` now
+  carries a WORK BUDGET for every family (`MAX_CELLS`): stipple grows its cell until the exact
+  `ceil(W/cell)*ceil(H/cell)` grid fits; the lattice families double their pitch above their
+  base floors (`am` → `Math.max(4.4, r * 3.4)`, lines → `Math.max(2.8, r * 2.2)`) until sweep
+  candidates fit; degenerate dims (0/negative/NaN/Infinity W or H) return `[]`; non-finite
+  `r` defaults to 2. **At the small sizes this plan's vectors use (50–100px), the budget
+  NEVER engages** — the base floors and raw pitches dominate, so pin exactly what you
+  observe. Do NOT write vectors for the budget itself: `verify-core.mjs` already regressions
+  it (allocation, thin-canvas, degenerate, per-family sweeps).
 - `halftone-kit/core/color.js` — `INKS` (6), `PAPER` (10), `mixHex` (13),
   `iband` (22), `tuneInk` (54), `tuneMix` (62).
 - `studio/src/store.js` — pure reducer with actions (from the source):
   `add, patch, remove, duplicate, rename, visible, reorder, roll, import,
   begin, transient, commit, select, camera, theme, replay` plus `undo`/`redo`
-  (lines 99–111) and gesture coalescing via `pending` (85–93). It exports
-  `newId` and `SCREENS` (imported by presets.js).
+  and gesture coalescing via `pending` (locate by case name — line numbers have
+  shifted). It exports `newId`, `SCREENS`, `GEOM`, `boundGeom`, `frameCost`,
+  `MAX_WORK`, `initialState`, and `reducer`, and imports `grainCost` from
+  `../../halftone-kit/core/screens.js` — still pure ESM, imports fine under
+  plain Node. Geometry-writing actions (`add`/`import`/`patch`/`transient`/
+  `duplicate`) clamp through `boundGeom`; `roll` draws new screens under the
+  scene work budget and is random by design — assert its INVARIANTS (screen
+  changed, roll value changed, geometry untouched), never exact values.
 - Harness pattern to copy — `tools/verify-core.mjs` opening:
 
   ```js
@@ -64,7 +78,7 @@ sub-second Node harness pinning both.
 | Purpose | Command | Expected on success |
 |---|---|---|
 | Run the new harness | `node tools/verify-vectors.mjs` | `N passed, 0 failed`, exit 0, < 2s |
-| Prove no regression | `node tools/verify-core.mjs` | `24 passed, 0 failed` |
+| Prove no regression | `node tools/verify-core.mjs` | `33 passed, 0 failed` |
 | Prove goldens hold | `npm run golden:check --prefix tools` | PASS (nothing in core changed) |
 
 ## Scope
@@ -151,7 +165,7 @@ harness, same ok() idiom). Cases enumerated in Steps 1–3.
 ## Done criteria
 
 - [ ] `node tools/verify-vectors.mjs` → ≥ 20 checks, 0 failed, < 2s wall
-- [ ] `node tools/verify-core.mjs` still `24 passed, 0 failed`
+- [ ] `node tools/verify-core.mjs` still `33 passed, 0 failed`
 - [ ] `npm run golden:check --prefix tools` still PASS
 - [ ] `git status`: only the in-scope file(s)
 - [ ] `plans/README.md` status row updated
