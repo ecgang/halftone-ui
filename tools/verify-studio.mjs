@@ -235,6 +235,11 @@ ok('generated JSX with hostile label still PARSES (esbuild jsx)', parseErr === n
 const hostileScene = JSON.stringify({ frames: [
   { type: 'barchart', x: 1e15, y: -1e15, w: 1e9, h: 1e9, props: { data: [4, 9, 6] } },
   { type: 'button', x: 0, y: 0, w: -50, h: 1, props: { label: 'tiny' } },
+  // The dial attack: r=0.0005 would have poisson() allocate a ~terabyte grid; scale<0 flips the
+  // pitch sign into Int32Array(Infinity). Both must land clamped to the inspector's UI ranges.
+  { type: 'surface', x: 0, y: 0, w: 200, h: 120, props: { r: 0.0005, scale: -5, ink: 99, fieldName: 'gradient' } },
+  // A megabyte text prop must be capped before it reaches the rasterizer.
+  { type: 'text', x: 0, y: 200, w: 200, h: 60, props: { text: 'A'.repeat(1_000_000) } },
 ] });
 await page.setInputFiles('input[type="file"]', { name: 'evil.json', mimeType: 'application/json', buffer: Buffer.from(hostileScene) });
 await page.waitForTimeout(600);
@@ -243,12 +248,20 @@ const bounds = await page.evaluate(() => [...document.querySelectorAll('[data-fr
   w: parseInt(el.style.width, 10), h: parseInt(el.style.height, 10),
 })));
 ok('hostile import: every frame lands within the sanitizer ceilings (w/h in [40,4096], |x|,|y| <= 100000)',
-  bounds.length === 2 && bounds.every((b) => b.w >= 40 && b.w <= 4096 && b.h >= 40 && b.h <= 4096 && b.x <= 100000 && b.y <= 100000),
+  bounds.length === 4 && bounds.every((b) => b.w >= 40 && b.w <= 4096 && b.h >= 40 && b.h <= 4096 && b.x <= 100000 && b.y <= 100000),
   JSON.stringify(bounds));
+// Select the surface frame and read the pitch dial back — the r=0.0005 / scale=-5 attack must have
+// been clamped to the inspector's own ranges (r >= 1, scale >= 0.4), or poisson() would have frozen
+// the tab before we ever got here.
+await page.locator('[data-frame]').nth(2).click();
+const rVal = parseFloat(await page.locator('#insp-r').inputValue());
+const scaleVal = parseFloat(await page.locator('#insp-scale').inputValue());
+ok('hostile import: pitch dials clamped to UI ranges (r in [1,6], scale in [0.4,2.4])',
+  rVal >= 1 && rVal <= 6 && scaleVal >= 0.4 && scaleVal <= 2.4, `r=${rVal} scale=${scaleVal}`);
 await page.click('#zoom-fit').catch(() => {}); // bring the clamped frames into view if possible
 await page.waitForTimeout(400);
 ok('hostile import: the studio stays alive and responsive (no page errors, frames present)',
-  (await page.locator('[data-frame]').count()) === 2 && errors.length === 0, errors.slice(-2).join(' | ') || 'clean');
+  (await page.locator('[data-frame]').count()) === 4 && errors.length === 0, errors.slice(-2).join(' | ') || 'clean');
 
 const png = path.join(HERE, '.verify-studio.png');
 await page.screenshot({ path: png, fullPage: true });

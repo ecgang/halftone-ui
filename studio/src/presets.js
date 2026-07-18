@@ -81,11 +81,20 @@ export function sanitizeScene(raw) {
     if (!c) continue;
     const p = (f.props && typeof f.props === 'object') ? f.props : {};
     const props = { ...c.props };
-    for (const k of ['screen', 'color', 'fieldName', 'text', 'src', 'label', 'heading', 'body']) {
-      if (typeof p[k] === 'string') props[k] = p[k];
+    // Free-text props are capped (huge strings feed the text rasterizer / an image decode); a
+    // sliced data-URI src just fails to decode -> the Image goes blank, never stale.
+    for (const k of ['screen', 'color', 'fieldName', 'text', 'label', 'heading', 'body']) {
+      if (typeof p[k] === 'string') props[k] = p[k].slice(0, 500);
     }
+    if (typeof p.src === 'string') props.src = p.src.slice(0, 2_000_000);
+    // The pitch dials reach the Poisson allocator: grainPts passes r*0.8*scale as the grid pitch
+    // and poisson allocates ceil(w/cell)*ceil(h/cell) — a tiny r means a multi-GB grid, r <= 0
+    // means Int32Array(Infinity). Clamp every dial to the inspector's own UI range.
+    const DIAL_RANGE = { scale: [0.4, 2.4], r: [1, 6], ink: [0.3, 2], value: [0, 1] };
     for (const k of ['scale', 'r', 'ink', 'seed', 'roll', 'value']) {
-      if (Number.isFinite(+p[k])) props[k] = +p[k];
+      if (!Number.isFinite(+p[k])) continue;
+      const lim = DIAL_RANGE[k];
+      props[k] = lim ? Math.max(lim[0], Math.min(lim[1], +p[k])) : +p[k];
     }
     if (!SCREENS.includes(props.screen)) props.screen = 'stipple';
     if (props.fieldName && !FIELDS[props.fieldName]) props.fieldName = 'gradient';

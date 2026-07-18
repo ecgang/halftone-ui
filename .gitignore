@@ -11,3 +11,7 @@
 
 # Dev-only harness deps (tools/). The site itself is static and has no build.
 node_modules
+
+# stray compiler scratch — a Mach-O a.out at root would otherwise ride a git add -A into the tree
+a.out
+*.out
