@@ -51,6 +51,16 @@ const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' 
   ok('scene budget: a 500-frame import keeps at most 64', many.length === 64, `kept=${many.length}`);
   const maxed = sanitizeScene(Array.from({ length: 10 }, () => ({ type: 'surface', x: 0, y: 0, w: 4096, h: 4096, props: { fieldName: 'gradient' } })));
   ok('scene budget: total canvas area capped at two 4096x4096 worth', maxed.length === 2, `kept=${maxed.length}`);
+  // Thin lattice frames: area is the WRONG cost proxy — sweep work is quadratic in the
+  // DIAGONAL, so 64 x (4096x40 hatch @ min pitch) is only 10.5M px of area but ~5.6M sweep
+  // candidates PER FRAME. The work budget (charged through core's grainCost) must cut this
+  // scene to a couple of frames where the area cap alone would keep all 64.
+  const thin = sanitizeScene(Array.from({ length: 64 }, () => ({
+    type: 'surface', x: 0, y: 0, w: 4096, h: 40,
+    props: { fieldName: 'gradient', screen: 'hatch', r: 1, scale: 0.4 },
+  })));
+  ok('scene budget: 64 thin 4096x40 min-pitch hatch frames cut by WORK, not area',
+    thin.length >= 1 && thin.length <= 2, `kept=${thin.length}`);
 }
 
 // ---- build the artifact first: the test target IS the committed file ----------------------------
@@ -319,6 +329,21 @@ const sizeMsg = await page.locator('[data-modal-text]').inputValue().catch(() =>
 ok('oversized scene file (17MB) is size-gated with the import-failed modal',
   sizeMsg.includes('too large') && (await page.locator('[data-frame]').count()) === 4, sizeMsg.slice(0, 60));
 await page.keyboard.press('Escape');
+
+// The thin-lattice multiplication attack through the REAL import + render path: the work
+// budget must admit only a frame or two, and the page must come back responsive quickly.
+const thinScene = JSON.stringify({ frames: Array.from({ length: 64 }, () => ({
+  type: 'surface', x: 0, y: 0, w: 4096, h: 40,
+  props: { fieldName: 'gradient', screen: 'hatch', r: 1, scale: 0.4 },
+})) });
+const tThin = Date.now();
+await page.setInputFiles('input[type="file"]', { name: 'thin.json', mimeType: 'application/json', buffer: Buffer.from(thinScene) });
+await page.waitForTimeout(1200);
+const thinMounted = await page.locator('[data-frame]').count();
+const thinResponsive = await page.evaluate(() => 1 + 1); // a round-trip proves the thread is free
+ok('thin-lattice import: work budget admits <=2 frames, studio responsive, no errors',
+  thinMounted >= 1 && thinMounted <= 2 && thinResponsive === 2 && Date.now() - tThin < 10000 && errors.length === 0,
+  `mounted=${thinMounted} in ${Date.now() - tThin}ms`);
 
 const png = path.join(HERE, '.verify-studio.png');
 await page.screenshot({ path: png, fullPage: true });

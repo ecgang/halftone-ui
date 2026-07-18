@@ -55,6 +55,31 @@ export function amPts(W, H, pitch, ang, rng) {
 // is ~7.5M candidates per family, x3 families.
 const MAX_CELLS = 2097152;
 
+// Budget helpers shared by grainPts (the generator) and grainCost (the estimator). ONE
+// implementation, so an admission decision made from grainCost can never drift from the work
+// grainPts actually executes. Each doubles its pitch/cell until the work fits MAX_CELLS;
+// doubling terminates in O(log) steps for finite dims and overshoots at most 2x. The sweep
+// count converges to a small constant as pitch grows, so the line/am loops always terminate.
+const stippleCell = (W, H, r) => {
+  let cell = r / Math.SQRT2;
+  while (Math.ceil(W / cell) * Math.ceil(H / cell) > MAX_CELLS) cell *= 2;
+  return cell;
+};
+// Both lattices iterate ~(2R/pitch) rows x (2R/step) columns per family with
+// R = hypot(W,H)/2 + pitch (so 2R = diag + 2*pitch).
+const lineIter = (diag, p) => ((diag + 2 * p) / p) * ((diag + 2 * p) / Math.max(1.6, p * 0.26));
+const linePitch = (diag, r) => {
+  let p = Math.max(2.8, r * 2.2);
+  while (lineIter(diag, p) > MAX_CELLS) p *= 2;
+  return p;
+};
+const amIter = (diag, p) => ((diag + 2 * p) / p) ** 2;
+const amPitch = (diag, r) => {
+  let p = Math.max(4.4, r * 3.4);
+  while (amIter(diag, p) > MAX_CELLS) p *= 2;
+  return p;
+};
+
 export function grainPts(W, H, r, rng, pat) {
   // Degenerate dimensions: nothing drawable — guarded BEFORE pattern dispatch, because every
   // family fails differently: Infinity spins the stipple budget loop AND the line/am sweep
@@ -64,25 +89,10 @@ export function grainPts(W, H, r, rng, pat) {
   // every candidate places, and the active list never drains (an infinite loop, not a throw).
   // On the lattice families it would NaN the pitch and press empty; defaulting is uniform.
   if (!(Number.isFinite(r) && r > 0)) r = 2;
-  if (!pat || pat === 'stipple') {
-    // Grow the cell until the exact allocation fits the budget. Doubling terminates in
-    // O(log) steps and overshoots at most 2x (grid >= MAX_CELLS/4 when it engages at all).
-    let cell = r / Math.SQRT2;
-    while (Math.ceil(W / cell) * Math.ceil(H / cell) > MAX_CELLS) cell *= 2;
-    return poisson(W, H, cell * Math.SQRT2, rng);
-  }
-  // Sweep budget: both lattices iterate ~(2R/pitch) rows x (2R/step) columns per family with
-  // R = hypot(W,H)/2 + pitch (so 2R = diag + 2*pitch). Double the pitch until the candidate
-  // count fits MAX_CELLS. As pitch grows the count converges to a small constant, so the loop
-  // terminates for any finite W/H; it never engages at docs/kit-sane size-to-pitch ratios.
+  if (!pat || pat === 'stipple') return poisson(W, H, stippleCell(W, H, r) * Math.SQRT2, rng);
   const diag = Math.hypot(W, H);
-  if (pat === 'am') {
-    let p = Math.max(4.4, r * 3.4);
-    while (((diag + 2 * p) / p) ** 2 > MAX_CELLS) p *= 2;
-    return amPts(W, H, p, 0.785, rng);
-  }
-  let pitch = Math.max(2.8, r * 2.2);
-  while (((diag + 2 * pitch) / pitch) * ((diag + 2 * pitch) / Math.max(1.6, pitch * 0.26)) > MAX_CELLS) pitch *= 2;
+  if (pat === 'am') return amPts(W, H, amPitch(diag, r), 0.785, rng);
+  const pitch = linePitch(diag, r);
   const pts = [];
   const fams = pat === 'hatch'
     ? [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1.0]]
@@ -91,6 +101,24 @@ export function grainPts(W, H, r, rng, pat) {
     for (const q of screenPts(W, H, pitch, a, rng, pat === 'waves'))
       pts.push({ x: q.x, y: q.y, th: lo + q.j * (hi - lo) });
   return pts;
+}
+
+// Admission-control estimator: the work grainPts would execute for these arguments, in the
+// units the internal budget clamps (grid cells / sweep candidates, x3 for hatch's families).
+// The per-CALL budget above bounds one frame; a host mounting MANY frames (the studio's scene
+// import) must bound the AGGREGATE, and area is the wrong proxy — sweep work is quadratic in
+// the DIAGONAL, so 64 thin 4096x40 hatch frames pass any area cap while costing ~5.6M
+// candidates each. Charging admissions through this estimator keeps the host's math exact.
+export function grainCost(W, H, r, pat) {
+  if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return 0;
+  if (!(Number.isFinite(r) && r > 0)) r = 2;
+  if (!pat || pat === 'stipple') {
+    const cell = stippleCell(W, H, r);
+    return Math.ceil(W / cell) * Math.ceil(H / cell);
+  }
+  const diag = Math.hypot(W, H);
+  if (pat === 'am') return amIter(diag, amPitch(diag, r));
+  return (pat === 'hatch' ? 3 : 1) * lineIter(diag, linePitch(diag, r));
 }
 
 // The AM area-law radius — the ONE place tone becomes a dot size for the amplitude family (V-5,

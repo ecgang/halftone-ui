@@ -3,6 +3,7 @@
 // resolve it here), scene-JSON sanitizing, and JSX code generation.
 
 import { newId, SCREENS, GEOM } from './store.js';
+import { grainCost } from '../../halftone-kit/core/screens.js';
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
@@ -75,16 +76,23 @@ const num = (v, d) => (Number.isFinite(+v) ? +v : d);
 const { MIN_DIM, MAX_DIM, MAX_POS } = GEOM;
 // A scene budget on top of the per-frame clamps: per-frame WORK is bounded (core's screen
 // budget), but a hostile file multiplies it — hundreds of max-size frames each mount a canvas
-// whose backing store alone is ~268MB at dpr 2. Cap the frame count AND the total canvas area;
-// two max-frames' worth keeps the ceiling at the same order a user can reach with two clicks
-// while making multiplication impossible. Frames past either budget are dropped in order.
+// whose backing store alone is ~268MB at dpr 2. Three caps compose, each bounding a different
+// resource, all pinned to "two worst frames' worth" — the same order a user reaches with two
+// clicks, so multiplication is impossible while any real scene sails through:
+//   MAX_FRAMES — React mounts / DOM nodes;
+//   MAX_AREA   — canvas backing stores (area IS the right proxy for pixels);
+//   MAX_WORK   — point generation, charged through core's own grainCost estimator, because
+//                area is the WRONG proxy for sweep work (quadratic in the diagonal: 64 thin
+//                4096x40 hatch frames pass any area cap while costing ~5.6M candidates each).
+// Frames past any budget are dropped in order.
 const MAX_FRAMES = 64;
 const MAX_AREA = 2 * 4096 * 4096;
+const MAX_WORK = 2 * grainCost(4096, 4096, 1 * 0.8 * 0.4, 'hatch');
 export function sanitizeScene(raw) {
   const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.frames) ? raw.frames : null);
   if (!list) return null;
   const frames = [];
-  let area = 0;
+  let area = 0, work = 0;
   for (const f of list) {
     if (frames.length >= MAX_FRAMES) break;
     const c = f && CASE_BY_TYPE[f.type];
@@ -115,8 +123,12 @@ export function sanitizeScene(raw) {
     // x=1e15 is unreachable. 4096px is far beyond any real workspace frame.
     const w = Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.w, c.w)));
     const h = Math.max(MIN_DIM, Math.min(MAX_DIM, num(f.h, c.h)));
-    if (area + w * h > MAX_AREA) break;
+    // Charge the frame at the pitch the press will actually use (spec r*0.8*scale, defaults
+    // 2.5/1) — props.r/scale are already clamped to DIAL_RANGE above.
+    const cost = grainCost(w, h, (props.r ?? 2.5) * 0.8 * (props.scale ?? 1), props.screen);
+    if (area + w * h > MAX_AREA || work + cost > MAX_WORK) break;
     area += w * h;
+    work += cost;
     frames.push({
       id: newId(), type: f.type,
       name: typeof f.name === 'string' && f.name.trim() ? f.name.slice(0, 80) : c.label,
