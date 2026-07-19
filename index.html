@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Halftone UI — a component library that ships its own printing press</title>
-<meta name="description" content="Every surface is printed, not painted. 88 documented sections whose fills are halftone screens pressed onto canvas — stipple, line, wave and crosshatch. Zero dependencies, one file, MIT.">
+<meta name="description" content="Every surface is printed, not painted. 88 documented sections whose fills are halftone screens pressed onto canvas — stipple, line, wave, crosshatch and amplitude. Zero dependencies, one file, MIT.">
 <link rel="canonical" href="https://halftone-ui.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://halftone-ui.com/">
@@ -303,7 +303,7 @@
   </section>
 
   <section id="screens">
-    <h2>Four screens, one engine</h2>
+    <h2>Five screens, one engine</h2>
     <p class="lede">A halftone screen fakes continuous tone with discrete marks. Change the screen and the whole page changes character — the tone field underneath never moves.</p>
     <div class="screens">
       <div class="scv"><canvas id="sccv" width="1000" height="560"></canvas></div>
@@ -313,6 +313,7 @@
           <button data-p="stipple" aria-pressed="false">stipple</button>
           <button data-p="lines" aria-pressed="false">lines</button>
           <button data-p="waves" aria-pressed="false">waves</button>
+          <button data-p="am" aria-pressed="false">am</button>
         </div>
         <p class="scdesc" id="scdesc"></p>
       </div>
@@ -485,12 +486,29 @@ open halftone-ui/docs/index.html
     return pts;
   }
 
+  // Amplitude (AM) screen for the single-ink demo surfaces: a square lattice at 45° whose dot AREA
+  // carries tone (radius ~ sqrt(tone)) — the classic halftone. Each point carries its cell size `c`;
+  // `th` is press-in reveal order only (AM has no tone threshold — the dot grows from nothing instead
+  // of switching on at one). NOTE: distinct from the masthead's own `amGrid(W,H,pitch,ang)` below,
+  // which builds the multi-plate rosette lattice at a plate angle and carries no cell/threshold.
+  function amScreenPts(W, H, pitch, rng) {
+    const pts = [], R = Math.hypot(W, H) / 2 + pitch, ca = Math.cos(0.785), sa = Math.sin(0.785);
+    for (let u = -R; u < R; u += pitch)
+      for (let v = -R; v < R; v += pitch) {
+        const x = W / 2 + u * ca - v * sa, y = H / 2 + u * sa + v * ca;
+        if (x < -pitch || y < -pitch || x > W + pitch || y > H + pitch) continue;
+        pts.push({ x, y, c: pitch, th: rng() });
+      }
+    return pts;
+  }
+
   const HATCH = [[0.26, 0.04, 0.42], [1.83, 0.34, 0.72], [1.05, 0.62, 1.0]];
   function screenPts(W, H, r, rng, pat) {
     const pitch = Math.max(2.8, r * 2.2);
     if (pat === 'stipple') return poisson(W, H, Math.max(2.2, r * 1.5), rng);
     if (pat === 'lines') return ruled(W, H, pitch, rng, [[0.05, 0, 1]], false);
     if (pat === 'waves') return ruled(W, H, pitch, rng, [[0, 0, 1]], true);
+    if (pat === 'am') return amScreenPts(W, H, Math.max(4.4, r * 3.0), rng);
     return ruled(W, H, pitch * 1.4, rng, HATCH, false);
   }
 
@@ -508,10 +526,18 @@ open halftone-ui/docs/index.html
       const ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = typeof opts.color === 'function' ? opts.color() : opts.color;
-      const stip = s.pat === 'stipple';
+      const stip = s.pat === 'stipple', am = s.pat === 'am';
       for (const p of s.pts) {
         if (p.th > s.pr) continue;
         const v = opts.tone(p, W, H) * GRAIN.ink;
+        if (am) {
+          // AM: dot AREA tracks tone (radius ~ sqrt), no on/off threshold. The 0.92 cap keeps a
+          // shadow from fusing solid; the 0.012 floor drops dots too faint to see.
+          const t = Math.min(0.92, v);
+          if (t <= 0.012) continue;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.c * 0.56 * Math.sqrt(t), 0, 6.283); ctx.fill();
+          continue;
+        }
         if (v > p.th) {
           const c = Math.min(1.15, v);
           if (stip) { ctx.beginPath(); ctx.arc(p.x, p.y, 0.42 + 0.85 * c, 0, 6.283); ctx.fill(); }
@@ -759,6 +785,7 @@ open halftone-ui/docs/index.html
     stipple: '<span class="term">Stochastic (FM) screening.</span> A blue-noise dot cloud where density carries tone. Poisson-disk sampling is literally what a real press uses for stochastic screens.',
     lines: '<span class="term">Line screen.</span> One ruled family whose weight tracks the tone. The oldest halftone there is — this is how newspapers printed photographs for a century.',
     waves: '<span class="term">Wave screen.</span> A line screen with a sine displacement. Not standard on any press — it just looks good.',
+    am: '<span class="term">Amplitude (AM) screen.</span> A fixed grid whose dot area carries tone — big dots in the shadows, small in the lights. The classic halftone: every printed photo, seen up close.',
   };
   {
     const cv = document.getElementById('sccv');
