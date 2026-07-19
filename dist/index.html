@@ -43,7 +43,7 @@
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  html { background: var(--bg); scroll-behavior: smooth; }
+  html { background: var(--bg); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body {
     margin: 0; background: var(--bg); color: var(--ink);
     font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -85,7 +85,7 @@
   }
   .mast-sub { color: var(--mut); margin: 16px 0 0; max-width: 60ch; }
   .mast-sub b { color: var(--ink); font-weight: 400; }
-  .mast-ctl { display: flex; align-items: center; gap: 10px; margin: 20px 0 0;
+  .mast-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 20px 0 0;
     font-size: 12.5px; color: var(--mut); }
   .mast-ctl button {
     all: unset; cursor: pointer; border: 1px solid var(--line-2); padding: 3px 10px 4px;
@@ -102,14 +102,25 @@
     padding: 28px 18px 60px 26px; font-size: 12px;
   }
   nav.side h5 { margin: 22px 0 8px; font-size: 11px; font-weight: 700; color: var(--ink); letter-spacing: 0.02em; }
-  nav.side h5:first-child { margin-top: 0; }
+  nav.side h5:first-of-type { margin-top: 0; }
   nav.side a {
     display: block; padding: 3.5px 0 3.5px 14px; color: var(--mut);
     border-left: 1px solid var(--line);
   }
   nav.side a:hover { color: var(--ink); border-left-color: var(--dim); }
   main { padding: 40px 40px 120px; max-width: 820px; }
-  @media (max-width: 860px) { .shell { grid-template-columns: 1fr; } nav.side { display: none; } main { padding: 28px 20px 90px; } }
+  /* mobile-only chrome: the ☰ sections button and the drawer's link group (hidden on desktop) */
+  .navbtn {
+    display: none; align-items: center; cursor: pointer;
+    background: none; border: 1px solid var(--line-2); color: var(--ink);
+    font: inherit; font-size: 12px; padding: 4px 11px 5px;
+  }
+  .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .side-links { display: none; }
+  #navscrim { position: fixed; inset: 0; z-index: 60; background: rgba(8, 8, 10, 0.5); }
+  @media (min-width: 861px) { #navscrim { display: none !important; } }
+  /* NOTE: the mobile @media overrides live at the BOTTOM of this stylesheet — media queries
+     don't add specificity, so they must come after every base rule they override. */
 
   /* ---- sections ---- */
   section.doc { margin-bottom: 72px; scroll-margin-top: 72px; }
@@ -119,7 +130,7 @@
   .eyebrow { font-size: 10.5px; letter-spacing: 0.22em; color: var(--dim); text-transform: uppercase; margin: 34px 0 12px; }
 
   /* ---- example block ---- */
-  .extabs { display: flex; gap: 20px; border-bottom: 1px solid var(--line); margin-bottom: 0; }
+  .extabs { display: flex; gap: 20px; border-bottom: 1px solid var(--line); margin-bottom: 0; flex-wrap: wrap; }
   .extabs button {
     all: unset; cursor: pointer; padding: 7px 2px 9px; color: var(--mut); font-size: 12.5px;
     border-bottom: 2px solid transparent; margin-bottom: -1px;
@@ -281,7 +292,7 @@
       0.6px 0 0 rgba(0,0,0,0.92), -0.6px 0 0 rgba(0,0,0,0.92),
       0 0.6px 0 rgba(0,0,0,0.92), 0 -0.6px 0 rgba(0,0,0,0.92),
       0 0 3px rgba(0,0,0,0.55), 0 0 3px rgba(0,0,0,0.45); }
-  .avrow { display: flex; gap: 14px; }
+  .avrow { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
   .avrow button { all: unset; cursor: pointer; line-height: 0; }
   .avrow button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .avrow canvas { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--line-2); }
@@ -306,6 +317,9 @@
   .legend .pip { width: 8px; height: 8px; border-radius: 50%; }
   details.data { margin-top: 12px; font-size: 12px; color: var(--mut); width: 100%; }
   details.data summary { cursor: pointer; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; }
+  /* .tblwrap only becomes a scroll container on mobile (see the mobile block): overflow
+     makes it a BFC, which un-collapses the table's 22px top margin against the preceding
+     paragraph and would shift the desktop layout down 13px. A plain div collapses through. */
   details.data .tblwrap { overflow-x: auto; }
   details.data table { border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; font-size: 11px; }
   details.data th, details.data td { border: 1px solid var(--line); padding: 4px 10px; text-align: right; color: var(--ink); font-weight: 400; }
@@ -326,7 +340,7 @@
   #toast-pop {
     position: fixed; right: 22px; bottom: 22px; z-index: 60; overflow: hidden;
     border: 1px solid var(--line-2); background: var(--card); padding: 12px 18px;
-    font-size: 12.5px; display: none; max-width: 320px;
+    font-size: 12.5px; display: none; max-width: min(320px, calc(100vw - 44px));
     transform: translateY(8px); opacity: 0; transition: transform 0.25s, opacity 0.25s;
   }
   #toast-pop.show { display: block; transform: translateY(0); opacity: 1; }
@@ -398,7 +412,7 @@
     display: flex; justify-content: space-around;
     font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: rgba(242, 239, 230, 0.72);
   }
-  .inkswap { display: flex; align-items: center; gap: 2px; margin: -10px 0 16px; }
+  .inkswap { display: flex; align-items: center; gap: 2px; margin: -10px 0 16px; flex-wrap: wrap; }
   .inkswap > b {
     font-weight: 400; font-size: 11px; color: var(--dim); margin-right: 8px;
     font-family: ui-monospace, Menlo, monospace;
@@ -426,7 +440,7 @@
   .cbox.ctr b { font-size: 12px; letter-spacing: 0.04em; }
   .ctitle {
     position: absolute; left: 16px; right: 16px; bottom: 18px; transform: rotate(-3deg);
-    font-weight: 900; font-style: italic; font-size: 46px; line-height: 0.88;
+    font-weight: 900; font-style: italic; font-size: clamp(34px, 12.5vw, 46px); line-height: 0.88;
     letter-spacing: -0.01em; color: #F2EFE6;
     -webkit-text-stroke: 2px #23252C; paint-order: stroke fill;
     text-shadow: 3px 3px 0 #C1652A, 6px 6px 0 #23252C;
@@ -514,7 +528,10 @@
   .rad button { display: inline-flex; align-items: center; gap: 9px; background: none; border: none; color: var(--ink); font: inherit; cursor: pointer; padding: 0; }
   .rad .box { position: relative; width: 18px; height: 18px; border: 1px solid var(--line-2); border-radius: 50%; overflow: hidden; }
   .rad canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .sld { position: relative; width: 250px; height: 26px; }
+  /* fixed width + %-max-width, NOT width:min(Npx,100%): stage demos are shrink-to-fit flex
+     items, where a % inside min() is cyclic and collapses the box to 0 during intrinsic
+     sizing. A % max-width is simply ignored in that phase, then caps on real containers. */
+  .sld { position: relative; width: 250px; max-width: 100%; height: 26px; }
   .sld canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   .sld input { position: absolute; inset: 0; width: 100%; margin: 0; -webkit-appearance: none; appearance: none; background: transparent; cursor: ew-resize; }
   .sld input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 22px; background: var(--ink); border: 1px solid var(--bg); }
@@ -522,14 +539,14 @@
   .sld input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .sldrow { display: flex; align-items: center; gap: 14px; color: var(--mut); }
   .sldrow output { min-width: 3ch; text-align: right; color: var(--ink); }
-  .fld { display: flex; flex-direction: column; gap: 6px; min-width: 250px; text-align: left; }
+  .fld { display: flex; flex-direction: column; gap: 6px; min-width: 250px; max-width: 100%; text-align: left; }
   .fld label { font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.08em; }
   .fld input, .fld textarea, .fld select { background: var(--card); border: 1px solid var(--line-2); color: var(--ink); font: inherit; padding: 8px 10px; outline: none; }
   .fld input:focus, .fld textarea:focus, .fld select:focus { border-color: var(--accent); }
   .fld input::placeholder, .fld textarea::placeholder { color: var(--dim); }
   .fld small { color: var(--dim); font-size: 11.5px; }
   .fld small.err { color: var(--red); }
-  .fset { border: 1px solid var(--line-2); padding: 8px 18px 18px; display: flex; flex-direction: column; gap: 14px; min-width: 290px; }
+  .fset { border: 1px solid var(--line-2); padding: 8px 18px 18px; display: flex; flex-direction: column; gap: 14px; min-width: 290px; max-width: 100%; }
   .fset legend { color: var(--mut); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 8px; }
   .numf { display: flex; }
   .numf button { width: 32px; background: var(--card); border: 1px solid var(--line-2); color: var(--mut); font: inherit; cursor: pointer; }
@@ -539,7 +556,7 @@
   .otp { display: flex; gap: 8px; }
   .otp input { width: 34px; height: 44px; text-align: center; font-size: 17px; background: var(--card); border: 1px solid var(--line-2); color: var(--ink); font-family: inherit; outline: none; }
   .otp input:focus { border-color: var(--accent); }
-  .combo { position: relative; width: 250px; text-align: left; }
+  .combo { position: relative; width: 250px; max-width: 100%; text-align: left; }
   .combo ul { position: absolute; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--panel); border: 1px solid var(--line-2); z-index: 30; max-height: 150px; overflow: auto; }
   .combo li { padding: 5px 8px; cursor: pointer; color: var(--mut); }
   .combo li:hover { background: var(--card); color: var(--ink); }
@@ -566,7 +583,7 @@
   .mlist button:hover { background: var(--card); color: var(--ink); }
   .mlist hr { border: none; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
   .mbar { display: flex; gap: 4px; }
-  .ctxzone { position: relative; width: 320px; height: 130px; border: 1px dashed var(--line-2); display: grid; place-items: center; color: var(--dim); user-select: none; }
+  .ctxzone { position: relative; width: 320px; max-width: 100%; height: 130px; border: 1px dashed var(--line-2); display: grid; place-items: center; color: var(--dim); user-select: none; }
   .ctxzone .mlist { top: auto; }
   .accgrp { width: 100%; max-width: 420px; }
   .accgrp details { border: 1px solid var(--line-2); margin: -1px 0 0; background: var(--panel); }
@@ -576,15 +593,15 @@
   .accgrp details[open] summary::after { content: '–'; }
   .accgrp summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .accgrp .abody { padding: 0 15px 13px; color: var(--mut); max-width: 54ch; }
-  .tbar { display: flex; gap: 3px; border: 1px solid var(--line-2); padding: 5px; align-items: center; }
+  .tbar { display: flex; gap: 3px; border: 1px solid var(--line-2); padding: 5px; align-items: center; flex-wrap: wrap; }
   .tbar button { background: none; border: none; color: var(--mut); font: inherit; padding: 5px 10px; cursor: pointer; }
   .tbar button:hover { background: var(--card); color: var(--ink); }
   .tbar button[aria-pressed="true"] { background: var(--card); color: var(--accent); }
   .tbar i.vr { width: 1px; align-self: stretch; background: var(--line-2); margin: 0 5px; }
-  .navm { display: flex; gap: 24px; }
+  .navm { display: flex; gap: 24px; flex-wrap: wrap; }
   .navm a { color: var(--mut); padding: 6px 2px; border-bottom: 2px solid transparent; }
   .navm a[aria-current="page"], .navm a:hover { color: var(--ink); border-bottom-color: var(--accent); }
-  .bc { display: flex; gap: 9px; color: var(--dim); align-items: center; font-size: 12.5px; }
+  .bc { display: flex; gap: 9px; color: var(--dim); align-items: center; font-size: 12.5px; flex-wrap: wrap; }
   .bc a { color: var(--mut); }
   .bc a:hover { color: var(--ink); }
   .bc b { color: var(--ink); font-weight: 400; }
@@ -595,7 +612,7 @@
   .rate { display: flex; gap: 4px; }
   .rate button { width: 30px; height: 30px; padding: 0; background: none; border: none; cursor: pointer; }
   .rate canvas { width: 100%; height: 100%; display: block; }
-  .steps { display: flex; align-items: center; }
+  .steps { display: flex; align-items: center; flex-wrap: wrap; row-gap: 10px; }
   .step { display: flex; align-items: center; gap: 9px; color: var(--dim); font-size: 12.5px; }
   .step i { width: 26px; height: 26px; border: 1px solid var(--line-2); display: grid; place-items: center; font-style: normal; font-size: 12px; }
   .step[aria-current="step"] { color: var(--ink); }
@@ -611,7 +628,7 @@
   .tlrow h4 { margin: 0; font-size: 12.5px; color: var(--ink); font-weight: 700; }
   .tlrow h4 time { color: var(--dim); font-size: 11px; font-weight: 400; margin-left: 10px; }
   .tlrow p { margin: 2px 0 0; color: var(--mut); font-size: 12px; }
-  .scrolla { height: 150px; overflow: auto; border: 1px solid var(--line-2); padding: 0 16px; width: 320px; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+  .scrolla { height: 150px; overflow: auto; border: 1px solid var(--line-2); padding: 0 16px; width: 320px; max-width: 100%; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
   .scrolla::-webkit-scrollbar { width: 8px; }
   .scrolla::-webkit-scrollbar-thumb { background: var(--line-2); }
   .scrolla p { color: var(--mut); font-size: 12px; }
@@ -669,6 +686,64 @@
     .combo li, .numf button, .sbtn, .mast-ctl button { transition: none; }
     .sbtn:active, .swapbtn:active, .grainpick button:active, .seedctl button:active, .mast-ctl button:active, .themectl > button:active { transition: none; transform: none; }
   }
+
+  /* ---- mobile ---- (kept last: media queries add no specificity, so these must
+     follow every base rule they override) */
+  @media (max-width: 860px) {
+    /* topbar wraps to two rows: brand + ☰ on the first, the press controls on the second */
+    .topbar { flex-wrap: wrap; height: auto; padding: 9px 14px; gap: 8px 14px; }
+    .topbar .docs { display: none; }
+    .navbtn { display: inline-flex; margin-left: auto; }
+    .topbar .right { flex-basis: 100%; margin-left: 0; flex-wrap: wrap; gap: 8px 12px; }
+    .topbar .right > a { display: none; } /* github / studio live in the drawer instead */
+    .seedctl .slab { display: none; }
+    #wheelpop, #grainpop { left: 0; right: auto; max-width: calc(100vw - 28px); }
+
+    /* the sidebar becomes a slide-over drawer. minmax(0,1fr), NOT 1fr: a bare 1fr is
+       minmax(auto,1fr), and the min-content floor would let one wide element blow the
+       whole column past the viewport (same trap the desktop template already avoids). */
+    .shell { grid-template-columns: minmax(0, 1fr); }
+    nav.side { display: none; }
+    html.nav-open nav.side {
+      display: block; position: fixed; z-index: 70; top: 0; left: 0; bottom: 0;
+      width: min(320px, 86vw); height: auto;
+      background: var(--bg); border-right: 1px solid var(--line-2);
+      padding: 16px 20px 44px; overflow-y: auto; overscroll-behavior: contain;
+    }
+    html.nav-open { overflow: hidden; }
+    nav.side a { padding-top: 7px; padding-bottom: 7px; font-size: 13px; }
+    .side-links { display: flex; gap: 18px; padding: 2px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+    .side-links a { border-left: none; padding: 4px 0; color: var(--mut); }
+
+    main { padding: 26px 14px 90px; }
+    section.doc { scroll-margin-top: 106px; }
+    .masthead { margin-bottom: 48px; }
+    .stage { padding: 32px 14px; }
+    .stage.tall { padding: 40px 14px; }
+    table.props th, table.props td { padding: 7px 9px; }
+    .tblwrap { overflow-x: auto; } /* mobile-only: on desktop the BFC would un-collapse margins */
+    .variants { gap: 18px; }
+    .sparkrow { gap: 22px; }
+  }
+  @media (max-width: 860px) and (pointer: coarse) {
+    /* 16px+ text inputs stop iOS Safari auto-zooming the page on focus */
+    .signup input, .inkcard input, .fld input, .fld textarea, .fld select, .combo input, .numf input { font-size: 16px; }
+  }
+  @media (max-width: 560px) {
+    section.doc { scroll-margin-top: 132px; } /* the wrapped topbar can reach three rows here */
+    /* dropdown demos: centre standalone menus under their summary; anchor menubar
+       popups to the bar itself (details goes static) so nothing opens off-screen */
+    details.menu > .mlist { left: 50%; right: auto; transform: translateX(-50%); max-width: calc(100vw - 20px); }
+    .mbar { position: relative; }
+    .mbar details.menu { position: static; }
+    .mbar details.menu > .mlist { left: 0; transform: none; }
+    .apps { grid-template-columns: 1fr; }
+    .apps .anav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); padding: 8px 10px; align-items: center; }
+    .apps .anav b { padding: 4px 8px 4px 0; }
+    .apps .anav a { white-space: nowrap; }
+    .apps .amain { overflow-x: auto; }
+    .sldrow { flex-wrap: wrap; justify-content: center; }
+  }
 </style>
 <script>try { document.documentElement.dataset.mode = localStorage.getItem('stipple-mode') || 'dark'; }
 catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
@@ -676,6 +751,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 <div class="topbar">
   <a class="brand" href="#quick-start"><canvas class="brandmark" aria-hidden="true"></canvas>halftone<i>·</i>ui</a>
   <a class="docs" href="#quick-start">docs</a>
+  <button id="navbtn" class="navbtn" type="button" aria-controls="sidenav" aria-expanded="false">☰ sections</button>
   <div class="right">
     <div class="themectl">
       <button id="modebtn" title="Toggle light / dark mode">☀ light</button>
@@ -696,14 +772,19 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
         <button id="grainreset">reset</button>
       </div>
     </div>
-    <div class="seedctl">seed <b id="seedval" class="seedout">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
+    <div class="seedctl"><span class="slab">seed </span><b id="seedval" class="seedout">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
     <a href="https://github.com/ecgang/halftone-ui" target="_blank" rel="noopener">github</a>
     <a href="../studio/">studio →</a>
   </div>
 </div>
 
 <div class="shell">
-<nav class="side" aria-label="Docs navigation">
+<div id="navscrim" hidden></div>
+<nav class="side" id="sidenav" aria-label="Docs navigation">
+  <div class="side-links">
+    <a href="https://github.com/ecgang/halftone-ui" target="_blank" rel="noopener">github ↗</a>
+    <a href="../studio/">studio →</a>
+  </div>
   <h5>Overview</h5>
   <a href="#quick-start">Quick start</a>
   <h5>Handbook</h5>
@@ -826,7 +907,7 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
     <div class="stage tall">
       <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
         <button class="sbtn" data-fill="purple"><canvas></canvas><span>Create account</span></button>
-        <div class="meter-row" style="width:260px"><span class="lbl">Memory</span><canvas data-meter="68" height="10"></canvas><span class="val">68%</span></div>
+        <div class="meter-row" style="width:260px;max-width:100%"><span class="lbl">Memory</span><canvas data-meter="68" height="10"></canvas><span class="val">68%</span></div>
       </div>
     </div>
     <div class="codewrap">
@@ -5734,5 +5815,32 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     });
     area.enter();
   })();
+})();
+</script>
+
+<script>
+(() => {
+  // mobile chrome: ☰ drawer for the section nav, and a scroll wrapper around each props table
+  const root = document.documentElement;
+  const btn = document.getElementById('navbtn');
+  const nav = document.getElementById('sidenav');
+  const scrim = document.getElementById('navscrim');
+  const setOpen = (open) => {
+    root.classList.toggle('nav-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    scrim.hidden = !open;
+  };
+  btn.addEventListener('click', () => setOpen(!root.classList.contains('nav-open')));
+  scrim.addEventListener('click', () => setOpen(false));
+  nav.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && root.classList.contains('nav-open')) { setOpen(false); btn.focus(); }
+  });
+  document.querySelectorAll('table.props').forEach((t) => {
+    const w = document.createElement('div');
+    w.className = 'tblwrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
 })();
 </script>
