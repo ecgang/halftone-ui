@@ -117,7 +117,7 @@
   }
   .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .side-links { display: none; }
-  #navscrim { position: fixed; inset: 0; z-index: 60; background: rgba(8, 8, 10, 0.5); }
+  #navscrim { position: fixed; inset: 0; z-index: 65; background: rgba(8, 8, 10, 0.5); } /* above #toast-pop (60), below the drawer (70) */
   @media (min-width: 861px) { #navscrim { display: none !important; } }
   /* NOTE: the mobile @media overrides live at the BOTTOM of this stylesheet — media queries
      don't add specificity, so they must come after every base rule they override. */
@@ -722,6 +722,7 @@
     .stage.tall { padding: 40px 14px; }
     table.props th, table.props td { padding: 7px 9px; }
     .tblwrap { overflow-x: auto; } /* mobile-only: on desktop the BFC would un-collapse margins */
+    .tblwrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .variants { gap: 18px; }
     .sparkrow { gap: 22px; }
   }
@@ -737,7 +738,8 @@
     .mbar { position: relative; }
     .mbar details.menu { position: static; }
     .mbar details.menu > .mlist { left: 0; transform: none; }
-    .apps { grid-template-columns: 1fr; }
+    /* !important: the Sidebar demo carries an inline grid-template (170px 1fr) */
+    .apps { grid-template-columns: 1fr !important; }
     .apps .anav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); padding: 8px 10px; align-items: center; }
     .apps .anav b { padding: 4px 8px 4px 0; }
     .apps .anav a { white-space: nowrap; }
@@ -5143,9 +5145,12 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     root.classList.toggle('nav-open', open);
     btn.setAttribute('aria-expanded', String(open));
     scrim.hidden = !open;
+    // inert the page behind the drawer so Tab cannot reach controls under the scrim
+    document.querySelectorAll('.topbar, main').forEach((el) => { el.inert = open; });
+    if (open) { const first = nav.querySelector('a'); if (first) first.focus(); }
   };
   btn.addEventListener('click', () => setOpen(!root.classList.contains('nav-open')));
-  scrim.addEventListener('click', () => setOpen(false));
+  scrim.addEventListener('click', () => { setOpen(false); btn.focus(); });
   nav.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && root.classList.contains('nav-open')) { setOpen(false); btn.focus(); }
@@ -5156,5 +5161,25 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     t.parentNode.insertBefore(w, t);
     w.appendChild(t);
   });
+  // breakpoint bookkeeping: leaving mobile closes the drawer (its state must not survive
+  // into the sidebar layout), and the table scrollers are keyboard-reachable only where
+  // they can actually scroll — no extra desktop tab stops.
+  const mq = matchMedia('(max-width: 860px)');
+  const applyMq = () => {
+    if (!mq.matches && root.classList.contains('nav-open')) setOpen(false);
+    document.querySelectorAll('.tblwrap').forEach((w) => {
+      if (mq.matches) {
+        w.tabIndex = 0;
+        w.setAttribute('role', 'region');
+        w.setAttribute('aria-label', 'Props table, scrolls horizontally');
+      } else {
+        w.removeAttribute('tabindex');
+        w.removeAttribute('role');
+        w.removeAttribute('aria-label');
+      }
+    });
+  };
+  mq.addEventListener('change', applyMq);
+  applyMq();
 })();
 </script>
