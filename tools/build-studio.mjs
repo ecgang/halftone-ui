@@ -40,6 +40,18 @@ const html = `<!doctype html>
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="${FAVICON}">
 <title>Halftone UI — studio</title>
+<!-- Vercel Web Analytics (loads only on Vercel-hosted deploys, never localhost/file://) -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  (function () {
+    var h = location.hostname;
+    if (h === 'halftone-ui.com' || h.endsWith('.vercel.app')) {
+      var s = document.createElement('script');
+      s.defer = true; s.src = '/_vercel/insights/script.js';
+      document.head.appendChild(s);
+    }
+  })();
+</script>
 <style>
 ${css}</style>
 </head>
