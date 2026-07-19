@@ -1,6 +1,6 @@
 {
   "meta": {
-    "capturedAt": "2026-07-18T06:09:42.415Z",
+    "capturedAt": "2026-07-19T03:21:30.147Z",
     "browser": "chromium 149.0.7827.55",
     "platform": "darwin arm64",
     "node": "v20.19.6"
@@ -1044,8 +1044,8 @@
         "clipPath": "none",
         "vis": true,
         "loop": false,
-        "bytes": 256196,
-        "hash": "8d3e2bbb8eb1cf04"
+        "bytes": 281716,
+        "hash": "0edeb9028926f0ce"
       },
       "bar-chart[0]": {
         "id": "bars",
@@ -1061,8 +1061,8 @@
         "clipPath": "none",
         "vis": true,
         "loop": false,
-        "bytes": 95644,
-        "hash": "3d54e7298ad73cc8"
+        "bytes": 106704,
+        "hash": "db93ab098dd4a29b"
       },
       "sparkline[0]": {
         "id": null,
@@ -3970,8 +3970,8 @@
         "clipPath": "none",
         "vis": true,
         "loop": false,
-        "bytes": 256168,
-        "hash": "b53e83087c0746f4"
+        "bytes": 310260,
+        "hash": "a6fd48dabd09c17b"
       },
       "bar-chart[0]": {
         "id": "bars",
@@ -3987,8 +3987,8 @@
         "clipPath": "none",
         "vis": true,
         "loop": false,
-        "bytes": 97376,
-        "hash": "b9446b505e30deeb"
+        "bytes": 116108,
+        "hash": "ef3123fc437dc95d"
       },
       "sparkline[0]": {
         "id": null,

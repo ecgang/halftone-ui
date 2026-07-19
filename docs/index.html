@@ -3430,7 +3430,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       return yAt(v * prog);
     }
     const obj = {
-      cv: areaCv, pat: null, kind: 'grain',
+      cv: areaCv, pat: 'am', kind: 'grain',
       rebuild() {
         const f = fit(areaCv, 280);
         if (!f) { this.stale = true; return; }
@@ -3582,7 +3582,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
                yt: M.t + (H - M.t - M.b) * (1 - vals[i] / vmax) };
     };
     const obj = {
-      cv: barsCv, pat: null, kind: 'grain', x: { pr: 1 },
+      cv: barsCv, pat: 'am', kind: 'grain', x: { pr: 1 },
       rebuild() {
         const f = fit(barsCv, 150);
         if (!f) { this.stale = true; return; }
@@ -4606,7 +4606,10 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     GRAINS.forEach(g => {
       const b = document.createElement('button');
       b.type = 'button'; b.textContent = g;
-      b.setAttribute('aria-pressed', String(g === GRAIN.pattern));
+      // default the pressed tab to the surfaces' own initial screen (charts may seed
+      // obj.pat, e.g. area/bar default to 'am'); falls back to the global GRAIN.pattern
+      // for every surface that leaves pat null, so the picker always matches the canvas.
+      b.setAttribute('aria-pressed', String(g === (surfs[0].pat || GRAIN.pattern)));
       b.addEventListener('click', () => {
         box.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
         surfs.forEach(s => {

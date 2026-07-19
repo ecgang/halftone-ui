@@ -3951,7 +3951,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       }
       const obj = {
         cv: areaCv,
-        pat: null,
+        pat: "am",
         kind: "grain",
         rebuild() {
           const f = fit(areaCv, 280);
@@ -4127,7 +4127,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       };
       const obj = {
         cv: barsCv,
-        pat: null,
+        pat: "am",
         kind: "grain",
         x: { pr: 1 },
         rebuild() {
@@ -5271,7 +5271,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = g;
-        b.setAttribute("aria-pressed", String(g === GRAIN.pattern));
+        b.setAttribute("aria-pressed", String(g === (surfs[0].pat || GRAIN.pattern)));
         b.addEventListener("click", () => {
           box.querySelectorAll("button").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
           surfs.forEach((s) => {
