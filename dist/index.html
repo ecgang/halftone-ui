@@ -140,7 +140,18 @@
     padding: 9px 22px; letter-spacing: 0.02em;
   }
   .sbtn canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  .sbtn span { position: relative; z-index: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.55); }
+  .sbtn span { position: relative; z-index: 1; }
+  /* FILLED buttons only: dark ground + light ink + crisp dark outline (same system as .sbadge).
+     Outline/ghost buttons (data-variant="outline") are excluded — they stay transparent with the
+     theme ink, so a dark fill or forced-light label wouldn't wreck the fill-vs-outline hierarchy
+     or vanish on the light page. */
+  .sbtn:not([data-variant="outline"]) { background: #17181e; }
+  .sbtn:not([data-variant="outline"]) span { color: #ECE8DD;
+    text-shadow:
+      0.5px 0 0 rgba(0,0,0,0.9), -0.5px 0 0 rgba(0,0,0,0.9),
+      0 0.5px 0 rgba(0,0,0,0.9), 0 -0.5px 0 rgba(0,0,0,0.9),
+      0 0 2px rgba(0,0,0,0.55); }
+  .sbtn[data-variant="outline"] span { text-shadow: 0 1px 2px rgba(0,0,0,0.28); }
   .sbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .sbtn.block { display: block; width: 100%; }
 
@@ -215,10 +226,22 @@
 
   /* ---- badges / avatars / skeleton ---- */
   .badges { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-  .sbadge { position: relative; overflow: hidden; border: 1px solid var(--line-2); padding: 3px 12px 4px; font-size: 11.5px; }
+  /* dark ground in BOTH themes: the halftone's gaps read dark so light-ink labels pop everywhere —
+     the same mechanic that makes dark mode legible. In light mode the chip becomes a small printed
+     ink-tile (colour dots on dark) instead of colour-dots-on-cream, where light text used to vanish
+     into the cream gaps. The dot texture still renders in full on top of this ground. */
+  .sbadge { position: relative; overflow: hidden; border: 1px solid var(--line-2); padding: 3px 12px 4px; font-size: 11.5px; background: #17181e; }
   .sbadge canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  .sbadge i { position: relative; z-index: 1; font-style: normal; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-  html[data-mode="light"] .sbadge i { text-shadow: 0 1px 2px rgba(245,242,233,0.7); }
+  /* light ink + dark outline, BOTH themes. A dark ring gives maximum edge contrast against the
+     colour dots regardless of hue — the reason the dark-mode outline read well. Light mode used to
+     flip to dark-text + light-ring (a weak combo that muddied), so we keep the text light in both
+     modes instead. Crisp 0-blur ring sharpens the edges; a soft dark "ground" glow deepens the fill
+     right behind the glyph so light text still pops on the lightest swatch (grey). No backing plate. */
+  .sbadge i { position: relative; z-index: 1; font-style: normal; color: #ECE8DD;
+    text-shadow:
+      0.6px 0 0 rgba(0,0,0,0.92), -0.6px 0 0 rgba(0,0,0,0.92),
+      0 0.6px 0 rgba(0,0,0,0.92), 0 -0.6px 0 rgba(0,0,0,0.92),
+      0 0 3px rgba(0,0,0,0.55), 0 0 3px rgba(0,0,0,0.45); }
   .avrow { display: flex; gap: 14px; }
   .avrow button { all: unset; cursor: pointer; line-height: 0; }
   .avrow button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -4071,7 +4094,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       const s = surface(toast.querySelector("canvas"), {
         r: 2.2,
         color: () => PAL.blue,
-        tone: (p, W, H, x, n) => Math.pow(p.x / W, 1.4) * (0.3 + n(p.x / 50, p.y / 50)) * 1.1
+        tone: (p, W, H, x, n) => GRAIN.wash * Math.pow(p.x / W, 1.4) * (0.3 + n(p.x / 50, p.y / 50)) * 1.1
       });
       let timer = 0;
       document.getElementById("toast-btn").addEventListener("click", () => {
