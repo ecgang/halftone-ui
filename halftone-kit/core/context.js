@@ -27,7 +27,7 @@ export const RESTING_BASE = 1859;
 
 export function createPressContext(opts = {}) {
   // instance-scoped state — the former globals, one copy per context
-  const grain = { pattern: 'hatch', scale: 1, ink: 1, wash: 1, ...(opts.grain || {}) };
+  const grain = { pattern: 'hatch', scale: 1, ink: 1, wash: 1, misreg: 1, ...(opts.grain || {}) };
   const theme = { mode: opts.mode || 'dark', hue: opts.hue || 0 };
   const inks = { ...INKS, ...(opts.inks || {}) };     // plate colors (the masthead/press vocabulary)
   const paper = { ...PAPER, ...(opts.paper || {}) };  // ground per mode

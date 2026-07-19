@@ -659,13 +659,14 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
         <div class="gdial"><b>scale</b><input type="range" id="gr-scale" min="0.6" max="1.8" step="0.05" value="1" aria-label="Screen scale"><span class="num" id="gr-scale-v">1.00</span></div>
         <div class="gdial"><b>ink</b><input type="range" id="gr-ink" min="0.5" max="1.5" step="0.05" value="1" aria-label="Ink weight"><span class="num" id="gr-ink-v">1.00</span></div>
         <div class="gdial"><b>washes</b><input type="range" id="gr-wash" min="0" max="2" step="0.1" value="1" aria-label="Wash strength"><span class="num" id="gr-wash-v">1.0</span></div>
+        <div class="gdial"><b>misreg</b><input type="range" id="gr-misreg" min="0" max="3" step="0.1" value="1" aria-label="Plate misregistration"><span class="num" id="gr-misreg-v">1.0</span></div>
         <small>re-presses every surface live</small>
         <button id="grainreset">reset</button>
       </div>
     </div>
     <div class="seedctl">seed <b id="seedval" class="seedout">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
     <a href="https://github.com/ecgang/halftone-ui" target="_blank" rel="noopener">github</a>
-    <a href="/studio/">studio →</a>
+    <a href="../studio/">studio →</a>
   </div>
 </div>
 
@@ -3020,7 +3021,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
 <div id="toast-pop" role="status"><canvas></canvas><div class="in"><span class="chk">▪</span><span id="toast-msg">Deploy finished</span></div></div>
 
 <script type="module">
-  import { mulberry32, poisson, makeNoise, screenPts, amPts, grainPts, amDot, amRadius, textField, INKS, PAPER, mixHex, tuneInk, tuneMix, drawPress, drawPlates, createPressContext } from '../halftone-kit/core/index.js';
+  import { mulberry32, poisson, makeNoise, screenPts, amPts, amPlates, grainPts, amDot, amRadius, textField, INKS, PAPER, mixHex, tuneInk, tuneMix, cmyk, drawPress, drawPlates, drawProcessAm, createPressContext } from '../halftone-kit/core/index.js';
   // Storage throws under file:// in some browsers and whenever cookies are
   // blocked. These reads run during init, so an unguarded throw would take
   // theme, hue and grain down with it — not just the saved preference.
@@ -3055,6 +3056,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     if (dial(gs.scale, 0.6, 1.8)) GRAIN.scale = gs.scale;
     if (dial(gs.ink, 0.5, 1.5)) GRAIN.ink = gs.ink;
     if (dial(gs.wash, 0, 2)) GRAIN.wash = gs.wash;
+    if (dial(gs.misreg, 0, 3)) GRAIN.misreg = gs.misreg;
   } catch (e) { /* corrupt storage: keep defaults */ }
 
   // amplitude modulation — a square grid at the classic 45 degree key-plate angle.
@@ -3103,7 +3105,11 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       const f = fit(cv, h);
       if (!f) { s.stale = true; return; }
       s.stale = false; s.ctx = f.ctx; s.W = f.w; s.H = f.h;
-      s.pts = grainPts(f.w, f.h, r * 0.8 * GRAIN.scale, mulberry32(CTX.seedValue + off), s.pat || GRAIN.pattern);
+      const pat = s.pat || GRAIN.pattern, pitchR = r * 0.8 * GRAIN.scale;
+      s.pts = grainPts(f.w, f.h, pitchR, mulberry32(CTX.seedValue + off), pat);
+      // am surfaces carry the four process-plate lattices too, built here (not per draw) so a
+      // chromatic fill can press as a real CMYK rosette (drawProcessAm) on the single-plate am grid.
+      s.amPlates = pat === 'am' ? amPlates(f.w, f.h, pitchR, (i) => mulberry32(CTX.seedValue + off + i * 977)) : null;
       s.noise = makeNoise(CTX.seedValue + off);
     };
     s.draw = () => {
@@ -3111,14 +3117,25 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       const { ctx, W, H, x } = s;
       ctx.clearRect(0, 0, W, H);
       if (pre) pre(ctx, W, H);
-      ctx.fillStyle = typeof color === 'function' ? color() : color;
-      // The generic surface press now funnels through the core's single drawPress site. The tone
-      // closure stays a legacy pixel-space field: (u,v,p) => tone(p,...) uses the raw point so the
-      // rebuild is byte-identical to the inline loop this replaced (V-4). GRAIN.ink is the dial.
+      const col = typeof color === 'function' ? color() : color;
+      ctx.fillStyle = col;
+      const pat = s.pat || GRAIN.pattern;
+      // The tone closure stays a legacy pixel-space field: (u,v,p) => tone(p,...) uses the raw point
+      // so the rebuild is byte-identical to the inline loop this replaced (V-4). GRAIN.ink is the dial.
+      const field = (u, v, p) => tone(p, W, H, x, s.noise);
+      // A chromatic `am` fill presses as a four-plate CMYK rosette; every non-am screen (and an
+      // achromatic am fill, which has no process separation) still funnels through the single
+      // drawPress site, keeping those bytes identical under the golden (V-4).
+      if (pat === 'am' && s.amPlates && Math.max(cmyk(col).c, cmyk(col).m, cmyk(col).y) > 0.02) {
+        drawProcessAm(ctx, {
+          base: col, W, H, plates: s.amPlates, field,
+          grain: { ink: GRAIN.ink }, misreg: GRAIN.misreg, paper: THEME.mode, pr: x.pr,
+        });
+        return;
+      }
       drawPress(ctx, {
-        pts: s.pts, W, H,
-        field: (u, v, p) => tone(p, W, H, x, s.noise),
-        screen: s.pat || GRAIN.pattern,
+        pts: s.pts, W, H, field,
+        screen: pat,
         grain: { ink: GRAIN.ink },
         pr: x.pr,
       });
@@ -3396,7 +3413,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
   const areaCv = document.getElementById('area');
   const tooltip = document.getElementById('tooltip');
   const area = (() => {
-    let ctx, W, H, sets = [], edge = [];
+    let ctx, W, H, sets = [], edge = [], plates = null;
     const M = { t: 16, r: 14, b: 26, l: 36 };
     const ymax = Math.max(...DATA.desktop, ...DATA.mobile) * 1.12;
     let prog = 1, hoverI = -1, solo = -1;
@@ -3418,7 +3435,11 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         const f = fit(areaCv, 280);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(CTX.seedValue + si * 7919), obj.pat || GRAIN.pattern));
+        const pat = obj.pat || GRAIN.pattern;
+        sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(CTX.seedValue + si * 7919), pat));
+        // when the screen is am, each series also gets its four process-plate lattices, so a series
+        // presses as a real CMYK rosette of its own colour rather than a single ink.
+        plates = pat === 'am' ? SERIES.map((s, si) => amPlates(W, H, 2.9 * GRAIN.scale, (i) => mulberry32(CTX.seedValue + si * 7919 + i * 977))) : null;
         edge = SERIES.map((s, si) => {
           const rng = mulberry32(CTX.seedValue * 31 + si), out = [];
           for (let x = M.l; x <= W - M.r; x += 2.1)
@@ -3447,20 +3468,30 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           ctx.fillStyle = s.color;
           // the area fill funnels through the core press; the field carries the curve geometry and
           // returns 0 outside the filled band (== the old early-continue). heavier chart dot law.
-          drawPress(ctx, {
-            pts: sets[si], W, H,
-            field: (u, v, p) => {
-              if (p.x < M.l || p.x > W - M.r || p.y > yBase) return 0;
-              const yc = curveY(vals, p.x);
-              if (p.y < yc) return 0;
-              return Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
-            },
-            // the chart always presses ROUND dots (arc) whatever the screen GRID is — the pattern
-            // shapes the point set (grainPts, above), not the mark. 'stipple' selects the round law.
-            screen: 'stipple',
-            grain: { ink: GRAIN.ink },
-            dot: { round: [0.45, 0.9], cap: 1.15 },
-          });
+          const field = (u, v, p) => {
+            if (p.x < M.l || p.x > W - M.r || p.y > yBase) return 0;
+            const yc = curveY(vals, p.x);
+            if (p.y < yc) return 0;
+            return Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
+          };
+          // am: the series presses as a four-plate CMYK rosette of its colour (drawProcessAm); every
+          // other screen keeps the single round-dot press. (An achromatic series would fall through
+          // to drawPress, but the chart palette is always chromatic.)
+          if (plates && Math.max(cmyk(s.color).c, cmyk(s.color).m, cmyk(s.color).y) > 0.02) {
+            drawProcessAm(ctx, {
+              base: s.color, W, H, plates: plates[si], field,
+              grain: { ink: GRAIN.ink }, misreg: GRAIN.misreg, paper: THEME.mode,
+            });
+          } else {
+            drawPress(ctx, {
+              pts: sets[si], W, H, field,
+              // the chart always presses ROUND dots (arc) whatever the screen GRID is — the pattern
+              // shapes the point set (grainPts, above), not the mark. 'stipple' selects the round law.
+              screen: 'stipple',
+              grain: { ink: GRAIN.ink },
+              dot: { round: [0.45, 0.9], cap: 1.15 },
+            });
+          }
           for (const e of edge[si]) {
             if (e.th > 0.85) continue;
             const y = curveY(vals, e.x) + e.o;
@@ -3541,7 +3572,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
   // ============ bar chart ============
   const barsCv = document.getElementById('bars');
   (() => {
-    let ctx, W, H, pts = [];
+    let ctx, W, H, pts = [], plates = null;
     const vals = [12, 19, 9, 24, 31, 22, 36, 28];
     const vmax = 40, M = { t: 12, b: 20, l: 8, r: 8 };
     let hover = -1;
@@ -3556,7 +3587,10 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         const f = fit(barsCv, 150);
         if (!f) { this.stale = true; return; }
         this.stale = false; ctx = f.ctx; W = f.w; H = f.h;
-        pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(CTX.seedValue + 101), obj.pat || GRAIN.pattern);
+        const pat = obj.pat || GRAIN.pattern;
+        pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(CTX.seedValue + 101), pat);
+        // am: the four process-plate lattices so the bars press as a CMYK rosette, not a single ink.
+        plates = pat === 'am' ? amPlates(W, H, 2.3 * GRAIN.scale, (i) => mulberry32(CTX.seedValue + 101 + i * 977)) : null;
       },
       draw() {
         if (this.stale || !ctx) return;
@@ -3567,23 +3601,32 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         ctx.fillStyle = PAL.blue;
         // bars funnel through the core press too; the field returns the per-bar column tone (with
         // the hover boost) or 0 between/under bars. dot law and pr gate match the old inline loop.
-        drawPress(ctx, {
-          pts, W, H,
-          field: (u, v, p) => {
-            if (p.y > yb) return 0;
-            for (let i = 0; i < vals.length; i++) {
-              const b = bar(i);
-              if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
-              const boost = hover === i ? 1.3 : 1;
-              return Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost;
-            }
-            return 0;
-          },
-          screen: 'stipple',  // round dots on whatever grid (see area chart note)
-          grain: { ink: GRAIN.ink },
-          pr: obj.x.pr,
-          dot: { round: [0.5, 1.05], cap: 1.1 },
-        });
+        const field = (u, v, p) => {
+          if (p.y > yb) return 0;
+          for (let i = 0; i < vals.length; i++) {
+            const b = bar(i);
+            if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
+            const boost = hover === i ? 1.3 : 1;
+            return Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost;
+          }
+          return 0;
+        };
+        // am: bars press as a four-plate CMYK rosette of PAL.blue; every other screen keeps the
+        // single round-dot press with the same pr gate.
+        if (plates && Math.max(cmyk(PAL.blue).c, cmyk(PAL.blue).m, cmyk(PAL.blue).y) > 0.02) {
+          drawProcessAm(ctx, {
+            base: PAL.blue, W, H, plates, field,
+            grain: { ink: GRAIN.ink }, misreg: GRAIN.misreg, paper: THEME.mode, pr: obj.x.pr,
+          });
+        } else {
+          drawPress(ctx, {
+            pts, W, H, field,
+            screen: 'stipple',  // round dots on whatever grid (see area chart note)
+            grain: { ink: GRAIN.ink },
+            pr: obj.x.pr,
+            dot: { round: [0.5, 1.05], cap: 1.1 },
+          });
+        }
         ctx.fillStyle = MUT;
         ctx.font = '9.5px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
         vals.forEach((v, i) => {
@@ -4745,9 +4788,10 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       { id: 'gr-scale', key: 'scale', def: 1, fmt: v => v.toFixed(2) },
       { id: 'gr-ink', key: 'ink', def: 1, fmt: v => v.toFixed(2) },
       { id: 'gr-wash', key: 'wash', def: 1, fmt: v => v.toFixed(1) },
+      { id: 'gr-misreg', key: 'misreg', def: 1, fmt: v => v.toFixed(1) },
     ];
     const saveGrain = () => store.set('stipple-grain',
-      JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash }));
+      JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash, misreg: GRAIN.misreg }));
     const setDial = (d, v) => {
       GRAIN[d.key] = v;
       document.getElementById(d.id).value = v;
@@ -4858,7 +4902,9 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           // rather than one fade. Cubic ease-out: arrives fast, decelerates into register.
           const pu = Math.min(1, Math.max(0, (s.x.pr - i * 0.12) / 0.64));
           const e = 1 - Math.pow(1 - pu, 3);
-          const ox = pl.dx + (1 - e) * pl.lx, oy = pl.dy + (1 - e) * pl.ly;
+          // GRAIN.misreg scales the settled registration offset (the misregistration dial). At the
+          // default 1 this is exactly pl.dx/pl.dy (x*1===x), so the masthead stays byte-identical.
+          const ox = pl.dx * GRAIN.misreg + (1 - e) * pl.lx, oy = pl.dy * GRAIN.misreg + (1 - e) * pl.ly;
           return {
             ink: pl.ink ? INKS[pl.ink] : (THEME.mode === 'dark' ? INKS.white : INKS.black),
             pts,

@@ -1,7 +1,7 @@
 // P2c-2 byte-oracle: prove drawPlates reproduces the ORIGINAL masthead ('batch') and inkSurface
 // ('layer') draw loops op-for-op, BEFORE touching the 260KB docs. Mock 2d ctx records every op
 // (fillStyle, gco, alpha, clear, path, arc, moveTo, fill, drawImage) so any divergence shows.
-import { drawPlates, amRadius } from '../halftone-kit/core/index.js';
+import { drawPlates, amRadius, cmyk, drawProcessAm, amPlates, mulberry32, INKS as CORE_INKS } from '../halftone-kit/core/index.js';
 
 let pass = 0, fail = 0;
 const ok = (n, c, x = '') => { (c ? pass++ : fail++); console.log(`${c ? 'PASS' : 'FAIL'}  ${n}${x ? '  — ' + x : ''}`); };
@@ -156,6 +156,62 @@ function inkCandidate(reveal, body, dk) {
 for (const [rev, body, dk] of [[1, 0.55, false], [0.4, 0.6, false], [1, 0.55, true], [0.02, 0.5, false]]) {
   ok(`inkSurface layer byte-identical (reveal=${rev} body=${body} dark=${dk})`, inkReference(rev, body, dk) === inkCandidate(rev, body, dk));
 }
+
+// ================= CMYK SEPARATION (cmyk) =================
+// The four-plate process press separates ANY resolved fill through cmyk(); resolveColor (press.js)
+// can hand it 6-/3-digit hex, rgb()/rgba(), or a named/hsl/malformed string. These pin the edge
+// vectors AND the deterministic (no-NaN) fallback that keeps an unreadable colour on the single-plate
+// path instead of pressing NaN-radius plates.
+const near = (a, b, e = 1e-9) => Math.abs(a - b) <= e;
+const cmykEq = (g, c, m, y, k) => near(g.c, c) && near(g.m, m) && near(g.y, y) && near(g.k, k);
+ok('cmyk pure black #000000 -> key only', cmykEq(cmyk('#000000'), 0, 0, 0, 1));
+ok('cmyk pure black short #000 -> key only', cmykEq(cmyk('#000'), 0, 0, 0, 1));
+ok('cmyk white #ffffff -> no ink', cmykEq(cmyk('#ffffff'), 0, 0, 0, 0));
+ok('cmyk white short #fff -> no ink', cmykEq(cmyk('#fff'), 0, 0, 0, 0));
+ok('cmyk pure red -> m+y', cmykEq(cmyk('#ff0000'), 0, 1, 1, 0));
+ok('cmyk pure green -> c+y', cmykEq(cmyk('#00ff00'), 1, 0, 1, 0));
+ok('cmyk pure blue -> c+m', cmykEq(cmyk('#0000ff'), 1, 1, 0, 0));
+ok('cmyk 3-hex #f00 equals 6-hex red', cmykEq(cmyk('#f00'), 0, 1, 1, 0));
+ok('cmyk rgb() comma form', cmykEq(cmyk('rgb(255,0,0)'), 0, 1, 1, 0));
+ok('cmyk rgb() space form', cmykEq(cmyk('rgb(0 255 0)'), 1, 0, 1, 0));
+ok('cmyk rgba() ignores alpha', cmykEq(cmyk('rgba(0,0,255,0.5)'), 1, 1, 0, 0));
+ok('cmyk mid-grey -> chroma-free (single-plate route)', (() => { const s = cmyk('#808080'); return near(s.c, 0) && near(s.m, 0) && near(s.y, 0) && s.k > 0.02; })());
+ok('cmyk named colour -> deterministic zero-chroma fallback (no NaN)', cmykEq(cmyk('red'), 0, 0, 0, 0));
+ok('cmyk hsl()/unparseable -> fallback', cmykEq(cmyk('hsl(200,50%,40%)'), 0, 0, 0, 0));
+ok('cmyk empty/non-string -> fallback (no throw)', cmykEq(cmyk(''), 0, 0, 0, 0) && cmykEq(cmyk(null), 0, 0, 0, 0));
+// malformed rgb() must hit the deterministic fallback, never NaN plates (public cmyk() contract)
+ok('cmyk rgb bare-dot -> fallback (finite)', (() => { const s = cmyk('rgb(.,0,0)'); return cmykEq(s, 0, 0, 0, 0) && [s.c, s.m, s.y, s.k].every(Number.isFinite); })());
+ok('cmyk rgb double-dot channel -> fallback', cmykEq(cmyk('rgb(1.2.3,0,0)'), 0, 0, 0, 0));
+ok('cmyk rgb missing close paren -> fallback', cmykEq(cmyk('rgb(255,0,0'), 0, 0, 0, 0));
+ok('cmyk rgb trailing garbage -> fallback', cmykEq(cmyk('rgb(255,0,0)junk'), 0, 0, 0, 0));
+ok('cmyk rgb decimal channel still parses', cmykEq(cmyk('rgb(255.0,0,0)'), 0, 1, 1, 0));
+ok('cmyk rgb() modern slash-alpha parses', cmykEq(cmyk('rgb(0 0 255 / 0.5)'), 1, 1, 0, 0));
+// mixed comma/space separators are invalid CSS -> deterministic fallback, not chromatic
+ok('cmyk rgb mixed sep (comma then space) -> fallback', cmykEq(cmyk('rgb(255, 0 0)'), 0, 0, 0, 0));
+ok('cmyk rgb mixed sep (space then comma) -> fallback', cmykEq(cmyk('rgb(255 0, 0)'), 0, 0, 0, 0));
+ok('cmyk rgb comma body + slash alpha -> fallback', cmykEq(cmyk('rgb(255,0,0 / 0.5)'), 0, 0, 0, 0));
+ok('cmyk rgb space body + comma alpha -> fallback', cmykEq(cmyk('rgb(255 0 0, 0.5)'), 0, 0, 0, 0));
+{ const s = cmyk(CORE_INKS.blue); ok('chromatic guard TRUE for an ink hex', Math.max(s.c, s.m, s.y) > 0.02); }
+ok('chromatic guard FALSE for white/black/grey/named', ['#ffffff', '#000000', '#808080', 'red'].every((c) => { const s = cmyk(c); return Math.max(s.c, s.m, s.y) <= 0.02; }));
+
+// ================= PROCESS-AM (drawProcessAm) =================
+// State hygiene (V7) + per-context ink isolation (Codex finding 2). Reuses the mockCtx op recorder.
+const procScene = (over = {}) => {
+  const ctx = mockCtx();
+  const plates = amPlates(W, H, 4, (i) => mulberry32(99 + i * 977));
+  drawProcessAm(ctx, { base: '#cc3344', W, H, plates, field: () => 0.8, grain: { ink: 1, wash: 1 }, misreg: 1, paper: 'light', pr: 1, ...over });
+  return ctx;
+};
+{ const ctx = procScene(); ok('drawProcessAm sets multiply on light paper', ctx.ops.includes('gco=multiply')); ok('drawProcessAm restores gco=source-over (normal, light)', ctx._gco === 'source-over' && ctx.ops[ctx.ops.length - 1] === 'gco=source-over'); }
+{ const ctx = procScene({ paper: 'dark' }); ok('drawProcessAm sets lighter on dark paper', ctx.ops.includes('gco=lighter')); ok('drawProcessAm restores gco=source-over (normal, dark)', ctx._gco === 'source-over'); }
+{ const ctx = mockCtx(); const plates = amPlates(W, H, 4, (i) => mulberry32(7 + i * 977)); let threw = false;
+  try { drawProcessAm(ctx, { base: '#3377cc', W, H, plates, field: () => { throw new Error('boom'); }, grain: {}, misreg: 1, paper: 'light', pr: 1 }); } catch { threw = true; }
+  ok('drawProcessAm rethrows a throwing field', threw);
+  ok('drawProcessAm restores gco=source-over even when the field throws (finally)', ctx._gco === 'source-over'); }
+{ const ctx = procScene({ inks: { yellow: '#111111', blue: '#123456', pink: '#654321', black: '#222222', white: '#eeeeee' } });
+  ok('drawProcessAm uses per-context inks (custom blue plate)', ctx.ops.includes('fillStyle=#123456'));
+  ok('drawProcessAm does NOT fall back to module INKS.blue when overridden', !ctx.ops.includes(`fillStyle=${CORE_INKS.blue}`)); }
+ok('drawProcessAm defaults to module INKS when no override given', procScene().ops.includes(`fillStyle=${CORE_INKS.blue}`));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

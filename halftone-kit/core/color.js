@@ -63,3 +63,54 @@ export const tuneMix = (a, b) => {
   const [h, s, l] = rgb2hsl(...hex2rgb(mixHex(a, b)));
   return hsl2hex(h, band(s, 0.30, 0.55), band(l, 0.26, 0.38));
 };
+
+// Parse a resolved CSS colour to sRGB 0..255. The docs/INKS emit 6-digit hex, but the adapter's
+// public `color` prop and its palette (filled from CSS custom props) can hand cmyk a 3-digit hex or
+// an `rgb()`/`rgba()` string — resolveColor (press.js) passes ANY CSS colour straight through. This
+// reads those three shapes and returns null for anything else (named colours, hsl(), modern syntax,
+// malformed input) so cmyk can fall back DETERMINISTICALLY instead of producing NaN plates. Space-
+// or comma-separated rgb() both parse; the alpha of rgba() is ignored (the press has no plate alpha).
+const parseSrgb = (s) => {
+  if (typeof s !== 'string') return null;
+  const h = s.trim();
+  const hm = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(h);
+  if (hm) {
+    const x = hm[1];
+    if (x.length === 3) return [x[0] + x[0], x[1] + x[1], x[2] + x[2]].map((p) => parseInt(p, 16));
+    return [x.slice(0, 2), x.slice(2, 4), x.slice(4, 6)].map((p) => parseInt(p, 16));
+  }
+  // rgb()/rgba() in EITHER legacy comma syntax `rgb(r, g, b[, a])` OR modern space syntax
+  // `rgb(r g b[ / a])` — never a mix of the two. A comma/space blend like `rgb(255, 0 0)` is invalid
+  // CSS the canvas itself would reject, so it takes the deterministic fallback rather than the
+  // chromatic four-plate path (where the separation would disagree with how the canvas paints the
+  // fill). Each channel is an anchored number token (`\d+(?:\.\d+)?` — one+ digit, at most one dot, so
+  // `.`, `1.2.3`, bare junk are rejected, never coerced to NaN); the optional alpha is ignored; and
+  // the string must END at the close paren (no trailing garbage). Anchoring guarantees finite
+  // channels — the explicit finite check is a belt in case the grammar is ever loosened.
+  const rgbComma = /^rgba?\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*(?:,\s*\d+(?:\.\d+)?%?\s*)?\)\s*$/i;
+  const rgbSpace = /^rgba?\(\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s*(?:\/\s*\d+(?:\.\d+)?%?\s*)?\)\s*$/i;
+  const rm = rgbComma.exec(h) || rgbSpace.exec(h);
+  if (rm) {
+    const ch = [+rm[1], +rm[2], +rm[3]];
+    if (!ch.every(Number.isFinite)) return null;
+    return ch.map((v) => Math.max(0, Math.min(255, v)));
+  }
+  return null;
+};
+
+// CMYK separation from a resolved sRGB colour — the process ink amounts (0..1). The four-plate AM
+// press (drawProcessAm) uses this to render ANY fill as a real process rosette: c->cyan(blue),
+// m->magenta(pink), y->yellow, k->black key. Standard GCR-free separation: k is how far the
+// brightest channel is from white; the CMY amounts are what's left after the key is pulled out. A
+// fully achromatic colour (max(c,m,y) ~ 0) has no process content — the caller prints it as a single
+// plate instead. An UNPARSEABLE colour (named/hsl/malformed) returns the same all-zero-chroma result,
+// so the chromatic guard routes it to the single-plate path rather than NaN plates — a colour the
+// separator can't read still presses, just as one ink.
+export const cmyk = (hex) => {
+  const rgb = parseSrgb(hex);
+  if (!rgb) return { c: 0, m: 0, y: 0, k: 0 };
+  const [r, g, b] = rgb.map((v) => v / 255);
+  const k = 1 - Math.max(r, g, b);
+  if (k >= 1) return { c: 0, m: 0, y: 0, k: 1 };
+  return { c: (1 - r - k) / (1 - k), m: (1 - g - k) / (1 - k), y: (1 - b - k) / (1 - k), k };
+};

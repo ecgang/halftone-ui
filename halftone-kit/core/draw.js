@@ -25,6 +25,7 @@
 // that FM threshold is what makes a line screen a line screen.
 
 import { amDot, amRadius } from './screens.js';
+import { cmyk, INKS } from './color.js';
 
 // The FM dot geometry: a near-fixed mark whose size eases with the field value. Different surfaces
 // legitimately want different dot weights (a chart reads better with a heavier dot than a button),
@@ -135,4 +136,74 @@ export function drawPlates(ctx, spec) {
     ctx.fill();
   }
   ctx.globalCompositeOperation = 'source-over';
+}
+
+// drawProcessAm — render an arbitrary base colour as a four-plate CMYK amplitude-modulation rosette.
+// This is to a generic `am` surface what drawPlates('batch') is to the masthead: the masthead hand-
+// authors its four plates; here the four plates fall straight out of a colour's process separation
+// (color.js `cmyk`), so ANY fill — a chart series, a wash — presses as a real process rosette rather
+// than a single ink. It reuses the masthead's exact machinery so the two read as one press:
+//   * the four `amPlates` lattices (yellow 0°, cyan 15°, magenta 75°, key 45°), one batched path
+//     per plate filled once (per-dot fills would double-composite a plate's own overlaps);
+//   * the same lighter-on-dark / multiply-on-paper composite;
+//   * the AM area law `amRadius` (V-5 — tone->radius lives in ONE place) with amDot's own 0.92
+//     no-fuse cap + 0.012 drop floor, so a plate never fuses solid;
+//   * the key plate flips white on a dark ground / black on paper, exactly like the masthead key,
+//     so a rosette's shadows read on both grounds (pure CMYK cannot print white — the key is the
+//     opaque plate that stands in for it).
+// The field is NORMALIZED like drawPress ((u,v) in [0,1], `p` the pixel escape hatch); each plate's
+// tone is `field * cmyk-component * ink * wash`. Dot centres are offset by (dx,dy)*misreg — the
+// misregistration dial. `pr` gates press-in reveal in `th` order (th<1, so the resting frame pr=1
+// is unaffected — the golden still pins a fixed frame).
+//
+// spec: { base, W, H, plates:[{ang,dx,dy,pts}] (amPlates order), field, grain:{ink,wash},
+//         misreg=1, paper:'light'|'dark', pr=1 }
+const PROCESS_PLATES = [
+  { ink: 'yellow', ch: 'y' },
+  { ink: 'blue', ch: 'c' },
+  { ink: 'pink', ch: 'm' },
+  { ink: 'black', ch: 'k' },
+];
+// Under-color removal. A pure CMYK separation gives a mid/dark colour a heavy black key; on a
+// FILLED surface (high tone everywhere) that key stacks under multiply into a dark mesh that
+// swallows the CMY colour — the area chart went muddy. A press pulls the key back for exactly this
+// reason (GCR/UCR): print less black, let the chromatic plates carry the colour. K_UCR scales the
+// key plate's coverage so mid/dark fills stay vivid while the rosette stays genuinely four-plate.
+// It never touches the golden — drawProcessAm only runs for CHROMATIC am (max(c,m,y) > 0.02); the
+// achromatic/default am surfaces the golden pins press through drawPress, not here.
+const K_UCR = 0.55;
+// `inks` is the plate palette — defaults to the module INKS, but a caller with a per-context palette
+// (createPressContext({ inks })) passes its OWN resolved inks so a themed/custom press keeps instance
+// isolation: the process plates print in the same cyan/magenta/yellow/key the rest of that context
+// uses, not the module defaults. Only the four process names + white/black key are read.
+export function drawProcessAm(ctx, { base, W, H, plates, field, grain = {}, misreg = 1, paper = 'light', pr = 1, inks = INKS }) {
+  const ink = grain.ink ?? 1, wash = grain.wash ?? 1;
+  const sep = cmyk(base);
+  const sample = fieldSampler(field);
+  const dark = paper === 'dark';
+  // The composite is set for the whole plate stack; the finally GUARANTEES it is restored to
+  // source-over even if a field callback throws mid-stack, so a throwing field can never leave the
+  // shared canvas stuck in multiply/lighter and corrupt every subsequent draw on it (V7).
+  ctx.globalCompositeOperation = dark ? 'lighter' : 'multiply';
+  try {
+    for (let i = 0; i < plates.length && i < PROCESS_PLATES.length; i++) {
+      const pl = plates[i], meta = PROCESS_PLATES[i];
+      const comp = meta.ch === 'k' ? sep.k * K_UCR : sep[meta.ch];
+      ctx.fillStyle = meta.ch === 'k' ? (dark ? inks.white : inks.black) : inks[meta.ink];
+      const dx = pl.dx * misreg, dy = pl.dy * misreg;
+      ctx.beginPath();
+      for (const p of pl.pts) {
+        if (p.th > pr) continue;
+        const t = Math.min(0.92, sample(p.x / W, p.y / H, p) * comp * ink * wash);
+        if (t <= 0.012) continue;
+        const r = amRadius(p.c * 0.56, t);
+        if (!(r > 0)) continue;
+        ctx.moveTo(p.x + dx + r, p.y + dy);
+        ctx.arc(p.x + dx, p.y + dy, r, 0, 6.283);
+      }
+      ctx.fill();
+    }
+  } finally {
+    ctx.globalCompositeOperation = 'source-over';
+  }
 }

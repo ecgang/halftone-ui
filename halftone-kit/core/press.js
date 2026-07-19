@@ -12,9 +12,10 @@
 // the surface from the context registry, killing blockers 1 (registry leak) and 5 (DOM scanning —
 // there are none; the caller owns the element) at once.
 
-import { grainPts } from './screens.js';
+import { grainPts, amPlates } from './screens.js';
 import { mulberry32, makeNoise } from './rng.js';
-import { drawPress } from './draw.js';
+import { drawPress, drawProcessAm } from './draw.js';
+import { cmyk } from './color.js';
 import { createPressContext } from './context.js';
 
 // Resolve a press's `color` opt to a concrete CSS color at DRAW time (lazy — V-11). A function is a
@@ -96,7 +97,14 @@ export function mount(el, spec, ctx) {
     if (!f) { s.stale = true; return; }
     s.stale = false; s.g = f.g; s.W = f.w; s.H = f.h;
     const restSeed = ctx.base + off + (spec.roll ?? ctx.roll);
-    s.pts = grainPts(f.w, f.h, spec.r * 0.8 * spec.scale, mulberry32(restSeed), spec.screen);
+    const pitchR = spec.r * 0.8 * spec.scale;
+    s.pts = grainPts(f.w, f.h, pitchR, mulberry32(restSeed), spec.screen);
+    // am surfaces additionally carry the four process-plate lattices, generated ONCE at rebuild (not
+    // per draw) so a colourful `am` fill can press as a real CMYK rosette (drawProcessAm). Same pitch
+    // as grainPts('am'), so the process dots sit on the single-plate am grid.
+    s.amPlates = spec.screen === 'am'
+      ? amPlates(f.w, f.h, pitchR, (i) => mulberry32(restSeed + i * 977))
+      : null;
     s.noise = makeNoise(restSeed);
   };
 
@@ -105,7 +113,29 @@ export function mount(el, spec, ctx) {
   s.draw = () => {
     if (s.stale || !s.g) return;
     s.g.clearRect(0, 0, s.W, s.H);
-    s.g.fillStyle = resolveColor(spec.color, ctx); // lazy ink — the docs' surface() wrapper (:3046)
+    const color = resolveColor(spec.color, ctx); // lazy ink — the docs' surface() wrapper (:3046)
+    s.g.fillStyle = color;
+    // A CHROMATIC am fill presses as a four-plate process rosette; an ACHROMATIC one (the default
+    // foreground white/black, or any grey) has no process separation, so it stays the single-plate
+    // am path — byte-identical to what this surface pressed before, and the honest print behaviour
+    // (CMYK cannot reproduce white; black is the key plate alone).
+    if (spec.screen === 'am' && s.amPlates) {
+      const sep = cmyk(color);
+      if (Math.max(sep.c, sep.m, sep.y) > 0.02) {
+        drawProcessAm(s.g, {
+          base: color, W: s.W, H: s.H, plates: s.amPlates, field: spec.field,
+          grain: { ink: spec.ink, wash: spec.wash },
+          misreg: ctx.grain.misreg ?? 1, paper: ctx.theme.mode, pr: s.pr,
+          // pass THIS context's process inks (not module INKS) so a createPressContext({ inks })
+          // override drives the rosette too — instance isolation, same as the rest of the press.
+          inks: {
+            yellow: ctx.ink('yellow'), blue: ctx.ink('blue'), pink: ctx.ink('pink'),
+            black: ctx.ink('black'), white: ctx.ink('white'),
+          },
+        });
+        return;
+      }
+    }
     drawPress(s.g, {
       pts: s.pts, W: s.W, H: s.H,
       field: spec.field, screen: spec.screen,

@@ -659,13 +659,14 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
         <div class="gdial"><b>scale</b><input type="range" id="gr-scale" min="0.6" max="1.8" step="0.05" value="1" aria-label="Screen scale"><span class="num" id="gr-scale-v">1.00</span></div>
         <div class="gdial"><b>ink</b><input type="range" id="gr-ink" min="0.5" max="1.5" step="0.05" value="1" aria-label="Ink weight"><span class="num" id="gr-ink-v">1.00</span></div>
         <div class="gdial"><b>washes</b><input type="range" id="gr-wash" min="0" max="2" step="0.1" value="1" aria-label="Wash strength"><span class="num" id="gr-wash-v">1.0</span></div>
+        <div class="gdial"><b>misreg</b><input type="range" id="gr-misreg" min="0" max="3" step="0.1" value="1" aria-label="Plate misregistration"><span class="num" id="gr-misreg-v">1.0</span></div>
         <small>re-presses every surface live</small>
         <button id="grainreset">reset</button>
       </div>
     </div>
     <div class="seedctl">seed <b id="seedval" class="seedout">1859</b><button id="reroll" title="Reroll every surface">⚄ reroll</button></div>
     <a href="https://github.com/ecgang/halftone-ui" target="_blank" rel="noopener">github</a>
-    <a href="/studio/">studio →</a>
+    <a href="../studio/">studio →</a>
   </div>
 </div>
 
@@ -3142,6 +3143,19 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         pts.push({ x: q.x, y: q.y, th: lo + q.j * (hi - lo) });
     return pts;
   }
+  var PROCESS_ANGLES = [0, 0.262, 1.309, 0.785];
+  var PROCESS_OFFSETS = [[0.9, 1], [-1.4, 0.7], [1.2, -0.9], [0, 0]];
+  function amPlates(W, H, r, mkRng) {
+    if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
+    if (!(Number.isFinite(r) && r > 0)) r = 2;
+    const pitch = amPitch(Math.hypot(W, H), r);
+    return PROCESS_ANGLES.map((ang, i) => ({
+      ang,
+      dx: PROCESS_OFFSETS[i][0],
+      dy: PROCESS_OFFSETS[i][1],
+      pts: amPts(W, H, pitch, ang, mkRng(i))
+    }));
+  }
   function amRadius(base, tone, wobble = 1) {
     return base * Math.sqrt(tone) * wobble;
   }
@@ -3205,6 +3219,33 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
   var tuneMix = (a, b) => {
     const [h, s, l] = rgb2hsl(...hex2rgb(mixHex(a, b)));
     return hsl2hex(h, band(s, 0.3, 0.55), band(l, 0.26, 0.38));
+  };
+  var parseSrgb = (s) => {
+    if (typeof s !== "string") return null;
+    const h = s.trim();
+    const hm = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(h);
+    if (hm) {
+      const x = hm[1];
+      if (x.length === 3) return [x[0] + x[0], x[1] + x[1], x[2] + x[2]].map((p) => parseInt(p, 16));
+      return [x.slice(0, 2), x.slice(2, 4), x.slice(4, 6)].map((p) => parseInt(p, 16));
+    }
+    const rgbComma = /^rgba?\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*(?:,\s*\d+(?:\.\d+)?%?\s*)?\)\s*$/i;
+    const rgbSpace = /^rgba?\(\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s*(?:\/\s*\d+(?:\.\d+)?%?\s*)?\)\s*$/i;
+    const rm = rgbComma.exec(h) || rgbSpace.exec(h);
+    if (rm) {
+      const ch = [+rm[1], +rm[2], +rm[3]];
+      if (!ch.every(Number.isFinite)) return null;
+      return ch.map((v) => Math.max(0, Math.min(255, v)));
+    }
+    return null;
+  };
+  var cmyk = (hex) => {
+    const rgb = parseSrgb(hex);
+    if (!rgb) return { c: 0, m: 0, y: 0, k: 0 };
+    const [r, g, b] = rgb.map((v) => v / 255);
+    const k = 1 - Math.max(r, g, b);
+    if (k >= 1) return { c: 0, m: 0, y: 0, k: 1 };
+    return { c: (1 - r - k) / (1 - k), m: (1 - g - k) / (1 - k), y: (1 - b - k) / (1 - k), k };
   };
 
   // halftone-kit/core/fields.js
@@ -3326,11 +3367,46 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     }
     ctx.globalCompositeOperation = "source-over";
   }
+  var PROCESS_PLATES = [
+    { ink: "yellow", ch: "y" },
+    { ink: "blue", ch: "c" },
+    { ink: "pink", ch: "m" },
+    { ink: "black", ch: "k" }
+  ];
+  var K_UCR = 0.55;
+  function drawProcessAm(ctx, { base, W, H, plates, field, grain = {}, misreg = 1, paper = "light", pr = 1, inks = INKS }) {
+    const ink = grain.ink ?? 1, wash = grain.wash ?? 1;
+    const sep = cmyk(base);
+    const sample = fieldSampler(field);
+    const dark = paper === "dark";
+    ctx.globalCompositeOperation = dark ? "lighter" : "multiply";
+    try {
+      for (let i = 0; i < plates.length && i < PROCESS_PLATES.length; i++) {
+        const pl = plates[i], meta = PROCESS_PLATES[i];
+        const comp = meta.ch === "k" ? sep.k * K_UCR : sep[meta.ch];
+        ctx.fillStyle = meta.ch === "k" ? dark ? inks.white : inks.black : inks[meta.ink];
+        const dx = pl.dx * misreg, dy = pl.dy * misreg;
+        ctx.beginPath();
+        for (const p of pl.pts) {
+          if (p.th > pr) continue;
+          const t = Math.min(0.92, sample(p.x / W, p.y / H, p) * comp * ink * wash);
+          if (t <= 0.012) continue;
+          const r = amRadius(p.c * 0.56, t);
+          if (!(r > 0)) continue;
+          ctx.moveTo(p.x + dx + r, p.y + dy);
+          ctx.arc(p.x + dx, p.y + dy, r, 0, 6.283);
+        }
+        ctx.fill();
+      }
+    } finally {
+      ctx.globalCompositeOperation = "source-over";
+    }
+  }
 
   // halftone-kit/core/context.js
   var RESTING_BASE = 1859;
   function createPressContext(opts = {}) {
-    const grain = { pattern: "hatch", scale: 1, ink: 1, wash: 1, ...opts.grain || {} };
+    const grain = { pattern: "hatch", scale: 1, ink: 1, wash: 1, misreg: 1, ...opts.grain || {} };
     const theme = { mode: opts.mode || "dark", hue: opts.hue || 0 };
     const inks = { ...INKS, ...opts.inks || {} };
     const paper = { ...PAPER, ...opts.paper || {} };
@@ -3469,6 +3545,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       if (dial(gs.scale, 0.6, 1.8)) GRAIN.scale = gs.scale;
       if (dial(gs.ink, 0.5, 1.5)) GRAIN.ink = gs.ink;
       if (dial(gs.wash, 0, 2)) GRAIN.wash = gs.wash;
+      if (dial(gs.misreg, 0, 3)) GRAIN.misreg = gs.misreg;
     } catch (e) {
     }
     const reduced = CTX.reduced;
@@ -3502,7 +3579,9 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         s.ctx = f.ctx;
         s.W = f.w;
         s.H = f.h;
-        s.pts = grainPts(f.w, f.h, r * 0.8 * GRAIN.scale, mulberry32(CTX.seedValue + off), s.pat || GRAIN.pattern);
+        const pat = s.pat || GRAIN.pattern, pitchR = r * 0.8 * GRAIN.scale;
+        s.pts = grainPts(f.w, f.h, pitchR, mulberry32(CTX.seedValue + off), pat);
+        s.amPlates = pat === "am" ? amPlates(f.w, f.h, pitchR, (i) => mulberry32(CTX.seedValue + off + i * 977)) : null;
         s.noise = makeNoise(CTX.seedValue + off);
       };
       s.draw = () => {
@@ -3510,13 +3589,30 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
         const { ctx, W, H, x } = s;
         ctx.clearRect(0, 0, W, H);
         if (pre) pre(ctx, W, H);
-        ctx.fillStyle = typeof color === "function" ? color() : color;
+        const col = typeof color === "function" ? color() : color;
+        ctx.fillStyle = col;
+        const pat = s.pat || GRAIN.pattern;
+        const field = (u, v, p) => tone(p, W, H, x, s.noise);
+        if (pat === "am" && s.amPlates && Math.max(cmyk(col).c, cmyk(col).m, cmyk(col).y) > 0.02) {
+          drawProcessAm(ctx, {
+            base: col,
+            W,
+            H,
+            plates: s.amPlates,
+            field,
+            grain: { ink: GRAIN.ink },
+            misreg: GRAIN.misreg,
+            paper: THEME.mode,
+            pr: x.pr
+          });
+          return;
+        }
         drawPress(ctx, {
           pts: s.pts,
           W,
           H,
-          field: (u, v, p) => tone(p, W, H, x, s.noise),
-          screen: s.pat || GRAIN.pattern,
+          field,
+          screen: pat,
           grain: { ink: GRAIN.ink },
           pr: x.pr
         });
@@ -3838,7 +3934,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     const areaCv = document.getElementById("area");
     const tooltip = document.getElementById("tooltip");
     const area = (() => {
-      let ctx, W, H, sets = [], edge = [];
+      let ctx, W, H, sets = [], edge = [], plates = null;
       const M = { t: 16, r: 14, b: 26, l: 36 };
       const ymax = Math.max(...DATA.desktop, ...DATA.mobile) * 1.12;
       let prog = 1, hoverI = -1, solo = -1;
@@ -3867,7 +3963,9 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           ctx = f.ctx;
           W = f.w;
           H = f.h;
-          sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(CTX.seedValue + si * 7919), obj.pat || GRAIN.pattern));
+          const pat = obj.pat || GRAIN.pattern;
+          sets = SERIES.map((s, si) => grainPts(W, H, 2.9 * GRAIN.scale, mulberry32(CTX.seedValue + si * 7919), pat));
+          plates = pat === "am" ? SERIES.map((s, si) => amPlates(W, H, 2.9 * GRAIN.scale, (i) => mulberry32(CTX.seedValue + si * 7919 + i * 977))) : null;
           edge = SERIES.map((s, si) => {
             const rng = mulberry32(CTX.seedValue * 31 + si), out = [];
             for (let x = M.l; x <= W - M.r; x += 2.1)
@@ -3894,22 +3992,36 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
             if (solo >= 0 && solo !== si) return;
             const vals = DATA[s.key];
             ctx.fillStyle = s.color;
-            drawPress(ctx, {
-              pts: sets[si],
-              W,
-              H,
-              field: (u, v, p) => {
-                if (p.x < M.l || p.x > W - M.r || p.y > yBase) return 0;
-                const yc = curveY(vals, p.x);
-                if (p.y < yc) return 0;
-                return Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
-              },
-              // the chart always presses ROUND dots (arc) whatever the screen GRID is — the pattern
-              // shapes the point set (grainPts, above), not the mark. 'stipple' selects the round law.
-              screen: "stipple",
-              grain: { ink: GRAIN.ink },
-              dot: { round: [0.45, 0.9], cap: 1.15 }
-            });
+            const field = (u, v, p) => {
+              if (p.x < M.l || p.x > W - M.r || p.y > yBase) return 0;
+              const yc = curveY(vals, p.x);
+              if (p.y < yc) return 0;
+              return Math.pow(1 - (p.y - yc) / Math.max(1, yBase - yc), 1.7) * 0.9;
+            };
+            if (plates && Math.max(cmyk(s.color).c, cmyk(s.color).m, cmyk(s.color).y) > 0.02) {
+              drawProcessAm(ctx, {
+                base: s.color,
+                W,
+                H,
+                plates: plates[si],
+                field,
+                grain: { ink: GRAIN.ink },
+                misreg: GRAIN.misreg,
+                paper: THEME.mode
+              });
+            } else {
+              drawPress(ctx, {
+                pts: sets[si],
+                W,
+                H,
+                field,
+                // the chart always presses ROUND dots (arc) whatever the screen GRID is — the pattern
+                // shapes the point set (grainPts, above), not the mark. 'stipple' selects the round law.
+                screen: "stipple",
+                grain: { ink: GRAIN.ink },
+                dot: { round: [0.45, 0.9], cap: 1.15 }
+              });
+            }
             for (const e of edge[si]) {
               if (e.th > 0.85) continue;
               const y = curveY(vals, e.x) + e.o;
@@ -4001,7 +4113,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     })();
     const barsCv = document.getElementById("bars");
     (() => {
-      let ctx, W, H, pts = [];
+      let ctx, W, H, pts = [], plates = null;
       const vals = [12, 19, 9, 24, 31, 22, 36, 28];
       const vmax = 40, M = { t: 12, b: 20, l: 8, r: 8 };
       let hover = -1;
@@ -4028,7 +4140,9 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           ctx = f.ctx;
           W = f.w;
           H = f.h;
-          pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(CTX.seedValue + 101), obj.pat || GRAIN.pattern);
+          const pat = obj.pat || GRAIN.pattern;
+          pts = grainPts(W, H, 2.3 * GRAIN.scale, mulberry32(CTX.seedValue + 101), pat);
+          plates = pat === "am" ? amPlates(W, H, 2.3 * GRAIN.scale, (i) => mulberry32(CTX.seedValue + 101 + i * 977)) : null;
         },
         draw() {
           if (this.stale || !ctx) return;
@@ -4037,26 +4151,41 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           ctx.fillStyle = DIM;
           for (let gx = M.l; gx < W - M.r; gx += 3.5) ctx.fillRect(gx, yb, 1.3, 1.3);
           ctx.fillStyle = PAL.blue;
-          drawPress(ctx, {
-            pts,
-            W,
-            H,
-            field: (u, v, p) => {
-              if (p.y > yb) return 0;
-              for (let i = 0; i < vals.length; i++) {
-                const b = bar(i);
-                if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
-                const boost = hover === i ? 1.3 : 1;
-                return Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost;
-              }
-              return 0;
-            },
-            screen: "stipple",
-            // round dots on whatever grid (see area chart note)
-            grain: { ink: GRAIN.ink },
-            pr: obj.x.pr,
-            dot: { round: [0.5, 1.05], cap: 1.1 }
-          });
+          const field = (u, v, p) => {
+            if (p.y > yb) return 0;
+            for (let i = 0; i < vals.length; i++) {
+              const b = bar(i);
+              if (p.x < b.x0 || p.x > b.x1 || p.y < b.yt) continue;
+              const boost = hover === i ? 1.3 : 1;
+              return Math.pow(1 - (p.y - b.yt) / Math.max(1, yb - b.yt), 1.1) * 0.95 * boost;
+            }
+            return 0;
+          };
+          if (plates && Math.max(cmyk(PAL.blue).c, cmyk(PAL.blue).m, cmyk(PAL.blue).y) > 0.02) {
+            drawProcessAm(ctx, {
+              base: PAL.blue,
+              W,
+              H,
+              plates,
+              field,
+              grain: { ink: GRAIN.ink },
+              misreg: GRAIN.misreg,
+              paper: THEME.mode,
+              pr: obj.x.pr
+            });
+          } else {
+            drawPress(ctx, {
+              pts,
+              W,
+              H,
+              field,
+              screen: "stipple",
+              // round dots on whatever grid (see area chart note)
+              grain: { ink: GRAIN.ink },
+              pr: obj.x.pr,
+              dot: { round: [0.5, 1.05], cap: 1.1 }
+            });
+          }
           ctx.fillStyle = MUT;
           ctx.font = "9.5px ui-monospace, Menlo, monospace";
           ctx.textAlign = "center";
@@ -5381,11 +5510,12 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       const dials = [
         { id: "gr-scale", key: "scale", def: 1, fmt: (v) => v.toFixed(2) },
         { id: "gr-ink", key: "ink", def: 1, fmt: (v) => v.toFixed(2) },
-        { id: "gr-wash", key: "wash", def: 1, fmt: (v) => v.toFixed(1) }
+        { id: "gr-wash", key: "wash", def: 1, fmt: (v) => v.toFixed(1) },
+        { id: "gr-misreg", key: "misreg", def: 1, fmt: (v) => v.toFixed(1) }
       ];
       const saveGrain = () => store.set(
         "stipple-grain",
-        JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash })
+        JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash, misreg: GRAIN.misreg })
       );
       const setDial = (d, v) => {
         GRAIN[d.key] = v;
@@ -5470,7 +5600,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           plates: s.plates.map(({ pl, pts }, i) => {
             const pu = Math.min(1, Math.max(0, (s.x.pr - i * 0.12) / 0.64));
             const e = 1 - Math.pow(1 - pu, 3);
-            const ox = pl.dx + (1 - e) * pl.lx, oy = pl.dy + (1 - e) * pl.ly;
+            const ox = pl.dx * GRAIN.misreg + (1 - e) * pl.lx, oy = pl.dy * GRAIN.misreg + (1 - e) * pl.ly;
             return {
               ink: pl.ink ? INKS[pl.ink] : THEME.mode === "dark" ? INKS.white : INKS.black,
               pts,

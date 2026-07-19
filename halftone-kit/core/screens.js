@@ -103,6 +103,25 @@ export function grainPts(W, H, r, rng, pat) {
   return pts;
 }
 
+// The four real process screen angles + their per-plate registration offsets, in the masthead's
+// plate order — yellow(0°), cyan/blue(15°≈.262), magenta/pink(75°≈1.309), key/black(45°≈.785).
+// Those offsets are why a press yields a rosette and not a moiré; the dx/dy are the plates'
+// misregistration (scaled by the misreg dial at draw). amPlates builds the four lattices on ONE
+// pitch — the exact am pitch grainPts('am') would pick for these dims — so a four-plate process
+// surface's dots sit on the same grid the single-plate am screen presses on. mkRng(i) supplies a
+// fresh RNG per plate so the four screens don't share a jitter/reveal order.
+export const PROCESS_ANGLES = [0, 0.262, 1.309, 0.785];
+export const PROCESS_OFFSETS = [[0.9, 1.0], [-1.4, 0.7], [1.2, -0.9], [0, 0]];
+export function amPlates(W, H, r, mkRng) {
+  if (!(Number.isFinite(W) && Number.isFinite(H) && W > 0 && H > 0)) return [];
+  if (!(Number.isFinite(r) && r > 0)) r = 2;
+  const pitch = amPitch(Math.hypot(W, H), r);
+  return PROCESS_ANGLES.map((ang, i) => ({
+    ang, dx: PROCESS_OFFSETS[i][0], dy: PROCESS_OFFSETS[i][1],
+    pts: amPts(W, H, pitch, ang, mkRng(i)),
+  }));
+}
+
 // Admission-control estimator: the work grainPts would execute for these arguments, in the
 // units the internal budget clamps (grid cells / sweep candidates, x3 for hatch's families).
 // The per-CALL budget above bounds one frame; a host mounting MANY frames (the studio's scene

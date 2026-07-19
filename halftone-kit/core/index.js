@@ -8,9 +8,9 @@
 // plans/halftone-kit-extraction.md.
 
 export { mulberry32, poisson, makeNoise } from './rng.js';
-export { screenPts, amPts, grainPts, amDot, amRadius } from './screens.js';
-export { INKS, PAPER, mixHex, iband, tuneInk, tuneMix } from './color.js';
+export { screenPts, amPts, amPlates, grainPts, amDot, amRadius } from './screens.js';
+export { INKS, PAPER, mixHex, iband, tuneInk, tuneMix, cmyk } from './color.js';
 export { textField } from './fields.js';
-export { drawPress, drawPlates, fieldSampler, DOT } from './draw.js';
+export { drawPress, drawPlates, drawProcessAm, fieldSampler, DOT } from './draw.js';
 export { createPressContext, RESTING_BASE } from './context.js';
 export { press, resolvePress, mount } from './press.js';

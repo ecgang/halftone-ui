@@ -26,7 +26,7 @@ Both wrap `tools/verify-all.mjs`, which runs the 8 suites below plus `golden:che
 | `node tools/verify-studio.mjs` | Studio SPA end-to-end |
 
 CI runs `npm run verify --prefix tools` (`.github/workflows/verify.yml`). Current suite counts:
-charts 14, core 33, plates 8, react 40, vue 46, react-visual 19, vue-visual 19, studio 50.
+charts 14, core 33, plates 44, react 40, vue 46, react-visual 19, vue-visual 19, studio 50.
 
 Additional golden scripts (see below): `golden:write`, `golden:check`, `golden:selftest`, all
 `--prefix tools`.
