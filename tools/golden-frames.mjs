@@ -116,6 +116,11 @@ function readAllCanvases(loopKeys) {
   const seen = new Map()
   const out = []
   for (const cv of document.querySelectorAll('canvas')) {
+    // The header brand mark is decorative AND intentionally dynamic (it re-presses with the grain
+    // dials / reroll / theme / type picker), and it is a tiny GPU-composited canvas that trips the
+    // flaky blank-readback quirk documented up top. It is not a regression surface, so skip it —
+    // this also keeps it out of the positional ~doc numbering, so adding it shifts no other key.
+    if (cv.classList.contains('brandmark')) continue
     const sec = cv.closest('section[id]')
     const base = sec ? sec.id : '~doc'
     const n = seen.get(base) || 0

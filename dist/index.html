@@ -36,8 +36,9 @@
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--line);
   }
-  .brand { font-weight: 700; letter-spacing: 0.02em; }
+  .brand { font-weight: 700; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 8px; }
   .brand i { font-style: normal; color: var(--accent); }
+  .brandmark { width: 26px; height: 26px; display: block; }
   .topbar .docs { color: var(--mut); }
   .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 22px; color: var(--mut); font-size: 12.5px; }
   .seedctl { display: flex; align-items: center; gap: 8px; }
@@ -109,6 +110,12 @@
   }
   .grainpick button:hover { color: var(--mut); }
   .grainpick button[aria-pressed="true"] { color: var(--ink); border-color: var(--line); }
+  .gtype-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .gtype-row > b { font-weight: 400; color: var(--mut); font-size: 12px; min-width: 34px; }
+  .gtype { display: flex; gap: 2px; }
+  .gtype button { font: inherit; font-size: 11px; color: var(--mut); background: none; border: 1px solid transparent; border-radius: 4px; padding: 1px 5px; cursor: pointer; }
+  .gtype button:hover { color: var(--ink); }
+  .gtype button[aria-pressed="true"] { color: var(--ink); border-color: var(--line); }
   .stage {
     border: 1px solid var(--line); border-top: none; background: var(--panel);
     padding: 48px 32px; display: flex; align-items: center; justify-content: center;
@@ -643,7 +650,7 @@
 catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
 
 <div class="topbar">
-  <a class="brand" href="#quick-start">halftone<i>·</i>ui</a>
+  <a class="brand" href="#quick-start"><canvas class="brandmark" aria-hidden="true"></canvas>halftone<i>·</i>ui</a>
   <a class="docs" href="#quick-start">docs</a>
   <div class="right">
     <div class="themectl">
@@ -660,7 +667,8 @@ catch (e) { document.documentElement.dataset.mode = 'dark'; }</script>
         <div class="gdial"><b>ink</b><input type="range" id="gr-ink" min="0.5" max="1.5" step="0.05" value="1" aria-label="Ink weight"><span class="num" id="gr-ink-v">1.00</span></div>
         <div class="gdial"><b>washes</b><input type="range" id="gr-wash" min="0" max="2" step="0.1" value="1" aria-label="Wash strength"><span class="num" id="gr-wash-v">1.0</span></div>
         <div class="gdial"><b>misreg</b><input type="range" id="gr-misreg" min="0" max="3" step="0.1" value="1" aria-label="Plate misregistration"><span class="num" id="gr-misreg-v">1.0</span></div>
-        <small>re-presses every surface live</small>
+        <div class="gtype-row"><b>type</b><div class="gtype" id="gr-type" role="group" aria-label="Logo mark screen"><button data-t="stipple">stipple</button><button data-t="lines">lines</button><button data-t="waves">waves</button><button data-t="hatch">hatch</button><button data-t="am" aria-pressed="true">am</button></div></div>
+        <small>dials re-press every surface · type sets the mark</small>
         <button id="grainreset">reset</button>
       </div>
     </div>
@@ -3539,6 +3547,8 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       reduced: matchMedia("(prefers-reduced-motion: reduce)").matches
     });
     const GRAIN = CTX.grain;
+    const LOGO_SCREENS = ["stipple", "lines", "waves", "hatch", "am"];
+    let LOGO_SCREEN = "am";
     try {
       const gs = JSON.parse(store.get("stipple-grain") || "{}");
       const dial = (v, lo, hi) => typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
@@ -3546,6 +3556,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       if (dial(gs.ink, 0.5, 1.5)) GRAIN.ink = gs.ink;
       if (dial(gs.wash, 0, 2)) GRAIN.wash = gs.wash;
       if (dial(gs.misreg, 0, 3)) GRAIN.misreg = gs.misreg;
+      if (LOGO_SCREENS.includes(gs.type)) LOGO_SCREEN = gs.type;
     } catch (e) {
     }
     const reduced = CTX.reduced;
@@ -5391,12 +5402,30 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       store.set("stipple-mode", mode);
       store.set("stipple-hue", String(hue));
     };
+    function drawLogo() {
+      const cv = document.querySelector(".brandmark");
+      if (!cv) return;
+      const dpr = Math.min(2, devicePixelRatio || 1), S = 26;
+      if (cv.width !== S * dpr) {
+        cv.width = S * dpr;
+        cv.height = S * dpr;
+      }
+      const ctx = cv.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, S, S);
+      ctx.fillStyle = CTX.fore();
+      const pitchR = 1.9 * 0.8 * GRAIN.scale;
+      const field = (u, v) => Math.min(1.05, 0.08 + (u + v) * 0.62);
+      const pts = grainPts(S, S, pitchR, mulberry32(CTX.seedValue + 4242), LOGO_SCREEN);
+      drawPress(ctx, { pts, W: S, H: S, field, screen: LOGO_SCREEN, grain: { ink: GRAIN.ink, wash: GRAIN.wash }, pr: 1 });
+    }
     const repaintAll = () => {
       CTX.surfaces.forEach((s) => {
         s.rebuild();
         if (s.afterRebuild) s.afterRebuild();
         s.draw();
       });
+      drawLogo();
     };
     let reLast = 0, reTo = 0;
     const requestRepaint = () => {
@@ -5515,7 +5544,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       ];
       const saveGrain = () => store.set(
         "stipple-grain",
-        JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash, misreg: GRAIN.misreg })
+        JSON.stringify({ scale: GRAIN.scale, ink: GRAIN.ink, wash: GRAIN.wash, misreg: GRAIN.misreg, type: LOGO_SCREEN })
       );
       const setDial = (d, v) => {
         GRAIN[d.key] = v;
@@ -5530,6 +5559,19 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           requestRepaint();
         });
       });
+      const typeWrap = document.getElementById("gr-type");
+      const setType = (t) => {
+        LOGO_SCREEN = t;
+        [...typeWrap.children].forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === t)));
+      };
+      setType(LOGO_SCREEN);
+      typeWrap.addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        setType(b.dataset.t);
+        saveGrain();
+        drawLogo();
+      });
       grainBtn.addEventListener("click", () => {
         grainPop.hidden = !grainPop.hidden;
         grainBtn.setAttribute("aria-expanded", String(!grainPop.hidden));
@@ -5540,6 +5582,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
       });
       document.getElementById("grainreset").addEventListener("click", () => {
         dials.forEach((d) => setDial(d, d.def));
+        setType("am");
         saveGrain();
         repaintAll();
       });
@@ -5552,6 +5595,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     }
     setModeLabel();
     applyTheme();
+    drawLogo();
     {
       const mastCv = document.getElementById("mast-cv");
       const PLATES = [
@@ -5643,6 +5687,7 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
           pressIn(s, s.ms || 550);
         } else s.draw();
       });
+      drawLogo();
       area.enter();
     }
     document.getElementById("reroll").addEventListener("click", rollPress);
