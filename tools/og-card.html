@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; padding: 0; background: #0e0d0b; }
+  /* card is exactly 1200x630; backing store is 2x for crisp dots, downsampled on screenshot */
+  #card { width: 1200px; height: 630px; display: block; }
+</style>
+</head>
+<body>
+<canvas id="card" width="2400" height="1260"></canvas>
+<script>
+/* ------------------------------------------------------------------
+   Self-contained OG-card generator. Reuses the landing masthead's exact
+   text -> CMYK amplitude-rosette pipeline (textField + amGrid + the four
+   process plates at Y 0 / C 15 / M 75 / K 45), so the share image is the
+   same press output the site shows. Dark ground + 'lighter' compositing =
+   the glowing rosette wordmark. Renders once, statically (all plates pr=1).
+   ------------------------------------------------------------------ */
+const CARD_W = 1200, CARD_H = 630, SS = 2;                 // logical size, supersample
+const card = document.getElementById('card');
+const ctx = card.getContext('2d');
+ctx.setTransform(SS, 0, 0, SS, 0, 0);                       // draw in logical coords, 2x backing
+
+// dark-theme inks (from index.html :root[data-theme=dark])
+const BG = '#0e0d0b';
+const INK = '#E7E2D5', INK2 = '#A8A294', INK3 = '#736E62', ACCENT = '#D96A96';
+const INKS = { '--cyan': '#4FA6C8', '--mag': '#D96A96', '--yel': '#D9A833', '--key': '#C9C3B4' };
+
+// --- masthead text field: rasterise the type, read luminance as the tone field ---
+function textField(text, W) {
+  const o = document.createElement('canvas');
+  const c = o.getContext('2d', { willReadFrequently: true });
+  const setFont = (px) => {
+    c.font = `900 ${px}px "Helvetica Neue", "Arial Black", Inter, system-ui, sans-serif`;
+    try { c.letterSpacing = `${-px * 0.035}px`; } catch (e) {}
+  };
+  setFont(400);
+  const size = Math.max(24, Math.floor(400 * (W * 0.94) / c.measureText(text).width));
+  setFont(size);
+  const m = c.measureText(text);
+  const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+  const H = Math.round((asc + desc) * 1.3);
+  o.width = W; o.height = H;
+  setFont(size);
+  c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#fff';
+  c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  c.fillText(text, W / 2, (H + asc - desc) / 2);
+  const d = c.getImageData(0, 0, W, H).data;
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? 0 : d[(((y | 0) * W) + (x | 0)) * 4] / 255;
+  const sample = (x, y, r) => {
+    let s = 0;
+    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) s += at(x + i * r * 0.66, y + j * r * 0.66);
+    return s / 9;
+  };
+  return { H, sample };
+}
+
+// amplitude modulation: a grid of cells rotated to each plate's screen angle
+function amGrid(W, H, pitch, ang) {
+  const pts = [], diag = Math.hypot(W, H), ca = Math.cos(ang), sa = Math.sin(ang);
+  for (let u = -diag; u < diag; u += pitch)
+    for (let v = -diag; v < diag; v += pitch) {
+      const x = W / 2 + u * ca - v * sa, y = H / 2 + u * sa + v * ca;
+      if (x < -pitch || y < -pitch || x > W + pitch || y > H + pitch) continue;
+      pts.push({ x, y });
+    }
+  return pts;
+}
+
+const PITCH = 12;
+const PLATES = [
+  { key: '--yel', ang: 0.0,   dx: 0.9,  dy: 1.0,  w: (u) => 0.10 + 0.18 * (1 - u) },
+  { key: '--cyan', ang: 0.262, dx: -1.4, dy: 0.7,  w: (u) => 0.12 + 0.72 * (1 - u) },
+  { key: '--mag', ang: 1.309, dx: 1.2,  dy: -0.9, w: (u) => 0.12 + 0.72 * u },
+  { key: '--key', ang: 0.785, dx: 0,    dy: 0,    w: (u, v) => 0.10 + 0.26 * v },
+];
+
+// render the wordmark rosette into the card at (ox0, oy0)
+function drawWordmark(ox0, oy0, PW) {
+  const T = textField('HALFTONE UI', PW);
+  const PH = T.H, field = T.sample, cell = PITCH;
+  ctx.save();
+  ctx.translate(ox0, oy0);
+  ctx.globalCompositeOperation = 'lighter';               // ink adds light on a dark ground
+  for (const pl of PLATES) {
+    const pts = amGrid(PW, PH, PITCH, pl.ang);
+    ctx.fillStyle = INKS[pl.key];
+    const ox = pl.dx, oy = pl.dy;                          // misreg = 1
+    ctx.beginPath();
+    for (const p of pts) {
+      const lum = field(p.x - ox, p.y - oy, cell * 0.5);
+      if (lum < 0.02) continue;
+      const t = Math.min(0.92, lum * pl.w(p.x / PW, p.y / PH) * 1.2);
+      if (t <= 0.01) continue;
+      const r = cell * 0.56 * Math.sqrt(t);
+      ctx.moveTo(p.x + r, p.y);
+      ctx.arc(p.x, p.y, r, 0, 6.283);
+    }
+    ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.restore();
+  return PH;
+}
+
+function render() {
+  // ground
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+  // wordmark rosette, horizontally centered, upper-middle
+  const PW = 1000, markX = (CARD_W - PW) / 2, markY = 132;
+  const PH = drawWordmark(markX, markY, PW);
+
+  const cx = CARD_W / 2;
+  const baseY = markY + PH;
+
+  // hairline accent rule under the mark
+  ctx.strokeStyle = ACCENT;
+  ctx.globalAlpha = 0.85;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 150, baseY + 40);
+  ctx.lineTo(cx + 150, baseY + 40);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // tagline
+  ctx.fillStyle = INK;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '500 34px "Helvetica Neue", Inter, system-ui, sans-serif';
+  ctx.fillText('a component library that ships its own printing press', cx, baseY + 96);
+
+  // sub-line
+  ctx.fillStyle = INK2;
+  ctx.font = '400 23px "Helvetica Neue", Inter, system-ui, sans-serif';
+  ctx.fillText('every surface is a halftone screen pressed onto canvas', cx, baseY + 134);
+
+  // footer meta
+  ctx.fillStyle = INK3;
+  ctx.font = '600 21px "SFMono-Regular", ui-monospace, Menlo, monospace';
+  try { ctx.letterSpacing = '2px'; } catch (e) {}
+  ctx.fillText('halftone-ui.com    ·    zero dependencies    ·    one file    ·    MIT', cx, CARD_H - 44);
+  try { ctx.letterSpacing = '0px'; } catch (e) {}
+
+  window.__ogReady = true;
+}
+
+// fonts may need a beat; render after load + a rAF
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => requestAnimationFrame(render));
+} else {
+  requestAnimationFrame(render);
+}
+</script>
+</body>
+</html>
