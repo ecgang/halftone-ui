@@ -5151,7 +5151,17 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
   };
   btn.addEventListener('click', () => setOpen(!root.classList.contains('nav-open')));
   scrim.addEventListener('click', () => { setOpen(false); btn.focus(); });
-  nav.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  nav.addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    setOpen(false);
+    // the drawer (which held focus) just went display:none — land focus on the
+    // destination section, or back on the trigger for the external links
+    const id = (a.getAttribute('href') || '').replace(/^#/, '');
+    const target = id && document.getElementById(id);
+    if (target) { target.tabIndex = -1; target.focus({ preventScroll: true }); }
+    else btn.focus();
+  });
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && root.classList.contains('nav-open')) { setOpen(false); btn.focus(); }
   });
@@ -5168,10 +5178,11 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
   const applyMq = () => {
     if (!mq.matches && root.classList.contains('nav-open')) setOpen(false);
     document.querySelectorAll('.tblwrap').forEach((w) => {
-      if (mq.matches) {
+      if (mq.matches && w.scrollWidth > w.clientWidth) {
+        const h = w.closest('section.doc')?.querySelector('h2');
         w.tabIndex = 0;
         w.setAttribute('role', 'region');
-        w.setAttribute('aria-label', 'Props table, scrolls horizontally');
+        w.setAttribute('aria-label', (h ? h.textContent.trim() + ' — ' : '') + 'props table, scrolls horizontally');
       } else {
         w.removeAttribute('tabindex');
         w.removeAttribute('role');
@@ -5180,6 +5191,8 @@ press(el.querySelector(<span class="s">'.ink'</span>), { field: () =&gt; 0.12 })
     });
   };
   mq.addEventListener('change', applyMq);
+  let mqTo = 0; // re-measure scrollability after the engine's own 180ms rebuild settles
+  addEventListener('resize', () => { clearTimeout(mqTo); mqTo = setTimeout(applyMq, 240); });
   applyMq();
 })();
 </script>
