@@ -1,9 +1,17 @@
-<h1 align="center">Halftone UI</h1>
+<!-- The banner and hero are SMIL-animated SVGs, generated deterministically:
+     node tools/readme-banner.mjs  (bump the _vN filename on visual changes — camo caches hard) -->
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark_v1.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/banner-light_v1.svg">
+    <img alt="Halftone UI — every surface printed, not painted" src="assets/banner-light_v1.svg" width="720">
+  </picture>
+</p>
 
 <p align="center">
   <strong>A component library that ships its own printing press.</strong><br>
-  Every surface is <em>printed, not painted</em> — buttons, charts, switches and washes are<br>
-  halftone screens pressed onto canvas, the way ink actually lands on paper.
+  Buttons, charts, switches and washes are halftone screens pressed onto canvas,<br>
+  the way ink actually lands on paper.
 </p>
 
 <p align="center">
@@ -19,10 +27,51 @@
 </p>
 
 <p align="center">
-  <img src="assets/line-chart-dark.jpeg" width="700" alt="A line chart in dark mode — a solid ink line with a comet of grain falling away beneath it">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/hero-press-dark_v1.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/hero-press-light_v1.svg">
+    <img alt="A pressed line chart — solid ink above, live grain falling away beneath; the grain flickers because every dot keeps re-testing its threshold" src="assets/hero-press-light_v1.svg" width="720">
+  </picture>
 </p>
 
 ---
+
+## What this is
+
+Most UI libraries **paint**: a fill is a hex value, a gradient is a CSS function, a chart is an SVG path. Halftone UI **prints**. Every fill is a live canvas holding a seeded dot cloud, and each dot carries its own threshold. A component supplies a *tone function* — how dark is the ink at this point? — and the press keeps the dots that tone can reach.
+
+That single operation — threshold a tone field against a screen — **is** what halftone means. It's also the entire library.
+
+```js
+// every component is just a tone function 0..1
+const meter = surface(canvas, {
+  tone: (p, W, H) => (p.x / W < 0.72 ? 0.95 : 0.05),
+  pattern: "hatch",
+})
+
+// the press: keep the dots whose threshold the local tone can reach
+for (const p of dots) {
+  if (tone(p) > p.threshold) ink(p)
+}
+```
+
+The dots come from a **seeded Poisson-disk cloud** — blue noise, which is exactly what stochastic screening uses on a real press. Because the seed is deterministic, a reload gives you the same ten thousand dots; reroll and the whole page reprints at once. Animation never tweens CSS: a value glides, every dot re-tests its threshold, and **the grain itself is the motion**.
+
+It's a loving riff on [dither-ui](https://dither-ui.com/) — same docs-site format, different printmaking tradition.
+
+## Quick start
+
+No install. It's one HTML file.
+
+```bash
+git clone https://github.com/ecgang/halftone-ui.git
+open halftone-ui/dist/index.html
+```
+
+Or just [download `dist/index.html`](https://raw.githubusercontent.com/ecgang/halftone-ui/main/dist/index.html) and double-click it. Everything — engine, docs, demos, themes — is inside, in one self-contained file. The docs are dogfooded on the real library: `dist/index.html` is the framework-free core from [`halftone-kit/core/`](halftone-kit/core/) inlined by [`tools/build-standalone.mjs`](tools/build-standalone.mjs).
+
+> [!TIP]
+> Try the topbar: `☀` toggles the designed light mode, `◐` opens the OKLCH wheel (drag the ring — the whole site rethemes), `▦` opens the global grain dials, and `reroll` reprints every surface from a new seed.
 
 ## Install
 
@@ -104,29 +153,6 @@ Every canvas is `aria-hidden` decoration — the table above is where the actual
 
 Full API + prop reference: [`halftone-kit/README.md`](halftone-kit/README.md). Play with every screen and dial live in [Studio](https://halftone-ui.com/studio/).
 
-## What this is
-
-Most UI libraries **paint**: a fill is a hex value, a gradient is a CSS function, a chart is an SVG path. Halftone UI **prints**. Every fill is a live canvas holding a seeded dot cloud, and each dot carries its own threshold. A component supplies a *tone function* — how dark is the ink at this point? — and the press keeps the dots that tone can reach.
-
-That single operation — threshold a tone field against a screen — **is** what halftone means. It's also the entire library.
-
-```js
-// every component is just a tone function 0..1
-const meter = surface(canvas, {
-  tone: (p, W, H) => (p.x / W < 0.72 ? 0.95 : 0.05),
-  pattern: "hatch",
-})
-
-// the press: keep the dots whose threshold the local tone can reach
-for (const p of dots) {
-  if (tone(p) > p.threshold) ink(p)
-}
-```
-
-The dots come from a **seeded Poisson-disk cloud** — blue noise, which is exactly what stochastic screening uses on a real press. Because the seed is deterministic, a reload gives you the same ten thousand dots; reroll and the whole page reprints at once. Animation never tweens CSS: a value glides, every dot re-tests its threshold, and **the grain itself is the motion**.
-
-It's a loving riff on [dither-ui](https://dither-ui.com/) — same docs-site format, different printmaking tradition.
-
 ## Features
 
 - **88 documented sections** — primitives (switch, slider, OTP field, dialogs, menus, combobox), charts (line, pie, radar, area, bars, heatmap, donut, sparkline), and whole page examples (dashboard, pricing, billing, sign-in flows)
@@ -146,28 +172,6 @@ It's a loving riff on [dither-ui](https://dither-ui.com/) — same docs-site for
 |---|---|
 | ![Pie chart in light mode — four plates stacked on one ring](assets/pie-chart-light.jpeg) | ![A photo re-printed as halftone by the Image primitive](assets/image-primitive.jpeg) |
 | ![Smudge, the Halftone UI ink imp](assets/smudge.jpeg) | ![Line chart in dark mode](assets/line-chart-dark.jpeg) |
-
-## Quick start
-
-No install. It's one HTML file.
-
-```bash
-git clone https://github.com/ecgang/halftone-ui.git
-open halftone-ui/dist/index.html
-```
-
-Or just [download `dist/index.html`](https://raw.githubusercontent.com/ecgang/halftone-ui/main/dist/index.html) and double-click it. Everything — engine, docs, demos, themes — is inside, in one self-contained file.
-
-> [!TIP]
-> Try the topbar: `☀` toggles the designed light mode, `◐` opens the OKLCH wheel (drag the ring — the whole site rethemes), `▦` opens the global grain dials, and `reroll` reprints every surface from a new seed.
-
-## Vue / React
-
-The docs show every component with Vue and React snippets. The engine's source of truth is the framework-free core in [`halftone-kit/core/`](halftone-kit/core/) — `dist/index.html` is that core inlined into one self-contained file by [`tools/build-standalone.mjs`](tools/build-standalone.mjs) (the docs are dogfooded on the real library). The React and Vue adapters in [`halftone-kit/`](halftone-kit/) are copy-in, not npm-installed — see [Install](#install) above.
-
-```jsx
-<Button color="purple">Press me</Button>
-```
 
 ## Why "halftone" and not "stipple"
 
