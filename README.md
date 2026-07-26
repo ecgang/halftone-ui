@@ -173,14 +173,6 @@ Full API + prop reference: [`halftone-kit/README.md`](halftone-kit/README.md). P
 | ![Pie chart in light mode — four plates stacked on one ring](assets/pie-chart-light.jpeg) | ![A photo re-printed as halftone by the Image primitive](assets/image-primitive.jpeg) |
 | ![Smudge, the Halftone UI ink imp](assets/smudge.jpeg) | ![Line chart in dark mode](assets/line-chart-dark.jpeg) |
 
-## Why "halftone" and not "stipple"
-
-Halftone is the umbrella technique: simulating continuous tone with discrete marks thresholded against a screen. Stippling is a hand-illustration technique — placing dots with a pen. They aren't siblings; one contains the other, and this engine is squarely the former, because its core operation is *threshold-against-a-screen* and hand stippling has no threshold function at all.
-
-Every pattern here maps to a named halftone screen: `stipple` is stochastic (FM) screening — Poisson-disk sampling *is* blue noise, exactly what a real press uses for stochastic screens; `lines` and `waves` are line screens; `hatch` is a crosshatch screen. The press seals it — "misregistration" is a meaningless idea in stippling, and only exists because plates on a press shift.
-
-So `stipple` survives where it's the correct word: as one of the four screens.
-
 ## Credits
 
 - Format and spirit: [dither-ui](https://dither-ui.com/)
